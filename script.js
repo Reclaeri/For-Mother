@@ -352,8 +352,17 @@ let activeDialogueArt;
 let cleaningCursorEl = null;
 let cleaningCursorTarget = null;
 
+const DEFAULT_SETTINGS = {
+  musicVolume: 70,
+  sfxVolume: 80,
+  visualMode: "normal",
+  textSize: "normal",
+  timerWarning: true
+};
+
 function init() {
   loadGame();
+  applySettings();
   initCleaningCursor();
   preloadAssets();
   resizeStage();
@@ -433,6 +442,7 @@ function setScene(name, bg) {
 
 function stopAll() {
   hideCleaningCursor();
+  closeSettingsModal();
   if (raf) cancelAnimationFrame(raf);
   if (timer) clearInterval(timer);
   if (typingTimer) clearInterval(typingTimer);
@@ -528,16 +538,29 @@ function flattenAssets(value, output = []) {
 
 function showMainMenu() {
   const scene = setScene("Main Menu", ASSETS.background.menu);
-  const center = el("div", "center");
-  center.append(img(ASSETS.ui.logo, "For Mother", "logo"));
-  const actions = el("div", "actions menu-actions");
-  actions.append(
-    btn("Mulai", () => gameState.openingSeen ? showWitchHouse() : showOpening()),
-    btn("Cara Main", showHowTo, "alt"),
-    btn("Reset Progress", () => { resetGame(false); toast("Progress direset."); }, "danger")
-  );
-  center.append(actions);
-  scene.append(center);
+  const menu = el("section", "main-menu-screen");
+  const overlay = el("div", "menu-overlay");
+
+  const content = el("div", "main-menu-content");
+  const logo = img(ASSETS.ui.logo, "For Mother", "main-logo");
+
+  const tagline = el("p", "menu-tagline", "A magical journey of love, courage, and cleanliness.");
+  const subtitle = el("p", "menu-subtitle", "Bersihkan ruangan ajaib, kumpulkan obat, dan selamatkan Ibu.");
+
+  const actions = el("div", "menu-buttons");
+  const startBtn = btn("Mulai", () => gameState.openingSeen ? showWitchHouse() : showOpening(), "menu-btn primary");
+  const howToPlayBtn = btn("Cara Main", showHowTo, "menu-btn");
+  const settingBtn = btn("Setting", openSettingsModal, "menu-btn");
+  const resetBtn = btn("Reset Progress", () => { resetGame(false); toast("Progress direset."); }, "menu-btn danger");
+  startBtn.id = "startBtn";
+  howToPlayBtn.id = "howToPlayBtn";
+  settingBtn.id = "settingBtn";
+  resetBtn.id = "resetBtn";
+  actions.append(startBtn, howToPlayBtn, settingBtn, resetBtn);
+
+  content.append(logo, tagline, subtitle, actions);
+  menu.append(overlay, content, el("p", "menu-footer", "Kebersihan kecil hari ini, kesehatan besar untuk keluarga."));
+  scene.append(menu);
 }
 
 function showHowTo() {
@@ -558,6 +581,163 @@ function showHowTo() {
   card.append(btn("Mengerti", closeModal));
   shade.append(card);
   game.append(shade);
+}
+
+function loadSettings() {
+  return {
+    musicVolume: Number(localStorage.getItem("forMotherSettingMusicVolume") ?? DEFAULT_SETTINGS.musicVolume),
+    sfxVolume: Number(localStorage.getItem("forMotherSettingSfxVolume") ?? DEFAULT_SETTINGS.sfxVolume),
+    visualMode: localStorage.getItem("forMotherSettingVisualMode") || DEFAULT_SETTINGS.visualMode,
+    textSize: localStorage.getItem("forMotherSettingTextSize") || DEFAULT_SETTINGS.textSize,
+    timerWarning: localStorage.getItem("forMotherSettingTimerWarning") === null
+      ? DEFAULT_SETTINGS.timerWarning
+      : localStorage.getItem("forMotherSettingTimerWarning") === "true"
+  };
+}
+
+function saveSettings(settings) {
+  localStorage.setItem("forMotherSettingMusicVolume", String(settings.musicVolume));
+  localStorage.setItem("forMotherSettingSfxVolume", String(settings.sfxVolume));
+  localStorage.setItem("forMotherSettingVisualMode", settings.visualMode);
+  localStorage.setItem("forMotherSettingTextSize", settings.textSize);
+  localStorage.setItem("forMotherSettingTimerWarning", String(settings.timerWarning));
+}
+
+function applySettings(settings = loadSettings()) {
+  document.body.classList.toggle("visual-cozy", settings.visualMode === "cozy");
+  document.body.classList.toggle("text-large", settings.textSize === "large");
+  window.forMotherSettings = settings;
+}
+
+function openSettingsModal() {
+  let modal = document.getElementById("settingsModal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "settingsModal";
+    modal.className = "settings-modal-backdrop";
+    modal.innerHTML = `
+      <div class="settings-card">
+        <div class="settings-header">
+          <div>
+            <p class="settings-label">Pengaturan</p>
+            <h2>Setting Game</h2>
+          </div>
+          <button class="settings-close" id="settingsCloseBtn" aria-label="Tutup setting">&times;</button>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <h3>Volume Musik</h3>
+            <p>Atur volume musik latar.</p>
+          </div>
+          <input type="range" id="musicVolumeSlider" min="0" max="100" value="70">
+          <span id="musicVolumeValue">70%</span>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <h3>Volume Efek</h3>
+            <p>Atur volume efek suara.</p>
+          </div>
+          <input type="range" id="sfxVolumeSlider" min="0" max="100" value="80">
+          <span id="sfxVolumeValue">80%</span>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <h3>Mode Tampilan</h3>
+            <p>Pilih tampilan normal atau lebih hangat.</p>
+          </div>
+          <select id="visualModeSelect">
+            <option value="normal">Normal</option>
+            <option value="cozy">Soft / Cozy</option>
+          </select>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <h3>Teks Dialog</h3>
+            <p>Perbesar teks dialog dan modal.</p>
+          </div>
+          <select id="textSizeSelect">
+            <option value="normal">Normal</option>
+            <option value="large">Besar</option>
+          </select>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <h3>Timer Warning</h3>
+            <p>Efek berkedip saat waktu hampir habis.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="timerWarningToggle" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <p class="settings-note">
+          Catatan: Jika musik atau efek suara belum tersedia, pengaturan volume akan disimpan dan diterapkan saat audio ditambahkan.
+        </p>
+
+        <div class="settings-actions">
+          <button class="settings-btn secondary" id="settingsCancelBtn">Tutup</button>
+          <button class="settings-btn" id="settingsSaveBtn">Simpan</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  const settings = loadSettings();
+  const musicSlider = document.getElementById("musicVolumeSlider");
+  const musicValue = document.getElementById("musicVolumeValue");
+  const sfxSlider = document.getElementById("sfxVolumeSlider");
+  const sfxValue = document.getElementById("sfxVolumeValue");
+  const visualMode = document.getElementById("visualModeSelect");
+  const textSize = document.getElementById("textSizeSelect");
+  const timerWarning = document.getElementById("timerWarningToggle");
+
+  musicSlider.value = settings.musicVolume;
+  musicValue.textContent = `${settings.musicVolume}%`;
+  sfxSlider.value = settings.sfxVolume;
+  sfxValue.textContent = `${settings.sfxVolume}%`;
+  visualMode.value = settings.visualMode;
+  textSize.value = settings.textSize;
+  timerWarning.checked = settings.timerWarning;
+
+  musicSlider.oninput = () => {
+    musicValue.textContent = `${musicSlider.value}%`;
+  };
+
+  sfxSlider.oninput = () => {
+    sfxValue.textContent = `${sfxSlider.value}%`;
+  };
+
+  document.getElementById("settingsCloseBtn").onclick = closeSettingsModal;
+  document.getElementById("settingsCancelBtn").onclick = closeSettingsModal;
+  document.getElementById("settingsSaveBtn").onclick = () => {
+    const newSettings = {
+      musicVolume: Number(musicSlider.value),
+      sfxVolume: Number(sfxSlider.value),
+      visualMode: visualMode.value,
+      textSize: textSize.value,
+      timerWarning: timerWarning.checked
+    };
+
+    saveSettings(newSettings);
+    applySettings(newSettings);
+    closeSettingsModal();
+    toast("Setting tersimpan");
+  };
+
+  modal.classList.add("active");
+}
+
+function closeSettingsModal() {
+  const modal = document.getElementById("settingsModal");
+  if (modal) modal.classList.remove("active");
 }
 
 function showOpening() {
@@ -845,7 +1025,8 @@ function updateHUD() {
   hud.querySelector(".clean").textContent = gameState.chapter.cleaning;
   hud.querySelector(".edu-points").textContent = gameState.totalEducationPoints;
   hud.querySelector(".fill").style.width = `${gameState.chapter.progress}%`;
-  hud.querySelector(".timer").classList.toggle("warn", s <= 30);
+  const settings = window.forMotherSettings || loadSettings();
+  hud.querySelector(".timer").classList.toggle("warn", s <= 30 && settings.timerWarning);
   const meds = hud.querySelector(".meds");
   meds.innerHTML = "";
   for (let i = 0; i < 5; i++) {
