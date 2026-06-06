@@ -351,6 +351,12 @@ let activeTypingFullText = "";
 let activeDialogueArt;
 let cleaningCursorEl = null;
 let cleaningCursorTarget = null;
+let audioContext = null;
+let masterGain = null;
+let musicGain = null;
+let sfxGain = null;
+let ambientStarted = false;
+let lastHoverSound = 0;
 
 const DEFAULT_SETTINGS = {
   musicVolume: 70,
@@ -364,6 +370,7 @@ function init() {
   loadGame();
   applySettings();
   initCleaningCursor();
+  initAudioUnlock();
   preloadAssets();
   resizeStage();
   addEventListener("resize", resizeStage);
@@ -373,7 +380,11 @@ function init() {
 }
 
 function resizeStage() {
-  document.documentElement.style.setProperty("--scale", Math.max(innerWidth / 1280, innerHeight / 720));
+  const portraitPhone = innerWidth < 700 && innerWidth < innerHeight;
+  const fit = portraitPhone
+    ? Math.min(innerWidth / 1280, innerHeight / 720)
+    : Math.max(innerWidth / 1280, innerHeight / 720);
+  document.documentElement.style.setProperty("--scale", fit);
 }
 
 function onKeyDown(e) {
@@ -381,6 +392,7 @@ function onKeyDown(e) {
   keys.add(key);
   if (dialogNext && (key === "enter" || key === " " || key === "e")) {
     e.preventDefault();
+    playSound("dialog");
     if (finishTypingIfNeeded()) return;
     dialogNext();
     return;
@@ -607,6 +619,104 @@ function applySettings(settings = loadSettings()) {
   document.body.classList.toggle("visual-cozy", settings.visualMode === "cozy");
   document.body.classList.toggle("text-large", settings.textSize === "large");
   window.forMotherSettings = settings;
+  updateAudioVolumes(settings);
+}
+
+function initAudioUnlock() {
+  const unlock = () => {
+    ensureAudio();
+    startAmbientMusic();
+  };
+  document.addEventListener("pointerdown", unlock, { once: true });
+  document.addEventListener("keydown", unlock, { once: true });
+}
+
+function ensureAudio() {
+  if (audioContext) {
+    if (audioContext.state === "suspended") audioContext.resume();
+    return audioContext;
+  }
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  audioContext = new AudioCtx();
+  masterGain = audioContext.createGain();
+  musicGain = audioContext.createGain();
+  sfxGain = audioContext.createGain();
+  musicGain.connect(masterGain);
+  sfxGain.connect(masterGain);
+  masterGain.connect(audioContext.destination);
+  updateAudioVolumes();
+  return audioContext;
+}
+
+function updateAudioVolumes(settings = window.forMotherSettings || loadSettings()) {
+  if (!musicGain || !sfxGain) return;
+  const now = audioContext.currentTime;
+  musicGain.gain.setTargetAtTime((settings.musicVolume / 100) * 0.16, now, 0.03);
+  sfxGain.gain.setTargetAtTime((settings.sfxVolume / 100) * 0.55, now, 0.02);
+}
+
+function startAmbientMusic() {
+  const ctx = ensureAudio();
+  if (!ctx || ambientStarted) return;
+  ambientStarted = true;
+  const notes = [261.63, 329.63, 392, 523.25, 392, 329.63];
+  const playNote = index => {
+    if (!ambientStarted) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(notes[index % notes.length], now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
+    osc.connect(gain);
+    gain.connect(musicGain);
+    osc.start(now);
+    osc.stop(now + 1.35);
+    setTimeout(() => playNote(index + 1), 1450);
+  };
+  playNote(0);
+}
+
+function playSound(type = "tap") {
+  const ctx = ensureAudio();
+  if (!ctx || !sfxGain) return;
+  if (ctx.state === "suspended") ctx.resume();
+  const now = ctx.currentTime;
+  const presets = {
+    tap: { notes: [520, 720], duration: .12, wave: "triangle", level: .18 },
+    hover: { notes: [660], duration: .08, wave: "sine", level: .08 },
+    clean: { notes: [540, 760, 980], duration: .22, wave: "triangle", level: .18 },
+    success: { notes: [523, 659, 784, 1046], duration: .38, wave: "sine", level: .18 },
+    wrong: { notes: [220, 165], duration: .22, wave: "sawtooth", level: .12 },
+    portal: { notes: [392, 523, 784], duration: .45, wave: "sine", level: .16 },
+    fail: { notes: [196, 146, 110], duration: .46, wave: "triangle", level: .15 },
+    dialog: { notes: [420], duration: .04, wave: "sine", level: .035 }
+  };
+  const preset = presets[type] || presets.tap;
+  preset.notes.forEach((freq, index) => {
+    const start = now + index * 0.055;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = preset.wave;
+    osc.frequency.setValueAtTime(freq, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(preset.level, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + preset.duration);
+    osc.connect(gain);
+    gain.connect(sfxGain);
+    osc.start(start);
+    osc.stop(start + preset.duration + 0.02);
+  });
+}
+
+function playHoverSound() {
+  const now = performance.now();
+  if (now - lastHoverSound < 90) return;
+  lastHoverSound = now;
+  playSound("hover");
 }
 
 function openSettingsModal() {
@@ -678,7 +788,7 @@ function openSettingsModal() {
         </div>
 
         <p class="settings-note">
-          Catatan: Jika musik atau efek suara belum tersedia, pengaturan volume akan disimpan dan diterapkan saat audio ditambahkan.
+          Catatan: Musik dan efek suara akan mulai setelah klik atau tekan tombol pertama.
         </p>
 
         <div class="settings-actions">
@@ -729,6 +839,7 @@ function openSettingsModal() {
     saveSettings(newSettings);
     applySettings(newSettings);
     closeSettingsModal();
+    playSound("success");
     toast("Setting tersimpan");
   };
 
@@ -773,6 +884,7 @@ function slideshow(name, slides, done) {
     typeDialogText(box, slides[i].text);
   };
   box.addEventListener("click", () => {
+    playSound("dialog");
     if (finishTypingIfNeeded()) return;
     next();
   });
@@ -798,6 +910,7 @@ function showDialogue(dialogueArray, onComplete) {
   const box = dialog(current);
   sceneEl.append(box);
   const next = () => {
+    playSound("dialog");
     if (finishTypingIfNeeded()) return;
     index++;
     if (index >= dialogueArray.length) {
@@ -940,16 +1053,21 @@ function interact() {
   setTimeout(() => gameState.player.interacting = false, 250);
   if (gameState.scene === "Witch House Hub") {
     if (point.type === "witch") {
+      playSound("dialog");
       gameState.witchTalked = true;
       showDialogue(hubDialogue(), () => {});
     } else if (gameState.completedChapters.length >= 5) {
+      playSound("portal");
       showEnding();
     } else if (!gameState.witchTalked) {
+      playSound("wrong");
       tempDialog("Penyihir", "Bicaralah denganku dulu sebelum masuk ke portal.");
     } else {
+      playSound("portal");
       startChapter(gameState.currentChapter);
     }
   } else if (gameState.scene.includes("Exploration")) {
+    playSound("tap");
     gameState.chapter.returnPlayer = {
       x: gameState.player.x,
       y: gameState.player.y,
@@ -1060,6 +1178,7 @@ function pauseGame() {
 
 function failChapter() {
   hideCleaningCursor();
+  playSound("fail");
   gameState.chapter.paused = true;
   modal("Waktu habis!", "Chapter gagal. Coba ulangi dan selesaikan sebelum timer habis.", [
     btn("Ulangi Chapter", () => startChapter(gameState.chapter.number)),
@@ -1152,10 +1271,12 @@ function dragSet(area, items, targets, done, showNeat = false) {
         setTimeout(() => hit.el.classList.remove("good"), 450);
         if (showNeat) hit.el.prepend(img(neat, id));
         dropped.remove();
+        playSound("clean");
         toast("+10 Bersih!");
         if (complete.size === items.length) done();
       } else {
         addClean(-5);
+        playSound("wrong");
         toast("Belum tepat. Coba target lain.");
         if (hit) {
           hit.el.classList.add("bad");
@@ -1231,6 +1352,7 @@ function waterMissionGame(area, mission, chapterNumber, missionIndex) {
     bucket.src = w.bucketClosed;
     mosquito.remove();
     addClean(10);
+    playSound("clean");
     toast("Ember tertutup. Nyamuk pergi!");
     completeMission(chapterNumber, missionIndex);
   });
@@ -1274,6 +1396,7 @@ function scrubObject(area, obj, index, completed, total, done, callEach = false,
       completed.add(index);
       badge.textContent = "Bersih";
       addClean(10);
+      playSound("clean");
       toast("+10 Bersih!");
       setProgress(completed.size, total);
       if (callEach || completed.size === total) done();
@@ -1356,8 +1479,10 @@ function showQuiz() {
     q[2].forEach(answer => opts.append(btn(answer, () => {
       if (answer === q[1]) {
         gameState.totalEducationPoints += 10;
+        playSound("success");
         toast("+10 Edukasi!");
       } else {
+        playSound("wrong");
         toast(`Jawaban benar: ${q[1]}`);
       }
       i++;
@@ -1399,6 +1524,7 @@ function updateChapterProgress(chapterNumber) {
 
 function completeChapter(n) {
   if (!gameState.chapter || gameState.chapter.paused) return;
+  playSound("success");
   gameState.chapter.paused = true;
   if (timer) clearInterval(timer);
   timer = null;
@@ -1558,6 +1684,7 @@ function showFinalMessage() {
     gameState.dialogOpen = false;
   };
   const next = () => {
+    playSound("dialog");
     if (!finished) {
       completeText();
     }
@@ -1571,10 +1698,14 @@ function showFinalMessage() {
   dialogNext = next;
 
   scene.querySelector("#playAgainBtn").addEventListener("click", () => {
+    playSound("tap");
     resetGame(false);
     showOpening();
   });
-  scene.querySelector("#backToMenuBtn").addEventListener("click", showMainMenu);
+  scene.querySelector("#backToMenuBtn").addEventListener("click", () => {
+    playSound("tap");
+    showMainMenu();
+  });
 }
 
 function addClean(v) {
@@ -1714,7 +1845,11 @@ function img(src, alt = "", cls = "", x, y) {
 
 function btn(text, fn, cls = "") {
   const b = el("button", `btn ${cls}`.trim(), text);
-  b.addEventListener("click", fn);
+  b.addEventListener("mouseenter", playHoverSound);
+  b.addEventListener("click", event => {
+    playSound(cls.includes("danger") ? "wrong" : "tap");
+    fn?.(event);
+  });
   return b;
 }
 

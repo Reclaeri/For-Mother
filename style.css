@@ -46,12 +46,14 @@ button { font: inherit; }
 }
 
 #game {
-  position: relative;
+  position: fixed;
+  left: 50%;
+  top: 50%;
   width: 1280px;
   height: 720px;
   overflow: hidden;
   background: #304155 center / cover no-repeat;
-  transform: scale(var(--scale));
+  transform: translate(-50%, -50%) scale(var(--scale));
   transform-origin: center;
   box-shadow: none;
   isolation: isolate;
@@ -171,24 +173,24 @@ button { font: inherit; }
 .main-menu-content {
   position: relative;
   z-index: 2;
-  width: min(720px, 90%);
-  padding: 34px 34px 30px;
+  width: min(820px, 92%);
+  padding: 16px 28px 24px;
   text-align: center;
-  border-radius: 28px;
-  background: rgba(35, 28, 26, .34);
-  border: 1px solid rgba(255, 235, 190, .22);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, .22);
-  backdrop-filter: blur(3px);
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
   animation: menuFadeIn .8s ease both;
 }
 .main-logo {
-  width: min(330px, 70vw);
-  max-height: 190px;
-  margin-bottom: 18px;
+  width: min(520px, 82vw);
+  max-height: 285px;
+  margin-bottom: 8px;
   object-fit: contain;
   filter:
-    drop-shadow(0 6px 12px rgba(0, 0, 0, .25))
-    drop-shadow(0 0 14px rgba(255, 235, 190, .42));
+    drop-shadow(0 10px 18px rgba(0, 0, 0, .30))
+    drop-shadow(0 0 20px rgba(255, 235, 190, .48));
   animation: logoFloat 3.8s ease-in-out infinite;
 }
 .menu-tagline {
@@ -199,7 +201,7 @@ button { font: inherit; }
   text-shadow: 0 3px 12px rgba(0, 0, 0, .38);
 }
 .menu-subtitle {
-  margin: 0 0 28px;
+  margin: 0 0 24px;
   font-size: clamp(13px, 1.3vw, 16px);
   color: rgba(255, 244, 220, .90);
   text-shadow: 0 3px 10px rgba(0, 0, 0, .35);
@@ -207,57 +209,85 @@ button { font: inherit; }
 .menu-buttons {
   display: grid;
   grid-template-columns: repeat(2, minmax(180px, 1fr));
-  gap: 15px;
-  width: min(560px, 100%);
+  gap: 17px;
+  width: min(610px, 100%);
   margin: 0 auto;
 }
 .menu-btn,
 .btn.menu-btn {
   min-width: 0;
-  min-height: 58px;
-  padding: 14px 22px;
-  border: 0;
-  border-radius: 18px;
+  min-height: 64px;
+  padding: 15px 24px;
+  border: 2px solid rgba(255, 246, 215, .88);
+  border-radius: 16px;
   color: #3d2b24;
   cursor: pointer;
   font-size: clamp(16px, 1.5vw, 20px);
-  font-weight: 800;
-  letter-spacing: .8px;
-  background: linear-gradient(135deg, #fff1b8, #f5b869);
-  background-image: linear-gradient(135deg, #fff1b8, #f5b869);
+  font-weight: 900;
+  letter-spacing: 0;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .72), transparent 22%),
+    linear-gradient(135deg, #fff7c8 0%, #f8c164 48%, #ea8745 100%);
+  background-image:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .72), transparent 22%),
+    linear-gradient(135deg, #fff7c8 0%, #f8c164 48%, #ea8745 100%);
   box-shadow:
-    0 7px 0 rgba(117, 76, 44, .38),
+    0 7px 0 #8d522b,
     0 13px 22px rgba(0, 0, 0, .22),
-    inset 0 3px 0 rgba(255, 255, 255, .45);
-  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    inset 0 3px 0 rgba(255, 255, 255, .55),
+    inset 0 -4px 0 rgba(133, 70, 34, .16);
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease;
+}
+.menu-btn::after,
+.btn.menu-btn::after {
+  content: "";
+  position: absolute;
+  inset: 7px 14px auto;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .38);
+  pointer-events: none;
 }
 .menu-btn:hover,
 .btn.menu-btn:hover {
-  transform: translateY(-4px);
-  filter: brightness(1.06);
+  transform: translateY(-5px) scale(1.02);
+  filter: brightness(1.08) saturate(1.06);
+  border-color: #fff7d3;
   box-shadow:
-    0 10px 0 rgba(117, 76, 44, .34),
+    0 11px 0 #7f4825,
     0 17px 28px rgba(0, 0, 0, .25),
-    0 0 18px rgba(255, 220, 145, .22),
-    inset 0 3px 0 rgba(255, 255, 255, .5);
+    0 0 20px rgba(255, 220, 145, .32),
+    inset 0 3px 0 rgba(255, 255, 255, .62),
+    inset 0 -4px 0 rgba(133, 70, 34, .12);
 }
 .menu-btn:active,
 .btn.menu-btn:active {
   transform: translateY(3px);
   box-shadow:
-    0 4px 0 rgba(117, 76, 44, .38),
+    0 4px 0 #8d522b,
     0 8px 16px rgba(0, 0, 0, .22),
     inset 0 2px 0 rgba(255, 255, 255, .38);
 }
 .menu-btn.primary,
 .btn.menu-btn.primary {
-  background: linear-gradient(135deg, #ffe88f, #f4a94f);
-  background-image: linear-gradient(135deg, #ffe88f, #f4a94f);
+  color: #33200f;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .8), transparent 23%),
+    linear-gradient(135deg, #fff9a8 0%, #ffd15c 42%, #f1863e 100%);
+  background-image:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .8), transparent 23%),
+    linear-gradient(135deg, #fff9a8 0%, #ffd15c 42%, #f1863e 100%);
 }
 .menu-btn.danger,
 .btn.menu-btn.danger {
-  background: linear-gradient(135deg, #ffd0c9, #e9857d);
-  background-image: linear-gradient(135deg, #ffd0c9, #e9857d);
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .62), transparent 23%),
+    linear-gradient(135deg, #ffd7d0 0%, #f19183 48%, #d95f59 100%);
+  background-image:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .62), transparent 23%),
+    linear-gradient(135deg, #ffd7d0 0%, #f19183 48%, #d95f59 100%);
 }
 .menu-footer {
   position: absolute;
@@ -1069,12 +1099,13 @@ body.text-large .edu-card {
 
 @media (max-width: 700px) {
   .main-menu-content {
-    width: min(430px, 90%);
-    padding: 28px 20px;
+    width: min(460px, 92%);
+    padding: 16px 20px 24px;
   }
 
   .main-logo {
-    max-height: 170px;
+    width: min(390px, 86vw);
+    max-height: 225px;
   }
 
   .menu-buttons {
