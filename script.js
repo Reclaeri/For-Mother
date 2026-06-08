@@ -1,4 +1,7 @@
 const ASSETS = {
+  bgm: {
+    scenario: "assets/bgm/bgm_1.mp3"
+  },
   background: {
     menu: "assets/background/menu/bg_main_menu_hospital_corridor.png",
     hospitalRoom: "assets/background/menu/bg_hospital_room.png",
@@ -355,7 +358,9 @@ let audioContext = null;
 let masterGain = null;
 let musicGain = null;
 let sfxGain = null;
-let ambientStarted = false;
+let scenarioBgm = null;
+let scenarioBgmSource = null;
+let scenarioMusicWanted = false;
 let lastHoverSound = 0;
 
 const DEFAULT_SETTINGS = {
@@ -445,6 +450,7 @@ function resetGame(render = true) {
 function setScene(name, bg) {
   stopAll();
   gameState.scene = name;
+  updateScenarioMusic();
   game.innerHTML = "";
   sceneEl = el("section", "scene");
   if (bg) sceneEl.style.backgroundImage = `url("${bg}")`;
@@ -625,7 +631,7 @@ function applySettings(settings = loadSettings()) {
 function initAudioUnlock() {
   const unlock = () => {
     ensureAudio();
-    startAmbientMusic();
+    updateScenarioMusic();
   };
   document.addEventListener("pointerdown", unlock, { once: true });
   document.addEventListener("keydown", unlock, { once: true });
@@ -656,28 +662,42 @@ function updateAudioVolumes(settings = window.forMotherSettings || loadSettings(
   sfxGain.gain.setTargetAtTime((settings.sfxVolume / 100) * 0.55, now, 0.02);
 }
 
-function startAmbientMusic() {
+function shouldPlayScenarioMusic() {
+  return gameState.scene.includes("Exploration") || gameState.scene.includes("Minigame");
+}
+
+function setupScenarioBgm() {
+  if (!scenarioBgm) {
+    scenarioBgm = new Audio(ASSETS.bgm.scenario);
+    scenarioBgm.loop = true;
+    scenarioBgm.preload = "auto";
+    scenarioBgm.volume = 1;
+  }
   const ctx = ensureAudio();
-  if (!ctx || ambientStarted) return;
-  ambientStarted = true;
-  const notes = [261.63, 329.63, 392, 523.25, 392, 329.63];
-  const playNote = index => {
-    if (!ambientStarted) return;
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(notes[index % notes.length], now);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
-    osc.connect(gain);
-    gain.connect(musicGain);
-    osc.start(now);
-    osc.stop(now + 1.35);
-    setTimeout(() => playNote(index + 1), 1450);
-  };
-  playNote(0);
+  if (ctx && musicGain && !scenarioBgmSource) {
+    scenarioBgmSource = ctx.createMediaElementSource(scenarioBgm);
+    scenarioBgmSource.connect(musicGain);
+  }
+  return scenarioBgm;
+}
+
+function updateScenarioMusic(forcePlay = shouldPlayScenarioMusic()) {
+  scenarioMusicWanted = forcePlay;
+  if (!forcePlay) {
+    if (scenarioBgm) scenarioBgm.pause();
+    return;
+  }
+  const bgm = setupScenarioBgm();
+  if (!bgm) return;
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  if (ctx.state === "suspended") {
+    ctx.resume().then(() => {
+      if (scenarioMusicWanted) bgm.play().catch(() => {});
+    });
+    return;
+  }
+  bgm.play().catch(() => {});
 }
 
 function playSound(type = "tap") {
@@ -1159,12 +1179,17 @@ function pauseGame() {
   if (!gameState.chapter) return;
   hideCleaningCursor();
   gameState.chapter.paused = true;
+  updateScenarioMusic(false);
   const shade = el("div", "shade");
   const box = el("div", "pause");
   box.innerHTML = "<h2>Pause</h2><p>Permainan sedang dijeda.</p>";
   const actions = el("div", "actions");
   actions.append(
-    btn("Lanjut", () => { gameState.chapter.paused = false; shade.remove(); }),
+    btn("Lanjut", () => {
+      gameState.chapter.paused = false;
+      shade.remove();
+      updateScenarioMusic();
+    }),
     btn("Kembali ke Menu", () => {
       saveGame();
       gameState.chapter = null;
@@ -1180,6 +1205,7 @@ function failChapter() {
   hideCleaningCursor();
   playSound("fail");
   gameState.chapter.paused = true;
+  updateScenarioMusic(false);
   modal("Waktu habis!", "Chapter gagal. Coba ulangi dan selesaikan sebelum timer habis.", [
     btn("Ulangi Chapter", () => startChapter(gameState.chapter.number)),
     btn("Kembali ke Rumah Penyihir", showWitchHouse, "alt")
@@ -1190,6 +1216,7 @@ function startMinigame(n, missionIndex) {
   if (raf) cancelAnimationFrame(raf);
   raf = null;
   gameState.scene = `Chapter ${n} Minigame`;
+  updateScenarioMusic();
   sceneEl.innerHTML = "";
   sceneEl.append(renderHUD(n));
   updateHUD();
@@ -1460,6 +1487,8 @@ function finalChapterGame(area, missionIndex) {
 
 function showQuiz() {
   hideCleaningCursor();
+  gameState.scene = "Chapter 5 Quiz";
+  updateScenarioMusic(false);
   gameState.chapter.remaining = 60;
   gameState.chapter.max = 60;
   gameState.chapter.timerLabel = "Timer Quiz";
@@ -1526,6 +1555,7 @@ function completeChapter(n) {
   if (!gameState.chapter || gameState.chapter.paused) return;
   playSound("success");
   gameState.chapter.paused = true;
+  updateScenarioMusic(false);
   if (timer) clearInterval(timer);
   timer = null;
   const chapter = CHAPTERS[n];
