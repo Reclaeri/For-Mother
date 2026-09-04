@@ -1,1902 +1,3853 @@
-const ASSETS = {
-  bgm: {
-    scenario: "assets/bgm/bgm_1.mp3"
-  },
-  background: {
-    menu: "assets/background/menu/bg_main_menu_hospital_corridor.png",
-    hospitalRoom: "assets/background/menu/bg_hospital_room.png",
-    hospitalCorridor: "assets/background/menu/bg_hospital_corridor.png",
-    endingHospital: "assets/background/menu/bg_ending_hospital_warm.png",
-    witchHouse: "assets/background/rumah penyihir/bg_witch_house_topdown.png",
-    portal: "assets/background/rumah penyihir/portal_topdown.png",
-    chapters: {
-      1: "assets/background/chapter background/bg_chapter_1_trash_room_topdown.png",
-      2: "assets/background/chapter background/bg_chapter_2_dust_room_topdown.png",
-      3: "assets/background/chapter background/bg_chapter_3_water_room_topdown.png",
-      4: "assets/background/chapter background/bg_chapter_4_messy_room_topdown.png",
-      5: "assets/background/chapter background/bg_chapter_5_final_room_topdown.png"
-    }
-  },
-  andi: {
-    idle_down: "assets/character/andi/andi_idle_down.png",
-    idle_left: "assets/character/andi/andi_idle_left.png",
-    idle_right: "assets/character/andi/andi_idle_right.png",
-    idle_up: "assets/character/andi/andi_idle_up.png",
-    walk_down: "assets/character/andi/andi_walk_down.png",
-    walk_left: "assets/character/andi/andi_walk_left.png",
-    walk_right: "assets/character/andi/andi_walk_right.png",
-    walk_up: "assets/character/andi/andi_walk_up.png",
-    interact_down: "assets/character/andi/andi_interact_down.png",
-    interact_left: "assets/character/andi/andi_interact_left.png",
-    interact_right: "assets/character/andi/andi_interact_right.png",
-    interact_up: "assets/character/andi/andi_interact_up.png",
-    neutral: "assets/character/andi/andi_expr_neutral.png",
-    sad: "assets/character/andi/andi_expr_sad.png",
-    worried: "assets/character/andi/andi_expr_worried.png",
-    determined: "assets/character/andi/andi_expr_determined.png",
-    tired: "assets/character/andi/andi_expr_tired.png",
-    surprised: "assets/character/andi/andi_expr_surprised.png",
-    relieved: "assets/character/andi/andi_expr_relieved.png",
-    happy: "assets/character/andi/andi_expr_happy.png",
-    emotional: "assets/character/andi/andi_expr_emotional.png",
-    fullbody: "assets/character/andi/andi_fullbody_standing.png",
-    holdingMedicine: "assets/character/andi/andi_holding_medicine.png",
-    endingHappy: "assets/character/andi/andi_ending_happy_pose.png"
-  },
-  characters: {
-    doctorPortrait: "assets/character/doctor/doctor_portrait_expression_sheet.png",
-    doctorFullbody: "assets/character/doctor/doctor_fullbody.png",
-    witchPortrait: "assets/character/witch/witch_portrait_expression_sheet.png",
-    witchFullbody: "assets/character/witch/witch_fullbody.png",
-    witchTopdown: "assets/character/witch/witch_topdown_npc.png",
-    mother: "assets/character/mother/mother_character_base.png"
-  },
-  cutscenes: {
-    opening: [
-      "assets/cutscenes/opening/cutscene_mother_unconscious_opening.png",
-      "assets/cutscenes/opening/cutscene_andi_beside_mother.png",
-      "assets/cutscenes/opening/cutscene_andi_talk_doctor.png",
-      "assets/background/menu/bg_hospital_corridor.png",
-      "assets/cutscenes/opening/cutscene_andi_go_to_witch_house.png",
-      "assets/cutscenes/opening/cutscene_andi_meet_witch.png",
-      "assets/cutscenes/opening/cutscene_witch_give_mission.png",
-      "assets/cutscenes/opening/cutscene_witch_open_portal.png",
-      "assets/cutscenes/opening/cutscene_andi_receive_medicine.png"
-    ],
-    mother: {
-      1: "assets/cutscenes/progres ibu/cutscene_mother_progress_1_unconscious.png",
-      2: "assets/cutscenes/progres ibu/cutscene_mother_progress_2_waking_up.png",
-      3: "assets/cutscenes/progres ibu/cutscene_mother_progress_3_small_response.png",
-      4: "assets/cutscenes/progres ibu/cutscene_mother_progress_4_sitting.png",
-      5: "assets/cutscenes/progres ibu/cutscene_mother_progress_5_recovered.png"
+/* For Mother — clean HTML5 runtime. Logical gameplay space is always 1672 × 941. */
+(() => {
+  "use strict";
+  const W = 1672,
+    H = 941,
+    INTERACTION_RADIUS = 100,
+    DEBUG_COLLISIONS = false,
+    SAVE_KEY = "forMother.save.v2",
+    SETTINGS_KEY = "forMother.settings.v1";
+  const AUDIO = "assets/audio/";
+  const AUDIO_ASSETS = Object.freeze({
+    music: {
+      calm: AUDIO + "alex-morgan-calm-piano-541028.mp3.mpeg",
+      emotional: AUDIO + "alex-morgan-emotional-545518.mp3.mpeg",
+      sad: AUDIO + "alex-morgan-sad-piano-emotional-rain-story-575883.mp3.mpeg",
+      exploration: AUDIO + "andriig-soft-soft-music-568206.mp3.mpeg",
+      magical: AUDIO + "atlasaudio-emotional-piano-510218.mp3.mpeg",
+      ending: AUDIO + "atlasaudio-sentimental-piano-512258.mp3.mpeg",
     },
-    ending: "assets/cutscenes/ending/cutscene_ending_mother_and_andi.png",
-    finalMessage: "assets/cutscenes/ending/final_message_panel.png"
-  },
-  ui: {
-    logo: "assets/ui/logo_for_mother.png"
-  },
-  medicines: [
-    "assets/medicines/medicine_01_awareness.png",
-    "assets/medicines/medicine_02_voice.png",
-    "assets/medicines/medicine_03_strength.png",
-    "assets/medicines/medicine_04_warmth.png",
-    "assets/medicines/medicine_05_recovery.png"
-  ],
-  medicineEmpty: "assets/medicines/medicine_slot_empty.png",
-  edu: {
-    trash: "assets/edu icons/edu_icon_trash.png",
-    dust: "assets/edu icons/edu_icon_dust.png",
-    water: "assets/edu icons/edu_icon_water.png",
-    tidy: "assets/edu icons/edu_icon_tidy.png",
-    health: "assets/edu icons/edu_icon_health.png"
-  },
-  mini: {
+    sfx: Object.fromEntries(
+      [
+        "trash_pickup",
+        "trash_dispose",
+        "window_close",
+        "ui_click",
+        "mop_scrub",
+        "wipe_clean",
+        "dialog_type",
+        "dialog_next",
+        "objective_complete",
+        "chapter_complete",
+        "medicine_obtained",
+        "lumi_vision_activate",
+        "hidden_dirt_found",
+        "portal_activate",
+        "portal_enter",
+      ].map((name) => [name, `${AUDIO}sfx/${name}.wav`]),
+    ),
+  });
+  const CHAPTER_TIME_LIMITS = Object.freeze({
+    1: 100,
+    2: 85,
+    3: 70,
+    4: 60,
+    5: 50,
+  });
+  const MOTHER_PROGRESS = Object.freeze([10, 25, 45, 65, 85, 100]);
+  const MEDICINE_NAMES = Object.freeze([
+    "Obat Kesadaran",
+    "Obat Suara",
+    "Obat Kekuatan",
+    "Obat Kehangatan",
+    "Obat Pemulihan",
+  ]);
+  const CREDIT_INFO = Object.freeze({
+    creator: "Kelompok 2 · Kelas XII RPL 1",
+    members: [
+      "Revan Oknanda -> navervan",
+      "Muhammad Carel Azzami -> mhmmdcrlazzam",
+      "Alya Nur Azizah -> norshallayya",
+      "Arzizah Dwiyanti Dasopang -> azizahdwiyantidasopang",
+    ],
+    created: "Agustus 2026 – September 2026",
+    deployment:
+      "Game berbasis website · Di-deploy melalui Vercel · Publikasi 8 September 2026",
+    visualAssets: "Generated by ChatGPT",
+    audioAssets: "Suno AI dan Pixabay",
+    technology: "HTML5, CSS3, dan JavaScript vanilla",
+  });
+  const HELD_ITEM_OFFSETS = Object.freeze({
+    up: { x: -2, y: -74, z: -1 },
+    down: { x: 0, y: -43, z: 2 },
+    left: { x: -34, y: -48, z: 2 },
+    right: { x: 34, y: -48, z: 2 },
+  });
+  const A = "assets/";
+  const ASSETS = {
+    menu: {
+      bg: A + "background/menu/menu awal.mp4",
+      logo: A + "ui/logo_for_mother.png",
+    },
+    bg: {
+      village: A + "background/desa/background_desa.png",
+      forest: A + "background/hutan/background-hutan.png",
+      witch: A + "background/rumah penyihir/bg_witch_house_topdown.png",
+      c1:
+        A + "background/chapter background/bg_chapter_1_trash_room_topdown.png",
+      c2:
+        A + "background/chapter background/bg_chapter_2_dust_room_topdown.png",
+      c3:
+        A + "background/chapter background/bg_chapter_3_water_room_topdown.png",
+      c4:
+        A + "background/chapter background/bg_chapter_4_messy_room_topdown.png",
+      c5:
+        A + "background/chapter background/bg_chapter_5_final_room_topdown.png",
+    },
+    opening: [
+      A + "cutscenes/opening/opening_1.png",
+      A + "cutscenes/opening/opening_2.png",
+      A + "cutscenes/opening/opening_3.png",
+    ],
+    witchCuts: {
+      approach: A + "cutscenes/penyihir/cutscene_andi_go_to_witch_house.png",
+      meet: A + "cutscenes/penyihir/cutscene_andi_meet_witch.png",
+      mission: A + "cutscenes/penyihir/cutscene_witch_give_mission.png",
+      open: A + "cutscenes/penyihir/cutscene_witch_open_portal.png",
+      reward: A + "cutscenes/penyihir/cutscene_andi_receive_medicine.png",
+    },
+    mother: [1, 2, 3, 4, 5].map(
+      (n) =>
+        A +
+        `cutscenes/progres ibu/cutscene_mother_progress_${n}_${["unconscious", "waking_up", "small_response", "sitting", "recovered"][n - 1]}.png`,
+    ),
+    ending: {
+      bg: A + "cutscenes/ending/cutscene_ending_mother_and_andi.png",
+      panel: A + "cutscenes/ending/final_message_panel.png",
+    },
+    andi: {
+      idle: {
+        down: A + "character/andi/andi_idle_down.png",
+        up: A + "character/andi/andi_idle_up.png",
+        left: A + "character/andi/andi_idle_left.png",
+        right: A + "character/andi/andi_idle_right.png",
+      },
+      walk: {},
+      interact: {
+        down: A + "character/andi/andi_interact_down.png",
+        up: A + "character/andi/andi_interact_up.png",
+        left: A + "character/andi/andi_interact_left.png",
+        right: A + "character/andi/andi_interact_right.png",
+      },
+      portrait: {},
+    },
+    npc: {
+      bima: A + "character/pak bima/idle.png",
+      nina: A + "character/nina/idle.png",
+      sari: A + "character/bu sari/idle.png",
+      witch: A + "character/witch/witch_topdown_npc.png",
+      mother: A + "character/mother/mother_character_base.png",
+      walk: {},
+    },
+    portraits: {
+      tabib: A + "character/tabib/potrait_dialog_tabib.png",
+      witch: A + "character/witch/witch_portrait_expression_sheet.png",
+      bima: A + "character/pak bima/idle.png",
+      nina: A + "character/nina/idle.png",
+      sari: A + "character/bu sari/idle.png",
+      mother: A + "character/mother/mother_character_base.png",
+    },
+    lumi: {
+      normal: A + "companion/lumi_orb.png",
+      happy: A + "companion/lumi_orb_happy.png",
+      worried: A + "companion/lumi_orb_worried.png",
+    },
+    portal: {
+      village: A + "portal_desa.png",
+      witch: A + "background/rumah penyihir/portal fiks.png",
+    },
     trash: {
-      binOrganic: "assets/mini game/trash/bin_organic.png",
-      binNonorganic: "assets/mini game/trash/bin_nonorganic.png",
-      banana: "assets/mini game/trash/trash_banana_peel.png",
-      can: "assets/mini game/trash/trash_can.png",
-      food: "assets/mini game/trash/trash_food_waste.png",
-      paper: "assets/mini game/trash/trash_paper.png",
-      plasticBag: "assets/mini game/trash/trash_plastic_bag.png",
-      bottle: "assets/mini game/trash/trash_plastic_bottle.png"
+      banana: A + "mini game/trash/trash_banana_peel.png",
+      food: A + "mini game/trash/trash_food_waste.png",
+      paper: A + "mini game/trash/trash_paper.png",
+      can: A + "mini game/trash/trash_can.png",
+      bag: A + "mini game/trash/trash_plastic_bag.png",
+      bottle: A + "mini game/trash/trash_plastic_bottle.png",
+      organic: A + "mini game/trash/bin_organic.png",
+      nonorganic: A + "mini game/trash/bin_nonorganic.png",
     },
     dust: {
-      cursor: "assets/mini game/dust/cursor_cloth.png",
-      shelfClean: "assets/mini game/dust/dust_shelf_clean.png",
-      shelfOverlay: "assets/mini game/dust/dust_shelf_overlay.png",
-      tableClean: "assets/mini game/dust/dust_table_clean.png",
-      tableOverlay: "assets/mini game/dust/dust_table_overlay.png",
-      windowClean: "assets/mini game/dust/dust_window_clean.png",
-      windowOverlay: "assets/mini game/dust/dust_window_overlay.png"
+      shelf: A + "mini game/dust/dust_shelf_overlay.png",
+      table: A + "mini game/dust/dust_table_overlay.png",
+      window: A + "mini game/dust/dust_window_overlay.png",
+      shelfClean: A + "mini game/dust/dust_shelf_clean.png",
+      tableClean: A + "mini game/dust/dust_table_clean.png",
+      windowClean: A + "mini game/dust/dust_window_clean.png",
+      cloth: A + "mini game/dust/cursor_cloth.png",
+      windowOpen: A + "mini game/dust/chapter2_window_open.png",
+      windowClosed: A + "mini game/dust/chapter2_window_closed.png",
+      pipeBroken: A + "mini game/dust/pipa rusak.png",
+      pipeFixed: A + "mini game/dust/pipa bener.png",
+      binFallen: A + "mini game/dust/tempat sampah jatuh.png",
+      binUp: A + "mini game/dust/tempat sampah benar.png",
+      trashPile: A + "mini game/dust/sampah.png",
     },
     water: {
-      cursor: "assets/mini game/water/cursor_mop.png",
-      dry: "assets/mini game/water/dry_floor_patch.png.png",
-      mosquito: "assets/mini game/water/mosquito_small.png",
-      bucketClosed: "assets/mini game/water/water_bucket_closed.png",
-      bucketOpen: "assets/mini game/water/water_bucket_open.png",
-      large: "assets/mini game/water/water_puddle_large.png",
-      medium: "assets/mini game/water/water_puddle_medium.png",
-      small: "assets/mini game/water/water_puddle_small.png"
+      small: A + "mini game/water/water_puddle_small.png",
+      medium: A + "mini game/water/water_puddle_medium.png",
+      large: A + "mini game/water/water_puddle_large.png",
+      mop: A + "mini game/water/cursor_mop.png",
+      foot: A + "mini game/water/chapter3_dirty_footprint.png",
+      dry: A + "mini game/water/dry_floor_patch.png.png",
+      mosquito: A + "mini game/water/mosquito_small.png",
+      bucketOpen: A + "mini game/water/water_bucket_open.png",
+      bucketClosed: A + "mini game/water/water_bucket_closed.png",
     },
     messy: {
-      messBooks: "assets/mini game/messy/mess_books.png",
-      messBox: "assets/mini game/messy/mess_box.png",
-      messPillow: "assets/mini game/messy/mess_pillow.png",
-      messToys: "assets/mini game/messy/mess_toys.png",
-      neatBooks: "assets/mini game/messy/neat_books.png",
-      neatBox: "assets/mini game/messy/neat_box.png",
-      neatPillow: "assets/mini game/messy/neat_pillow.png",
-      neatToys: "assets/mini game/messy/neat_toys.png"
+      books: A + "mini game/messy/mess_books.png",
+      box: A + "mini game/messy/mess_box.png",
+      pillow: A + "mini game/messy/mess_pillow.png",
+      toys: A + "mini game/messy/mess_toys.png",
+      neatBooks: A + "mini game/messy/neat_books.png",
+      neatBox: A + "mini game/messy/neat_box.png",
+      neatPillow: A + "mini game/messy/neat_pillow.png",
+      neatToys: A + "mini game/messy/neat_toys.png",
     },
     final: {
-      cleanAura: "assets/mini game/final/clean_aura.png",
-      cleanPatch: "assets/mini game/final/clean_stain_patch.png",
-      dirtyAura: "assets/mini game/final/dirty_aura.png",
-      germ: "assets/mini game/final/germ_shadow.png",
-      dark: "assets/mini game/final/stain_dark.png",
-      drink: "assets/mini game/final/stain_drink.png",
-      mud: "assets/mini game/final/stain_mud.png"
-    }
-  }
-};
-
-const CHAPTERS = {
-  1: { name: "Chapter 1: Sampah", time: 120, edu: "trash", med: 0, mother: 2 },
-  2: { name: "Chapter 2: Debu", time: 100, edu: "dust", med: 1, mother: 3 },
-  3: { name: "Chapter 3: Genangan Air dan DBD", time: 80, edu: "water", med: 2, mother: 4 },
-  4: { name: "Chapter 4: Ruangan Berantakan", time: 70, edu: "tidy", med: 3, mother: 5 },
-  5: { name: "Chapter 5: Ruang Final", time: 60, edu: "health", med: 4, mother: 5 }
-};
-
-const EDU = {
-  trash: ["Sampah dan Kesehatan", "Sampah yang dibiarkan menumpuk dapat menjadi sarang kuman dan menyebabkan penyakit. Buanglah sampah pada tempatnya dan pisahkan sesuai jenisnya.", ASSETS.edu.trash],
-  dust: ["Debu dan Pernapasan", "Debu dapat mengganggu pernapasan dan membuat ruangan terasa tidak sehat. Membersihkan debu secara rutin membantu menjaga udara tetap bersih.", ASSETS.edu.dust],
-  water: ["Genangan Air dan Nyamuk", "Air yang menggenang dapat menjadi tempat berkembang biak nyamuk. Keringkan genangan dan tutup wadah air untuk mencegah penyakit seperti DBD.", ASSETS.edu.water],
-  tidy: ["Kerapian dan Keselamatan", "Barang yang berserakan dapat membuat orang tersandung atau terluka. Ruangan yang rapi membuat rumah lebih aman dan nyaman.", ASSETS.edu.tidy],
-  health: ["Rumah Bersih, Keluarga Sehat", "Menjaga kebersihan rumah membantu melindungi keluarga dari kuman, debu, nyamuk, dan kecelakaan kecil.", ASSETS.edu.health]
-};
-
-function openingDialogue() {
-  return [
-    { art: ASSETS.cutscenes.opening[0], speaker: "Narator", text: "Malam itu, ruang rumah sakit terasa sangat sunyi." },
-    { speaker: "Andi", text: "Ibu... kenapa Ibu belum bangun juga?", portrait: ASSETS.andi.sad, side: "left" },
-    { speaker: "Andi", text: "Aku takut... tapi aku harus tetap kuat.", portrait: ASSETS.andi.worried, side: "left" },
-    { art: ASSETS.cutscenes.opening[1], speaker: "Andi", text: "Ibu selalu menjaga rumah dan menjagaku. Sekarang giliranku menjaga Ibu.", portrait: ASSETS.andi.sad, side: "left" },
-    { speaker: "Ibu", text: "Andi...", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Ibu? Ibu bisa dengar aku?", portrait: ASSETS.andi.surprised, side: "left" },
-    { speaker: "Narator", text: "Ibu belum benar-benar sadar. Namun suara kecil itu membuat Andi yakin masih ada harapan." },
-    { art: ASSETS.cutscenes.opening[2], speaker: "Dokter", text: "Andi, kondisi ibumu sangat lemah.", portrait: ASSETS.characters.doctorPortrait, side: "right" },
-    { speaker: "Andi", text: "Apa Ibu bisa sembuh, Dok?", portrait: ASSETS.andi.worried, side: "left" },
-    { speaker: "Dokter", text: "Kami sudah berusaha, tetapi tubuhnya membutuhkan pemulihan yang tidak biasa.", portrait: ASSETS.characters.doctorPortrait, side: "right" },
-    { speaker: "Andi", text: "Tidak biasa? Maksud Dokter apa?", portrait: ASSETS.andi.sad, side: "left" },
-    { speaker: "Dokter", text: "Ada cerita lama tentang penyihir bijak. Ia memahami hubungan antara kebersihan, kesehatan, dan kekuatan hidup.", portrait: ASSETS.characters.doctorPortrait, side: "right" },
-    { speaker: "Andi", text: "Kalau itu bisa menyelamatkan Ibu, aku akan mencarinya.", portrait: ASSETS.andi.determined, side: "left" },
-    { speaker: "Dokter", text: "Hati-hati, Andi. Jalan itu tidak mudah. Tapi tekadmu bisa menjadi kekuatan besar.", portrait: ASSETS.characters.doctorPortrait, side: "right" },
-    { art: ASSETS.cutscenes.opening[4], speaker: "Andi", text: "Aku tidak boleh terlambat. Ibu menungguku.", portrait: ASSETS.andi.determined, side: "left" },
-    { speaker: "Narator", text: "Andi berjalan menuju rumah tua di tengah hutan." },
-    { art: ASSETS.cutscenes.opening[5], speaker: "Penyihir", text: "Kau datang dengan hati yang berat, Nak.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Kamu tahu kenapa aku datang?", portrait: ASSETS.andi.surprised, side: "left" },
-    { speaker: "Penyihir", text: "Aku melihat rasa sayangmu kepada ibumu. Tapi obat yang kau cari tidak bisa didapat dengan mudah.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Aku siap melakukan apa saja.", portrait: ASSETS.andi.determined, side: "left" },
-    { speaker: "Penyihir", text: "Bukan kekuatan besar yang kubutuhkan darimu. Aku membutuhkan ketekunan.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { art: ASSETS.cutscenes.opening[6], speaker: "Penyihir", text: "Ada lima ruangan ajaib yang dipenuhi kotoran, debu, genangan, dan kekacauan.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Apa hubungannya membersihkan ruangan dengan menyembuhkan Ibu?", portrait: ASSETS.andi.worried, side: "left" },
-    { speaker: "Penyihir", text: "Rumah yang kotor menyimpan kuman. Debu mengganggu napas. Air menggenang memanggil nyamuk. Barang berserakan membawa bahaya.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Jadi kebersihan bisa menjaga kesehatan keluarga?", portrait: ASSETS.andi.worried, side: "left" },
-    { speaker: "Penyihir", text: "Tepat. Setiap ruangan yang kau bersihkan akan memberimu satu obat.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Aku akan membersihkan semuanya.", portrait: ASSETS.andi.determined, side: "left" },
-    { art: ASSETS.cutscenes.opening[7], speaker: "Penyihir", text: "Masuklah ke portal ini. Waktu akan berjalan cepat di setiap ruangan.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Berapa banyak waktu yang kupunya?", portrait: ASSETS.andi.neutral, side: "left" },
-    { speaker: "Penyihir", text: "Tidak banyak. Tapi cukup untuk orang yang fokus dan tidak menyerah.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { art: ASSETS.cutscenes.opening[8], speaker: "Penyihir", text: "Ini hanyalah contoh cahaya obatnya. Obat yang sebenarnya harus kau dapatkan dari ruangan ajaib.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Ibu... tunggu aku. Aku akan pulang membawa semuanya.", portrait: ASSETS.andi.emotional, side: "left" }
-  ];
-}
-
-const HUB_DIALOGUES = {
-  1: [
-    ["Penyihir", "Ruangan pertama menguji kepedulianmu pada sampah."],
-    ["Andi", "Aku harus memilah sampah dengan benar, kan?", ASSETS.andi.determined],
-    ["Penyihir", "Benar. Sampah organik dan non-organik tidak boleh dicampur."]
-  ],
-  2: [
-    ["Penyihir", "Ruangan berikutnya dipenuhi debu."],
-    ["Andi", "Debu terlihat kecil, tapi bisa mengganggu napas.", ASSETS.andi.worried],
-    ["Penyihir", "Kau mulai memahami maknanya."]
-  ],
-  3: [
-    ["Penyihir", "Kali ini, perhatikan air yang menggenang."],
-    ["Andi", "Karena genangan bisa menjadi tempat nyamuk berkembang.", ASSETS.andi.determined],
-    ["Penyihir", "Tepat sekali."]
-  ],
-  4: [
-    ["Penyihir", "Ruangan berantakan bisa terlihat sepele."],
-    ["Andi", "Tapi bisa membuat orang tersandung atau terluka.", ASSETS.andi.neutral],
-    ["Penyihir", "Kebersihan dan kerapian selalu berjalan bersama."]
-  ],
-  5: [
-    ["Penyihir", "Ini ruangan terakhir. Semua pelajaranmu akan diuji."],
-    ["Andi", "Aku sudah sampai sejauh ini. Aku tidak akan menyerah.", ASSETS.andi.determined]
-  ],
-  done: [
-    ["Penyihir", "Kau telah mengumpulkan lima obat."],
-    ["Andi", "Berarti Ibu bisa sembuh?", ASSETS.andi.emotional],
-    ["Penyihir", "Pergilah. Ia menunggumu."]
-  ]
-};
-
-const MISSIONS = {
-  1: [
-    { x: 250, y: 430, radius: 105, id: "banana", src: ASSETS.mini.trash.banana, type: "organic", title: "Kulit Pisang" },
-    { x: 420, y: 320, radius: 105, id: "food", src: ASSETS.mini.trash.food, type: "organic", title: "Sisa Makanan" },
-    { x: 610, y: 455, radius: 105, id: "bottle", src: ASSETS.mini.trash.bottle, type: "nonorganic", title: "Botol Plastik" },
-    { x: 785, y: 335, radius: 105, id: "can", src: ASSETS.mini.trash.can, type: "nonorganic", title: "Kaleng" },
-    { x: 955, y: 480, radius: 105, id: "paper", src: ASSETS.mini.trash.paper, type: "nonorganic", title: "Kertas" },
-    { x: 1080, y: 325, radius: 105, id: "bag", src: ASSETS.mini.trash.plasticBag, type: "nonorganic", title: "Kantong Plastik" }
-  ],
-  2: [
-    { x: 345, y: 420, radius: 115, id: "table", clean: ASSETS.mini.dust.tableClean, overlay: ASSETS.mini.dust.tableOverlay, src: ASSETS.mini.dust.tableOverlay, title: "Meja Berdebu", w: 560, h: 390 },
-    { x: 640, y: 325, radius: 115, id: "window", clean: ASSETS.mini.dust.windowClean, overlay: ASSETS.mini.dust.windowOverlay, src: ASSETS.mini.dust.windowOverlay, title: "Jendela Berdebu", w: 510, h: 510 },
-    { x: 960, y: 390, radius: 115, id: "shelf", clean: ASSETS.mini.dust.shelfClean, overlay: ASSETS.mini.dust.shelfOverlay, src: ASSETS.mini.dust.shelfOverlay, title: "Lemari Berdebu", w: 540, h: 540 },
-    { x: 500, y: 555, radius: 105, id: "drawer", clean: ASSETS.mini.dust.tableClean, overlay: ASSETS.mini.dust.tableOverlay, src: ASSETS.mini.dust.tableOverlay, title: "Laci Berdebu", w: 560, h: 390, propWidth: 155 },
-    { x: 805, y: 525, radius: 105, id: "small-shelf", clean: ASSETS.mini.dust.shelfClean, overlay: ASSETS.mini.dust.shelfOverlay, src: ASSETS.mini.dust.shelfOverlay, title: "Rak Kecil Berdebu", w: 540, h: 540, propWidth: 155 }
-  ],
-  3: [
-    { x: 285, y: 460, radius: 110, id: "small", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.small, src: ASSETS.mini.water.small, title: "Genangan Kecil", w: 300, h: 210 },
-    { x: 595, y: 370, radius: 110, id: "medium", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.medium, src: ASSETS.mini.water.medium, title: "Genangan Sedang", w: 390, h: 265 },
-    { x: 890, y: 475, radius: 115, id: "large", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.large, src: ASSETS.mini.water.large, title: "Genangan Besar", w: 500, h: 305 },
-    { x: 1010, y: 300, radius: 105, id: "bucket", src: ASSETS.mini.water.bucketOpen, title: "Ember Terbuka" },
-    { x: 430, y: 560, radius: 105, id: "corner-small", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.small, src: ASSETS.mini.water.small, title: "Genangan Sudut", w: 300, h: 210 },
-    { x: 760, y: 575, radius: 105, id: "door-medium", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.medium, src: ASSETS.mini.water.medium, title: "Genangan Dekat Pintu", w: 390, h: 265 }
-  ],
-  4: [
-    { x: 285, y: 365, radius: 110, id: "books", src: ASSETS.mini.messy.messBooks, neat: ASSETS.mini.messy.neatBooks, type: "books", target: "Rak Buku", title: "Buku Berantakan" },
-    { x: 545, y: 500, radius: 110, id: "toys", src: ASSETS.mini.messy.messToys, neat: ASSETS.mini.messy.neatToys, type: "toys", target: "Kotak Mainan", title: "Mainan Berantakan" },
-    { x: 805, y: 365, radius: 110, id: "pillow", src: ASSETS.mini.messy.messPillow, neat: ASSETS.mini.messy.neatPillow, type: "pillow", target: "Sofa", title: "Bantal Jatuh" },
-    { x: 1010, y: 500, radius: 110, id: "box", src: ASSETS.mini.messy.messBox, neat: ASSETS.mini.messy.neatBox, type: "box", target: "Area Penyimpanan", title: "Kotak Berantakan" }
-  ],
-  5: [
-    { x: 520, y: 222, radius: 95, id: "final-table-dust", kind: "dust", clean: ASSETS.mini.dust.tableClean, overlay: ASSETS.mini.dust.tableOverlay, src: ASSETS.mini.dust.tableOverlay, title: "Meja Berdebu", w: 560, h: 390, propWidth: 150 },
-    { x: 642, y: 132, radius: 96, id: "final-window-dust", kind: "dust", clean: ASSETS.mini.dust.windowClean, overlay: ASSETS.mini.dust.windowOverlay, src: ASSETS.mini.dust.windowOverlay, title: "Jendela Berdebu", w: 510, h: 510, propWidth: 150 },
-    { x: 1094, y: 468, radius: 95, id: "final-water-small", kind: "water", clean: ASSETS.mini.water.dry, overlay: ASSETS.mini.water.small, src: ASSETS.mini.water.small, title: "Genangan Dekat Ember", w: 300, h: 210 },
-    { x: 1118, y: 430, radius: 95, id: "final-bucket", kind: "water", src: ASSETS.mini.water.bucketOpen, title: "Ember Terbuka" },
-    { x: 160, y: 642, radius: 92, id: "final-banana", kind: "trash", src: ASSETS.mini.trash.banana, type: "organic", title: "Kulit Pisang" },
-    { x: 1048, y: 626, radius: 92, id: "final-bottle", kind: "trash", src: ASSETS.mini.trash.bottle, type: "nonorganic", title: "Botol Plastik" },
-    { x: 646, y: 442, radius: 95, id: "mud", kind: "final", clean: ASSETS.mini.final.cleanPatch, overlay: ASSETS.mini.final.mud, src: ASSETS.mini.final.mud, title: "Noda Lumpur", w: 360, h: 300 },
-    { x: 305, y: 450, radius: 95, id: "drink", kind: "final", clean: ASSETS.mini.final.cleanPatch, overlay: ASSETS.mini.final.drink, src: ASSETS.mini.final.drink, title: "Noda Minuman", w: 360, h: 300 },
-    { x: 1000, y: 260, radius: 95, id: "dark", kind: "final", clean: ASSETS.mini.final.cleanPatch, overlay: ASSETS.mini.final.dark, src: ASSETS.mini.final.dark, title: "Noda Gelap", w: 360, h: 300 }
-  ]
-};
-
-const COLLISION = {
-  hub: {
-    bounds: { minX: 120, maxX: 1160, minY: 150, maxY: 650 },
-    obstacles: [
-      { x: 570, y: 210, w: 170, h: 190 },
-      { x: 860, y: 270, w: 125, h: 165 }
-    ]
-  },
-  1: {
-    bounds: { minX: 120, maxX: 1160, minY: 165, maxY: 650 },
-    obstacles: [
-      { x: 165, y: 180, w: 520, h: 85 },
-      { x: 1100, y: 165, w: 55, h: 235 }
-    ]
-  },
-  2: {
-    bounds: { minX: 125, maxX: 1155, minY: 165, maxY: 650 },
-    obstacles: [
-      { x: 155, y: 520, w: 260, h: 125 },
-      { x: 125, y: 185, w: 145, h: 210 },
-      { x: 1015, y: 235, w: 135, h: 260 },
-      { x: 925, y: 530, w: 230, h: 110 }
-    ]
-  },
-  3: {
-    bounds: { minX: 125, maxX: 1155, minY: 165, maxY: 650 },
-    obstacles: [
-      { x: 135, y: 190, w: 250, h: 205 }
-    ]
-  },
-  4: {
-    bounds: { minX: 125, maxX: 1155, minY: 165, maxY: 650 },
-    obstacles: [
-      { x: 125, y: 170, w: 245, h: 125 },
-      { x: 880, y: 170, w: 260, h: 170 },
-      { x: 120, y: 430, w: 185, h: 95 },
-      { x: 1030, y: 520, w: 110, h: 95 }
-    ]
-  },
-  5: {
-    bounds: { minX: 125, maxX: 1155, minY: 165, maxY: 650 },
-    obstacles: [
-      { x: 155, y: 485, w: 265, h: 105 }
-    ]
-  }
-};
-
-function collisionForCurrentScene() {
-  if (gameState.scene === "Witch House Hub") return COLLISION.hub;
-  if (gameState.scene.includes("Exploration")) return COLLISION[gameState.chapter.number];
-  return null;
-}
-
-const gameState = {
-  scene: "Main Menu",
-  currentChapter: 1,
-  completedChapters: [],
-  medicinesOwned: [],
-  totalCleaningPoints: 0,
-  totalEducationPoints: 0,
-  openingSeen: false,
-  player: { x: 640, y: 500, dir: "down", moving: false, interacting: false },
-  chapter: null,
-  witchTalked: false,
-  dialogOpen: false
-};
-
-const game = document.getElementById("game");
-const keys = new Set();
-const CLEANING_CURSOR_ASSETS = {
-  cloth: "assets/mini game/dust/cursor_cloth.png",
-  mop: "assets/mini game/water/cursor_mop.png"
-};
-let sceneEl;
-let raf;
-let timer;
-let dialogNext;
-let typingTimer;
-let activeTypingBox;
-let activeTypingFullText = "";
-let activeDialogueArt;
-let cleaningCursorEl = null;
-let cleaningCursorTarget = null;
-let audioContext = null;
-let masterGain = null;
-let musicGain = null;
-let sfxGain = null;
-let scenarioBgm = null;
-let scenarioBgmSource = null;
-let scenarioMusicWanted = false;
-let lastHoverSound = 0;
-
-const DEFAULT_SETTINGS = {
-  musicVolume: 70,
-  sfxVolume: 80,
-  visualMode: "normal",
-  textSize: "normal",
-  timerWarning: true
-};
-
-function init() {
-  loadGame();
-  applySettings();
-  initCleaningCursor();
-  initAudioUnlock();
-  preloadAssets();
-  resizeStage();
-  addEventListener("resize", resizeStage);
-  addEventListener("keydown", onKeyDown);
-  addEventListener("keyup", e => keys.delete(e.key.toLowerCase()));
-  showMainMenu();
-}
-
-function resizeStage() {
-  const portraitPhone = innerWidth < 700 && innerWidth < innerHeight;
-  const fit = portraitPhone
-    ? Math.min(innerWidth / 1280, innerHeight / 720)
-    : Math.max(innerWidth / 1280, innerHeight / 720);
-  document.documentElement.style.setProperty("--scale", fit);
-}
-
-function onKeyDown(e) {
-  const key = e.key.toLowerCase();
-  keys.add(key);
-  if (dialogNext && (key === "enter" || key === " " || key === "e")) {
-    e.preventDefault();
-    playSound("dialog");
-    if (finishTypingIfNeeded()) return;
-    dialogNext();
-    return;
-  }
-  if (key === "e" && (gameState.scene.includes("Hub") || gameState.scene.includes("Exploration"))) {
-    e.preventDefault();
-    interact();
-  }
-}
-
-function saveGame() {
-  localStorage.setItem("forMotherSave", JSON.stringify({
-    currentChapter: gameState.currentChapter,
-    completedChapters: gameState.completedChapters,
-    medicinesOwned: gameState.medicinesOwned,
-    totalCleaningPoints: gameState.totalCleaningPoints,
-    totalEducationPoints: gameState.totalEducationPoints,
-    openingSeen: gameState.openingSeen
-  }));
-}
-
-function loadGame() {
-  try {
-    const data = JSON.parse(localStorage.getItem("forMotherSave") || "{}");
-    Object.assign(gameState, {
-      currentChapter: data.currentChapter || 1,
-      completedChapters: data.completedChapters || [],
-      medicinesOwned: data.medicinesOwned || [],
-      totalCleaningPoints: data.totalCleaningPoints || 0,
-      totalEducationPoints: data.totalEducationPoints || 0,
-      openingSeen: Boolean(data.openingSeen)
-    });
-  } catch {
-    resetGame(false);
-  }
-}
-
-function resetGame(render = true) {
-  localStorage.removeItem("forMotherSave");
-  gameState.currentChapter = 1;
-  gameState.completedChapters = [];
-  gameState.medicinesOwned = [];
-  gameState.totalCleaningPoints = 0;
-  gameState.totalEducationPoints = 0;
-  gameState.openingSeen = false;
-  gameState.chapter = null;
-  if (render) showMainMenu();
-}
-
-function setScene(name, bg) {
-  stopAll();
-  gameState.scene = name;
-  updateScenarioMusic();
-  game.innerHTML = "";
-  sceneEl = el("section", "scene");
-  if (bg) sceneEl.style.backgroundImage = `url("${bg}")`;
-  game.append(sceneEl);
-  return sceneEl;
-}
-
-function stopAll() {
-  hideCleaningCursor();
-  closeSettingsModal();
-  if (raf) cancelAnimationFrame(raf);
-  if (timer) clearInterval(timer);
-  if (typingTimer) clearInterval(typingTimer);
-  raf = null;
-  timer = null;
-  typingTimer = null;
-  activeTypingBox = null;
-  activeTypingFullText = "";
-  activeDialogueArt = null;
-  gameState.dialogOpen = false;
-  dialogNext = null;
-}
-
-function initCleaningCursor() {
-  cleaningCursorEl = document.getElementById("cleaningCursor");
-  if (!cleaningCursorEl) {
-    cleaningCursorEl = document.createElement("div");
-    cleaningCursorEl.id = "cleaningCursor";
-    document.body.appendChild(cleaningCursorEl);
-  }
-}
-
-function showCleaningCursor(type, targetElement) {
-  initCleaningCursor();
-  const assetPath = CLEANING_CURSOR_ASSETS[type];
-  if (!assetPath) return;
-
-  hideCleaningCursor();
-  cleaningCursorEl.style.backgroundImage = `url("${assetPath}")`;
-  cleaningCursorEl.classList.add("active");
-  cleaningCursorTarget = targetElement || sceneEl?.querySelector(".mini") || document.body;
-  cleaningCursorTarget.classList.add("cleaning-mode");
-
-  cleaningCursorTarget.addEventListener("pointermove", handleCleaningCursorMove);
-  cleaningCursorTarget.addEventListener("pointerdown", handleCleaningCursorDown);
-  cleaningCursorTarget.addEventListener("pointerup", handleCleaningCursorUp);
-  cleaningCursorTarget.addEventListener("pointercancel", handleCleaningCursorUp);
-  cleaningCursorTarget.addEventListener("pointerleave", handleCleaningCursorUp);
-}
-
-function hideCleaningCursor() {
-  if (!cleaningCursorEl) return;
-
-  cleaningCursorEl.classList.remove("active", "scrubbing");
-  cleaningCursorEl.style.backgroundImage = "";
-
-  if (cleaningCursorTarget) {
-    cleaningCursorTarget.classList.remove("cleaning-mode");
-    cleaningCursorTarget.removeEventListener("pointermove", handleCleaningCursorMove);
-    cleaningCursorTarget.removeEventListener("pointerdown", handleCleaningCursorDown);
-    cleaningCursorTarget.removeEventListener("pointerup", handleCleaningCursorUp);
-    cleaningCursorTarget.removeEventListener("pointercancel", handleCleaningCursorUp);
-    cleaningCursorTarget.removeEventListener("pointerleave", handleCleaningCursorUp);
-  }
-
-  cleaningCursorTarget = null;
-}
-
-function handleCleaningCursorMove(e) {
-  if (!cleaningCursorEl) return;
-  cleaningCursorEl.style.left = `${e.clientX}px`;
-  cleaningCursorEl.style.top = `${e.clientY}px`;
-}
-
-function handleCleaningCursorDown(e) {
-  if (!cleaningCursorEl) return;
-  cleaningCursorEl.classList.add("scrubbing");
-  handleCleaningCursorMove(e);
-}
-
-function handleCleaningCursorUp() {
-  if (!cleaningCursorEl) return;
-  cleaningCursorEl.classList.remove("scrubbing");
-}
-
-function preloadAssets() {
-  const paths = [...document.documentElement.innerHTML.matchAll(/assets\/[^"')]+/g)].map(match => match[0]);
-  Object.values(flattenAssets(ASSETS)).forEach(src => paths.push(src));
-  [...new Set(paths)].forEach(src => {
-    if (typeof src === "string" && src.startsWith("assets/")) {
-      const imageAsset = new Image();
-      imageAsset.src = src;
-    }
+      germ: A + "mini game/final/germ_shadow.png",
+      dirty: A + "mini game/final/dirty_aura.png",
+      clean: A + "mini game/final/clean_aura.png",
+      dark: A + "mini game/final/stain_dark.png",
+      drink: A + "mini game/final/stain_drink.png",
+      mud: A + "mini game/final/stain_mud.png",
+      patch: A + "mini game/final/clean_stain_patch.png",
+    },
+    meds: [1, 2, 3, 4, 5].map(
+      (n) =>
+        A +
+        `medicines/medicine_0${n}_${["awareness", "voice", "strength", "warmth", "recovery"][n - 1]}.png`,
+    ),
+    ui: {
+      empty: A + "ui/icon_check_empty.png",
+      done: A + "ui/icon_check_done.png",
+      star0: A + "ui/icon_star_empty.png",
+      star1: A + "ui/icon_star_filled.png",
+      slot: A + "medicines/medicine_slot_empty.png",
+    },
+    edu: ["trash", "dust", "water", "tidy", "health"].map(
+      (x) => A + `edu icons/edu_icon_${x}.png`,
+    ),
+  };
+  ["down", "up", "left", "right"].forEach((d) => {
+    ASSETS.andi.walk[d] = [1, 2, 3, 4].map(
+      (n) => A + `character/andi/walk_${d}_${n}.png`,
+    );
   });
-}
-
-function flattenAssets(value, output = []) {
-  if (typeof value === "string") output.push(value);
-  else if (Array.isArray(value)) value.forEach(item => flattenAssets(item, output));
-  else if (value && typeof value === "object") Object.values(value).forEach(item => flattenAssets(item, output));
-  return output;
-}
-
-function showMainMenu() {
-  const scene = setScene("Main Menu", ASSETS.background.menu);
-  const menu = el("section", "main-menu-screen");
-  const overlay = el("div", "menu-overlay");
-
-  const content = el("div", "main-menu-content");
-  const logo = img(ASSETS.ui.logo, "For Mother", "main-logo");
-
-  const tagline = el("p", "menu-tagline", "A magical journey of love, courage, and cleanliness.");
-  const subtitle = el("p", "menu-subtitle", "Bersihkan ruangan ajaib, kumpulkan obat, dan selamatkan Ibu.");
-
-  const actions = el("div", "menu-buttons");
-  const startBtn = btn("Mulai", () => gameState.openingSeen ? showWitchHouse() : showOpening(), "menu-btn primary");
-  const howToPlayBtn = btn("Cara Main", showHowTo, "menu-btn");
-  const settingBtn = btn("Setting", openSettingsModal, "menu-btn");
-  const resetBtn = btn("Reset Progress", () => { resetGame(false); toast("Progress direset."); }, "menu-btn danger");
-  startBtn.id = "startBtn";
-  howToPlayBtn.id = "howToPlayBtn";
-  settingBtn.id = "settingBtn";
-  resetBtn.id = "resetBtn";
-  actions.append(startBtn, howToPlayBtn, settingBtn, resetBtn);
-
-  content.append(logo, tagline, subtitle, actions);
-  menu.append(overlay, content, el("p", "menu-footer", "Kebersihan kecil hari ini, kesehatan besar untuk keluarga."));
-  scene.append(menu);
-}
-
-function showHowTo() {
-  closeModal();
-  const shade = el("div", "shade");
-  const card = el("div", "modal-card howto-card");
-  card.innerHTML = `
-    <div class="howto-badge">Panduan Singkat</div>
-    <h2>Cara Main</h2>
-    <div class="howto-grid">
-      <div class="howto-step"><span class="howto-icon">WASD</span><strong>Bergerak</strong><p>Pakai WASD atau tombol panah untuk jalan di ruangan.</p></div>
-      <div class="howto-step"><span class="howto-icon">E</span><strong>Interaksi</strong><p>Dekati objek bercahaya, lalu tekan E untuk mulai membersihkan.</p></div>
-      <div class="howto-step"><span class="howto-icon">+</span><strong>Bersihkan</strong><p>Seret, gosok, atau klik sesuai jenis minigame yang muncul.</p></div>
-      <div class="howto-step"><span class="howto-icon">00</span><strong>Kejar Waktu</strong><p>Selesaikan tiap chapter sebelum timer habis.</p></div>
-      <div class="howto-step wide"><span class="howto-icon">5</span><strong>Kumpulkan Obat</strong><p>Dapatkan lima obat ajaib untuk membawa Ibu pulih kembali.</p></div>
-    </div>
-  `;
-  card.append(btn("Mengerti", closeModal));
-  shade.append(card);
-  game.append(shade);
-}
-
-function loadSettings() {
-  return {
-    musicVolume: Number(localStorage.getItem("forMotherSettingMusicVolume") ?? DEFAULT_SETTINGS.musicVolume),
-    sfxVolume: Number(localStorage.getItem("forMotherSettingSfxVolume") ?? DEFAULT_SETTINGS.sfxVolume),
-    visualMode: localStorage.getItem("forMotherSettingVisualMode") || DEFAULT_SETTINGS.visualMode,
-    textSize: localStorage.getItem("forMotherSettingTextSize") || DEFAULT_SETTINGS.textSize,
-    timerWarning: localStorage.getItem("forMotherSettingTimerWarning") === null
-      ? DEFAULT_SETTINGS.timerWarning
-      : localStorage.getItem("forMotherSettingTimerWarning") === "true"
-  };
-}
-
-function saveSettings(settings) {
-  localStorage.setItem("forMotherSettingMusicVolume", String(settings.musicVolume));
-  localStorage.setItem("forMotherSettingSfxVolume", String(settings.sfxVolume));
-  localStorage.setItem("forMotherSettingVisualMode", settings.visualMode);
-  localStorage.setItem("forMotherSettingTextSize", settings.textSize);
-  localStorage.setItem("forMotherSettingTimerWarning", String(settings.timerWarning));
-}
-
-function applySettings(settings = loadSettings()) {
-  document.body.classList.toggle("visual-cozy", settings.visualMode === "cozy");
-  document.body.classList.toggle("text-large", settings.textSize === "large");
-  window.forMotherSettings = settings;
-  updateAudioVolumes(settings);
-}
-
-function initAudioUnlock() {
-  const unlock = () => {
-    ensureAudio();
-    updateScenarioMusic();
-  };
-  document.addEventListener("pointerdown", unlock, { once: true });
-  document.addEventListener("keydown", unlock, { once: true });
-}
-
-function ensureAudio() {
-  if (audioContext) {
-    if (audioContext.state === "suspended") audioContext.resume();
-    return audioContext;
-  }
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) return null;
-  audioContext = new AudioCtx();
-  masterGain = audioContext.createGain();
-  musicGain = audioContext.createGain();
-  sfxGain = audioContext.createGain();
-  musicGain.connect(masterGain);
-  sfxGain.connect(masterGain);
-  masterGain.connect(audioContext.destination);
-  updateAudioVolumes();
-  return audioContext;
-}
-
-function updateAudioVolumes(settings = window.forMotherSettings || loadSettings()) {
-  if (!musicGain || !sfxGain) return;
-  const now = audioContext.currentTime;
-  musicGain.gain.setTargetAtTime((settings.musicVolume / 100) * 0.16, now, 0.03);
-  sfxGain.gain.setTargetAtTime((settings.sfxVolume / 100) * 0.55, now, 0.02);
-}
-
-function shouldPlayScenarioMusic() {
-  return gameState.scene.includes("Exploration") || gameState.scene.includes("Minigame");
-}
-
-function setupScenarioBgm() {
-  if (!scenarioBgm) {
-    scenarioBgm = new Audio(ASSETS.bgm.scenario);
-    scenarioBgm.loop = true;
-    scenarioBgm.preload = "auto";
-    scenarioBgm.volume = 1;
-  }
-  const ctx = ensureAudio();
-  if (ctx && musicGain && !scenarioBgmSource) {
-    scenarioBgmSource = ctx.createMediaElementSource(scenarioBgm);
-    scenarioBgmSource.connect(musicGain);
-  }
-  return scenarioBgm;
-}
-
-function updateScenarioMusic(forcePlay = shouldPlayScenarioMusic()) {
-  scenarioMusicWanted = forcePlay;
-  if (!forcePlay) {
-    if (scenarioBgm) scenarioBgm.pause();
-    return;
-  }
-  const bgm = setupScenarioBgm();
-  if (!bgm) return;
-  const ctx = ensureAudio();
-  if (!ctx) return;
-  if (ctx.state === "suspended") {
-    ctx.resume().then(() => {
-      if (scenarioMusicWanted) bgm.play().catch(() => {});
-    });
-    return;
-  }
-  bgm.play().catch(() => {});
-}
-
-function playSound(type = "tap") {
-  const ctx = ensureAudio();
-  if (!ctx || !sfxGain) return;
-  if (ctx.state === "suspended") ctx.resume();
-  const now = ctx.currentTime;
-  const presets = {
-    tap: { notes: [520, 720], duration: .12, wave: "triangle", level: .18 },
-    hover: { notes: [660], duration: .08, wave: "sine", level: .08 },
-    clean: { notes: [540, 760, 980], duration: .22, wave: "triangle", level: .18 },
-    success: { notes: [523, 659, 784, 1046], duration: .38, wave: "sine", level: .18 },
-    wrong: { notes: [220, 165], duration: .22, wave: "sawtooth", level: .12 },
-    portal: { notes: [392, 523, 784], duration: .45, wave: "sine", level: .16 },
-    fail: { notes: [196, 146, 110], duration: .46, wave: "triangle", level: .15 },
-    dialog: { notes: [420], duration: .04, wave: "sine", level: .035 }
-  };
-  const preset = presets[type] || presets.tap;
-  preset.notes.forEach((freq, index) => {
-    const start = now + index * 0.055;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = preset.wave;
-    osc.frequency.setValueAtTime(freq, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(preset.level, start + 0.015);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + preset.duration);
-    osc.connect(gain);
-    gain.connect(sfxGain);
-    osc.start(start);
-    osc.stop(start + preset.duration + 0.02);
+  ["pak bima", "nina", "bu sari"].forEach((folder) => {
+    ASSETS.npc.walk[folder] = {};
+    ["down", "up", "left", "right"].forEach(
+      (d) =>
+        (ASSETS.npc.walk[folder][d] = [1, 2, 3, 4].map(
+          (n) => A + `character/${folder}/walk_${d}_${n}.png`,
+        )),
+    );
   });
-}
-
-function playHoverSound() {
-  const now = performance.now();
-  if (now - lastHoverSound < 90) return;
-  lastHoverSound = now;
-  playSound("hover");
-}
-
-function openSettingsModal() {
-  let modal = document.getElementById("settingsModal");
-
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "settingsModal";
-    modal.className = "settings-modal-backdrop";
-    modal.innerHTML = `
-      <div class="settings-card">
-        <div class="settings-header">
-          <div>
-            <p class="settings-label">Pengaturan</p>
-            <h2>Setting Game</h2>
-          </div>
-          <button class="settings-close" id="settingsCloseBtn" aria-label="Tutup setting">&times;</button>
-        </div>
-
-        <div class="settings-row">
-          <div>
-            <h3>Volume Musik</h3>
-            <p>Atur volume musik latar.</p>
-          </div>
-          <input type="range" id="musicVolumeSlider" min="0" max="100" value="70">
-          <span id="musicVolumeValue">70%</span>
-        </div>
-
-        <div class="settings-row">
-          <div>
-            <h3>Volume Efek</h3>
-            <p>Atur volume efek suara.</p>
-          </div>
-          <input type="range" id="sfxVolumeSlider" min="0" max="100" value="80">
-          <span id="sfxVolumeValue">80%</span>
-        </div>
-
-        <div class="settings-row">
-          <div>
-            <h3>Mode Tampilan</h3>
-            <p>Pilih tampilan normal atau lebih hangat.</p>
-          </div>
-          <select id="visualModeSelect">
-            <option value="normal">Normal</option>
-            <option value="cozy">Soft / Cozy</option>
-          </select>
-        </div>
-
-        <div class="settings-row">
-          <div>
-            <h3>Teks Dialog</h3>
-            <p>Perbesar teks dialog dan modal.</p>
-          </div>
-          <select id="textSizeSelect">
-            <option value="normal">Normal</option>
-            <option value="large">Besar</option>
-          </select>
-        </div>
-
-        <div class="settings-row">
-          <div>
-            <h3>Timer Warning</h3>
-            <p>Efek berkedip saat waktu hampir habis.</p>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="timerWarningToggle" checked>
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-
-        <p class="settings-note">
-          Catatan: Musik dan efek suara akan mulai setelah klik atau tekan tombol pertama.
-        </p>
-
-        <div class="settings-actions">
-          <button class="settings-btn secondary" id="settingsCancelBtn">Tutup</button>
-          <button class="settings-btn" id="settingsSaveBtn">Simpan</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  }
-
-  const settings = loadSettings();
-  const musicSlider = document.getElementById("musicVolumeSlider");
-  const musicValue = document.getElementById("musicVolumeValue");
-  const sfxSlider = document.getElementById("sfxVolumeSlider");
-  const sfxValue = document.getElementById("sfxVolumeValue");
-  const visualMode = document.getElementById("visualModeSelect");
-  const textSize = document.getElementById("textSizeSelect");
-  const timerWarning = document.getElementById("timerWarningToggle");
-
-  musicSlider.value = settings.musicVolume;
-  musicValue.textContent = `${settings.musicVolume}%`;
-  sfxSlider.value = settings.sfxVolume;
-  sfxValue.textContent = `${settings.sfxVolume}%`;
-  visualMode.value = settings.visualMode;
-  textSize.value = settings.textSize;
-  timerWarning.checked = settings.timerWarning;
-
-  musicSlider.oninput = () => {
-    musicValue.textContent = `${musicSlider.value}%`;
-  };
-
-  sfxSlider.oninput = () => {
-    sfxValue.textContent = `${sfxSlider.value}%`;
-  };
-
-  document.getElementById("settingsCloseBtn").onclick = closeSettingsModal;
-  document.getElementById("settingsCancelBtn").onclick = closeSettingsModal;
-  document.getElementById("settingsSaveBtn").onclick = () => {
-    const newSettings = {
-      musicVolume: Number(musicSlider.value),
-      sfxVolume: Number(sfxSlider.value),
-      visualMode: visualMode.value,
-      textSize: textSize.value,
-      timerWarning: timerWarning.checked
-    };
-
-    saveSettings(newSettings);
-    applySettings(newSettings);
-    closeSettingsModal();
-    playSound("success");
-    toast("Setting tersimpan");
-  };
-
-  modal.classList.add("active");
-}
-
-function closeSettingsModal() {
-  const modal = document.getElementById("settingsModal");
-  if (modal) modal.classList.remove("active");
-}
-
-function showOpening() {
-  setScene("Opening Story", ASSETS.cutscenes.opening[0]);
-  showDialogue(openingDialogue(), () => {
-    gameState.openingSeen = true;
-    saveGame();
-    showWitchHouse();
-  });
-}
-
-function showOpeningStory() {
-  showOpening();
-}
-
-function slideshow(name, slides, done) {
-  let i = 0;
-  const scene = setScene(name, slides[0].art);
-  const art = img(slides[0].art, "", "cutscene");
-  const box = dialog(slides[0]);
-  scene.append(art, box);
-  const next = () => {
-    i++;
-    if (i >= slides.length) {
-      dialogNext = null;
-      done();
-      return;
-    }
-    art.src = slides[i].art;
-    scene.style.backgroundImage = `url("${slides[i].art}")`;
-    box.querySelector(".speaker").textContent = slides[i].speaker;
-    updateDialogPortrait(box, slides[i]);
-    typeDialogText(box, slides[i].text);
-  };
-  box.addEventListener("click", () => {
-    playSound("dialog");
-    if (finishTypingIfNeeded()) return;
-    next();
-  });
-  dialogNext = next;
-}
-
-function showDialogue(dialogueArray, onComplete) {
-  hideCleaningCursor();
-  gameState.dialogOpen = true;
-  let index = 0;
-  const ensureArt = entry => {
-    if (!entry.art && !entry.background) return;
-    const src = entry.art || entry.background;
-    sceneEl.style.backgroundImage = `url("${src}")`;
-    if (!activeDialogueArt || !activeDialogueArt.isConnected) {
-      activeDialogueArt = img(src, "", "cutscene");
-      sceneEl.prepend(activeDialogueArt);
-    }
-    activeDialogueArt.src = src;
-  };
-  const current = dialogueArray[index];
-  ensureArt(current);
-  const box = dialog(current);
-  sceneEl.append(box);
-  const next = () => {
-    playSound("dialog");
-    if (finishTypingIfNeeded()) return;
-    index++;
-    if (index >= dialogueArray.length) {
-      box.remove();
-      dialogNext = null;
-      gameState.dialogOpen = false;
-      onComplete?.();
-      return;
-    }
-    const entry = dialogueArray[index];
-    ensureArt(entry);
-    box.querySelector(".speaker").textContent = entry.speaker;
-    updateDialogPortrait(box, entry);
-    typeDialogText(box, entry.text);
-  };
-  box.addEventListener("click", next);
-  dialogNext = next;
-}
-
-function showWitchHouse() {
-  const scene = setScene("Witch House Hub", ASSETS.background.witchHouse);
-  gameState.chapter = null;
-  gameState.witchTalked = false;
-  gameState.player = { x: 365, y: 500, dir: "down", moving: false, interacting: false };
-  scene.append(img(ASSETS.characters.witchTopdown, "Penyihir", "sprite witch", 650, 320));
-  scene.append(img(ASSETS.background.portal, "Portal", "sprite portal", 920, 360));
-  const andi = img(ASSETS.andi.idle_down, "Andi", "sprite andi");
-  const prompt = el("div", "prompt hidden", "E");
-  scene.append(andi, prompt, note("Rumah Penyihir", "Bicaralah dengan penyihir dulu, lalu masuk portal."));
-  moveLoop(andi, prompt, [
-    { x: 650, y: 330, radius: 105, type: "witch" },
-    { x: 920, y: 365, radius: 112, type: "portal" }
-  ]);
-}
-
-function startChapter(chapterNumber) {
-  gameState.currentChapter = chapterNumber;
-  gameState.chapter = {
-    number: chapterNumber,
-    remaining: CHAPTERS[chapterNumber].time,
-    max: CHAPTERS[chapterNumber].time,
-    timerLabel: "Timer",
-    cleaning: 0,
-    progress: 0,
-    paused: false,
-    missionsDone: []
-  };
-  saveGame();
-  setScene(`Chapter ${chapterNumber} Intro`, ASSETS.background.chapters[chapterNumber]);
-  showDialogue(chapterIntroDialogue(chapterNumber), () => startExploration(chapterNumber));
-}
-
-function startExploration(chapterNumber) {
-  const scene = setScene(`Chapter ${chapterNumber} Exploration`, ASSETS.background.chapters[chapterNumber]);
-  const returnPlayer = gameState.chapter?.returnPlayer;
-  gameState.player = returnPlayer ? { ...returnPlayer, moving: false, interacting: false } : { x: 640, y: 560, dir: "up", moving: false, interacting: false };
-  const hud = renderHUD(chapterNumber);
-  const andi = img(ASSETS.andi.idle_up, "Andi", "sprite andi");
-  const prompt = el("div", "prompt hidden", "E");
-  const spots = chapterSpots(chapterNumber);
-  scene.append(hud);
-  spots.forEach(p => {
-    const spot = el("div", "spot");
-    spot.style.left = `${p.x}px`;
-    spot.style.top = `${p.y}px`;
-    const prop = img(p.src || p.overlay, p.title || "Misi", "mission-prop");
-    prop.style.left = `${p.x}px`;
-    prop.style.top = `${p.y}px`;
-    if (p.propWidth) prop.style.width = `${p.propWidth}px`;
-    else if (chapterNumber === 2) prop.style.width = "185px";
-    else if (chapterNumber === 3 || chapterNumber === 5) prop.style.width = "120px";
-    scene.append(spot);
-    scene.append(prop);
-  });
-  scene.append(andi, prompt);
-  startTimer();
-  moveLoop(andi, prompt, spots);
-}
-
-function chapterSpots(n) {
-  return MISSIONS[n].map((mission, index) => ({ ...mission, missionIndex: index }))
-    .filter(mission => !gameState.chapter?.missionsDone.includes(mission.missionIndex));
-}
-
-function moveLoop(andi, prompt, points) {
-  function tick() {
-    if (!gameState.chapter?.paused && !gameState.dialogOpen) {
-      const p = gameState.player;
-      let dx = 0, dy = 0;
-      if (keys.has("arrowleft") || keys.has("a")) dx--;
-      if (keys.has("arrowright") || keys.has("d")) dx++;
-      if (keys.has("arrowup") || keys.has("w")) dy--;
-      if (keys.has("arrowdown") || keys.has("s")) dy++;
-      p.moving = dx || dy;
-      if (p.moving) {
-        const len = Math.hypot(dx, dy) || 1;
-        movePlayer(dx / len * 4.2, dy / len * 4.2);
-        p.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
-      }
-      andi.src = andiSprite();
-      andi.style.left = `${p.x}px`;
-      andi.style.top = `${p.y}px`;
-      const near = points.find(point => dist(p, point) < point.radius);
-      prompt.classList.toggle("hidden", !near);
-      if (near) {
-        prompt.style.left = `${near.promptX ?? near.x}px`;
-        prompt.style.top = `${near.promptY ?? near.y - 48}px`;
-      }
-    }
-    raf = requestAnimationFrame(tick);
-  }
-  sceneEl._points = points;
-  tick();
-}
-
-function movePlayer(dx, dy) {
-  const p = gameState.player;
-  const collision = collisionForCurrentScene();
-  const bounds = collision?.bounds || { minX: 40, maxX: 1240, minY: 82, maxY: 680 };
-  const tryX = clamp(p.x + dx, bounds.minX, bounds.maxX);
-  if (!pointBlocked(tryX, p.y, collision)) p.x = tryX;
-  const tryY = clamp(p.y + dy, bounds.minY, bounds.maxY);
-  if (!pointBlocked(p.x, tryY, collision)) p.y = tryY;
-}
-
-function pointBlocked(x, y, collision) {
-  if (!collision) return false;
-  return collision.obstacles.some(rect => x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h);
-}
-
-function andiSprite() {
-  const mode = gameState.player.interacting ? "interact" : gameState.player.moving ? "walk" : "idle";
-  return ASSETS.andi[`${mode}_${gameState.player.dir}`];
-}
-
-function interact() {
-  const point = sceneEl?._points?.find(p => dist(gameState.player, p) < p.radius);
-  if (!point) return;
-  gameState.player.interacting = true;
-  setTimeout(() => gameState.player.interacting = false, 250);
-  if (gameState.scene === "Witch House Hub") {
-    if (point.type === "witch") {
-      playSound("dialog");
-      gameState.witchTalked = true;
-      showDialogue(hubDialogue(), () => {});
-    } else if (gameState.completedChapters.length >= 5) {
-      playSound("portal");
-      showEnding();
-    } else if (!gameState.witchTalked) {
-      playSound("wrong");
-      tempDialog("Penyihir", "Bicaralah denganku dulu sebelum masuk ke portal.");
-    } else {
-      playSound("portal");
-      startChapter(gameState.currentChapter);
-    }
-  } else if (gameState.scene.includes("Exploration")) {
-    playSound("tap");
-    gameState.chapter.returnPlayer = {
-      x: gameState.player.x,
-      y: gameState.player.y,
-      dir: gameState.player.dir
-    };
-    startMinigame(gameState.chapter.number, point.missionIndex);
-  }
-}
-
-function chapterIntroDialogue(chapterNumber) {
-  const data = {
-    1: [
-      { speaker: "Andi", text: "Ruangan ini penuh sampah. Aku harus memilahnya dengan benar.", portrait: ASSETS.andi.determined, side: "left" },
-      { speaker: "Penyihir", text: "Ingat, sampah organik berasal dari sisa makhluk hidup. Non-organik seperti plastik dan kaleng harus dipisahkan.", portrait: ASSETS.characters.witchPortrait, side: "right" }
-    ],
-    2: [
-      { speaker: "Andi", text: "Debunya tebal sekali. Ruangan seperti ini pasti tidak sehat.", portrait: ASSETS.andi.worried, side: "left" },
-      { speaker: "Penyihir", text: "Debu bisa mengganggu pernapasan. Bersihkan dengan teliti.", portrait: ASSETS.characters.witchPortrait, side: "right" }
-    ],
-    3: [
-      { speaker: "Andi", text: "Lantainya basah. Ada ember terbuka juga.", portrait: ASSETS.andi.neutral, side: "left" },
-      { speaker: "Penyihir", text: "Hati-hati. Genangan air bisa menjadi tempat nyamuk berkembang.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-      { speaker: "Andi", text: "Aku harus mengepel lantai dan menutup wadah air.", portrait: ASSETS.andi.determined, side: "left" }
-    ],
-    4: [
-      { speaker: "Andi", text: "Barang-barang berserakan di mana-mana.", portrait: ASSETS.andi.neutral, side: "left" },
-      { speaker: "Penyihir", text: "Ruangan yang berantakan bisa membuat orang tersandung atau terluka.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-      { speaker: "Andi", text: "Berarti merapikan ruangan juga bagian dari menjaga kesehatan.", portrait: ASSETS.andi.determined, side: "left" }
-    ],
-    5: [
-      { speaker: "Penyihir", text: "Ini ruangan terakhir. Semua pelajaranmu akan diuji.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-      { speaker: "Andi", text: "Aku sudah belajar tentang sampah, debu, genangan, dan kerapian.", portrait: ASSETS.andi.determined, side: "left" },
-      { speaker: "Penyihir", text: "Bersihkan sampah, debu, air, dan noda yang tersisa. Sekarang buktikan bahwa kau memahami maknanya.", portrait: ASSETS.characters.witchPortrait, side: "right" }
-    ]
-  };
-  return data[chapterNumber];
-}
-
-function renderHUD(n) {
-  const hud = el("div", "hud");
-  hud.innerHTML = `
-    <div><span class="label">Chapter</span><span class="value chapter-name">${CHAPTERS[n].name}</span></div>
-    <div class="timer"><span class="label timer-label">Timer</span><span class="value time">00:00</span></div>
-    <div><span class="label">Poin Bersih</span><span class="value clean">0</span></div>
-    <div><span class="label">Poin Edu</span><span class="value edu-points">0</span></div>
-    <div><span class="label">Progress</span><div class="bar"><div class="fill"></div></div></div>
-    <div class="meds"></div>
-  `;
-  const pause = el("button", "pause-btn", "II");
-  pause.title = "Pause";
-  pause.addEventListener("click", pauseGame);
-  hud.append(pause);
-  return hud;
-}
-
-function startTimer() {
-  if (timer) clearInterval(timer);
-  updateHUD();
-  timer = setInterval(() => {
-    if (!gameState.chapter || gameState.chapter.paused) return;
-    gameState.chapter.remaining--;
-    updateHUD();
-    if (gameState.chapter.remaining <= 0) failChapter();
-  }, 1000);
-}
-
-function updateHUD() {
-  const hud = sceneEl?.querySelector(".hud");
-  if (!hud || !gameState.chapter) return;
-  const s = Math.max(0, gameState.chapter.remaining);
-  hud.querySelector(".timer-label").textContent = gameState.chapter.timerLabel || "Timer";
-  hud.querySelector(".time").textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-  hud.querySelector(".clean").textContent = gameState.chapter.cleaning;
-  hud.querySelector(".edu-points").textContent = gameState.totalEducationPoints;
-  hud.querySelector(".fill").style.width = `${gameState.chapter.progress}%`;
-  const settings = window.forMotherSettings || loadSettings();
-  hud.querySelector(".timer").classList.toggle("warn", s <= 30 && settings.timerWarning);
-  const meds = hud.querySelector(".meds");
-  meds.innerHTML = "";
-  for (let i = 0; i < 5; i++) {
-    const slot = el("div", "slot");
-    slot.style.backgroundImage = `url("${ASSETS.medicineEmpty}")`;
-    if (gameState.medicinesOwned.includes(i)) slot.append(img(ASSETS.medicines[i], `Obat ${i + 1}`));
-    meds.append(slot);
-  }
-}
-
-function pauseGame() {
-  if (!gameState.chapter) return;
-  hideCleaningCursor();
-  gameState.chapter.paused = true;
-  updateScenarioMusic(false);
-  const shade = el("div", "shade");
-  const box = el("div", "pause");
-  box.innerHTML = "<h2>Pause</h2><p>Permainan sedang dijeda.</p>";
-  const actions = el("div", "actions");
-  actions.append(
-    btn("Lanjut", () => {
-      gameState.chapter.paused = false;
-      shade.remove();
-      updateScenarioMusic();
-    }),
-    btn("Kembali ke Menu", () => {
-      saveGame();
-      gameState.chapter = null;
-      showMainMenu();
-    }, "alt")
+  [
+    "neutral",
+    "worried",
+    "sad",
+    "determined",
+    "surprised",
+    "relieved",
+    "happy",
+    "emotional",
+    "tired",
+  ].forEach(
+    (x) => (ASSETS.andi.portrait[x] = A + `character/andi/andi_expr_${x}.png`),
   );
-  box.append(actions);
-  shade.append(box);
-  sceneEl.append(shade);
-}
 
-function failChapter() {
-  hideCleaningCursor();
-  playSound("fail");
-  gameState.chapter.paused = true;
-  updateScenarioMusic(false);
-  modal("Waktu habis!", "Chapter gagal. Coba ulangi dan selesaikan sebelum timer habis.", [
-    btn("Ulangi Chapter", () => startChapter(gameState.chapter.number)),
-    btn("Kembali ke Rumah Penyihir", showWitchHouse, "alt")
-  ]);
-}
+  const $ = (s) => document.querySelector(s),
+    els = {
+      view: $("#viewport"),
+      scene: $("#scene"),
+      bg: $("#bg"),
+      world: $("#world"),
+      fx: $("#fx"),
+      debug: $("#debug"),
+      cleaning: $("#cleaning"),
+      ui: $("#ui"),
+      dialog: $("#dialog"),
+      modal: $("#modal"),
+      fade: $("#fade"),
+    };
+  const defaults = () => ({
+    scene: "MainMenu",
+    storyStage: 0,
+    currentChapter: 1,
+    clues: { sari: false, bima: false, nina: false },
+    chapters: [false, false, false, false, false],
+    medicines: [false, false, false, false, false],
+    motherProgress: 0,
+    gameCompleted: false,
+    ratings: {},
+    chapterProgress: {},
+    settings: {
+      motion: true,
+      dialogSpeed: "normal",
+      masterVolume: 100,
+      musicVolume: 40,
+      sfxVolume: 65,
+      muted: false,
+    },
+  });
+  let state = defaults(),
+    runtime = {},
+    keys = new Set(),
+    pressed = new Set(),
+    last = performance.now(),
+    transitionActive = false,
+    pauseActive = false,
+    dialogActive = false,
+    cutsceneActive = false,
+    miniGameActive = false,
+    currentTarget = null,
+    debugCollisions = DEBUG_COLLISIONS,
+    sceneToken = 0;
+  const player = {
+    x: 820,
+    y: 780,
+    dir: "up",
+    moving: false,
+    speed: 205,
+    w: 40,
+    h: 20,
+    frame: 0,
+    anim: 0,
+    interactTimer: 0,
+    held: null,
+  };
 
-function startMinigame(n, missionIndex) {
-  if (raf) cancelAnimationFrame(raf);
-  raf = null;
-  gameState.scene = `Chapter ${n} Minigame`;
-  updateScenarioMusic();
-  sceneEl.innerHTML = "";
-  sceneEl.append(renderHUD(n));
-  updateHUD();
-  const area = el("div", "mini");
-  area.append(el("div", "mini-title", `${CHAPTERS[n].name} - ${MISSIONS[n][missionIndex].title}`));
-  sceneEl.append(area);
-  if (n === 1) trashGame(area, missionIndex);
-  if (n === 2) dustGame(area, missionIndex);
-  if (n === 3) waterGame(area, missionIndex);
-  if (n === 4) messyGame(area, missionIndex);
-  if (n === 5) finalChapterGame(area, missionIndex);
-}
+  const AudioManager = (() => {
+    const music = new Audio();
+    music.loop = true;
+    music.preload = "auto";
+    let currentTrack = "",
+      baseMusicLevel = 1,
+      duckFactor = 1,
+      unlocked = false,
+      switchToken = 0;
+    const loops = new Map(),
+      lastPlayed = new Map();
+    const settings = () => state.settings || defaults().settings;
+    const master = () =>
+      settings().muted
+        ? 0
+        : Math.max(0, Math.min(1, settings().masterVolume / 100));
+    const musicGain = () =>
+      master() *
+      Math.max(0, Math.min(1, settings().musicVolume / 100)) *
+      baseMusicLevel *
+      duckFactor;
+    const sfxGain = (level = 1) =>
+      master() * Math.max(0, Math.min(1, settings().sfxVolume / 100)) * level;
+    const safePlay = (audio) => {
+      const promise = audio.play();
+      promise?.catch?.(() => {});
+      return promise;
+    };
+    const ramp = (from, to, ms, update, done) => {
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / Math.max(1, ms));
+        update(from + (to - from) * p);
+        if (p < 1) requestAnimationFrame(tick);
+        else done?.();
+      };
+      requestAnimationFrame(tick);
+    };
+    function applyVolumes() {
+      music.volume = Math.max(0, Math.min(1, musicGain()));
+      loops.forEach(({ audio, level }) => (audio.volume = sfxGain(level)));
+    }
+    function unlock() {
+      unlocked = true;
+      if (currentTrack && music.paused) safePlay(music);
+    }
+    function playMusic(track, level = 1, fadeMs = 750) {
+      baseMusicLevel = level;
+      if (currentTrack === track) {
+        applyVolumes();
+        if (unlocked && music.paused) safePlay(music);
+        return;
+      }
+      const token = ++switchToken;
+      const change = () => {
+        if (token !== switchToken) return;
+        music.pause();
+        music.src = track;
+        music.currentTime = 0;
+        currentTrack = track;
+        music.volume = 0;
+        if (unlocked) safePlay(music);
+        ramp(
+          0,
+          musicGain(),
+          fadeMs,
+          (v) => (music.volume = Math.max(0, Math.min(1, v))),
+        );
+      };
+      if (currentTrack && !music.paused && music.volume > 0.01)
+        ramp(music.volume, 0, fadeMs * 0.55, (v) => (music.volume = v), change);
+      else change();
+    }
+    function playSFX(
+      name,
+      { level = 1, rate = 1, vary = 0, cooldown = 0 } = {},
+    ) {
+      if (!unlocked || settings().muted) return null;
+      const now = performance.now();
+      if (cooldown && now - (lastPlayed.get(name) || 0) < cooldown) return null;
+      lastPlayed.set(name, now);
+      const audio = new Audio(AUDIO_ASSETS.sfx[name]);
+      audio.preload = "auto";
+      audio.volume = sfxGain(level);
+      audio.playbackRate = Math.max(0.5, rate + (Math.random() * 2 - 1) * vary);
+      safePlay(audio);
+      return audio;
+    }
+    function startLoop(name, { level = 0.55, rate = 1 } = {}) {
+      if (loops.has(name) || !unlocked || settings().muted) return;
+      const audio = new Audio(AUDIO_ASSETS.sfx[name]);
+      audio.loop = true;
+      audio.preload = "auto";
+      audio.volume = sfxGain(level);
+      audio.playbackRate = rate;
+      loops.set(name, { audio, level });
+      safePlay(audio);
+    }
+    function stopLoop(name, fadeMs = 100) {
+      const entry = loops.get(name);
+      if (!entry) return;
+      loops.delete(name);
+      const from = entry.audio.volume;
+      ramp(
+        from,
+        0,
+        fadeMs,
+        (v) => (entry.audio.volume = v),
+        () => {
+          entry.audio.pause();
+          entry.audio.currentTime = 0;
+        },
+      );
+    }
+    function stopAllLoops() {
+      [...loops.keys()].forEach((name) => stopLoop(name, 60));
+    }
+    function setPaused(paused) {
+      const from = duckFactor,
+        to = paused ? 0.5 : 1;
+      ramp(from, to, 240, (value) => {
+        duckFactor = value;
+        applyVolumes();
+      });
+      if (paused) stopAllLoops();
+    }
+    [
+      "ui_click",
+      "dialog_type",
+      "trash_pickup",
+      "trash_dispose",
+      "wipe_clean",
+      "mop_scrub",
+      "objective_complete",
+    ].forEach((name) => {
+      const audio = new Audio(AUDIO_ASSETS.sfx[name]);
+      audio.preload = "auto";
+    });
+    music.addEventListener("error", () =>
+      console.warn("Audio musik gagal dimuat:", music.src),
+    );
+    return {
+      unlock,
+      playMusic,
+      playSFX,
+      startLoop,
+      stopLoop,
+      stopAllLoops,
+      setPaused,
+      applyVolumes,
+      get currentTrack() {
+        return currentTrack;
+      },
+      get unlocked() {
+        return unlocked;
+      },
+    };
+  })();
 
-function trashGame(area, missionIndex) {
-  const mission = MISSIONS[1][missionIndex];
-  trashMissionGame(area, mission, 1, missionIndex);
-}
-
-function trashMissionGame(area, mission, chapterNumber, missionIndex) {
-  const t = ASSETS.mini.trash;
-  const items = [[mission.id, mission.src, mission.type, 430, 280]];
-  const targets = [
-    makeTarget("organic", t.binOrganic, "Organik", 950, 90),
-    makeTarget("nonorganic", t.binNonorganic, "Non-Organik", 950, 310)
-  ];
-  targets.forEach(tg => area.append(tg.el));
-  dragSet(area, items, targets, () => completeMission(chapterNumber, missionIndex));
-}
-
-function messyGame(area, missionIndex) {
-  const mission = MISSIONS[4][missionIndex];
-  const items = [[mission.id, mission.src, mission.type, 370, 280, mission.neat]];
-  const targets = [makeTarget(mission.type, "", mission.target, 870, 220)];
-  targets.forEach(t => area.append(t.el));
-  dragSet(area, items, targets, () => {
-    showNeatContinue(area, mission.title, () => completeMission(4, missionIndex));
-  }, true);
-}
-
-function showNeatContinue(area, title, done) {
-  const shade = el("div", "shade");
-  const card = el("div", "modal-card");
-  card.innerHTML = `<h2>Sudah Rapi</h2><p>${title} sudah dibereskan.</p>`;
-  card.append(btn("Lanjut", () => {
-    shade.remove();
-    done();
-  }));
-  shade.append(card);
-  area.append(shade);
-}
-
-function makeTarget(type, src, label, x, y) {
-  const box = el("div", "target");
-  box.dataset.type = type;
-  box.style.left = `${x}px`;
-  box.style.top = `${y}px`;
-  if (src) box.append(img(src, label));
-  box.append(document.createTextNode(label));
-  return { type, el: box };
-}
-
-function dragSet(area, items, targets, done, showNeat = false) {
-  const complete = new Set();
-  items.forEach(item => {
-    const [id, src, type, x, y, neat] = item;
-    const obj = img(src, id, "drag");
-    obj.style.left = `${x}px`;
-    obj.style.top = `${y}px`;
-    obj.dataset.homeX = x;
-    obj.dataset.homeY = y;
-    area.append(obj);
-    attachDrag(obj, area, dropped => {
-      const hit = targets.find(t => overlap(dropped.getBoundingClientRect(), t.el.getBoundingClientRect()));
-      if (hit && hit.type === type) {
-        complete.add(id);
-        addClean(10);
-        setProgress(complete.size, items.length);
-        hit.el.classList.add("good");
-        setTimeout(() => hit.el.classList.remove("good"), 450);
-        if (showNeat) hit.el.prepend(img(neat, id));
-        dropped.remove();
-        playSound("clean");
-        toast("+10 Bersih!");
-        if (complete.size === items.length) done();
-      } else {
-        addClean(-5);
-        playSound("wrong");
-        toast("Belum tepat. Coba target lain.");
-        if (hit) {
-          hit.el.classList.add("bad");
-          setTimeout(() => hit.el.classList.remove("bad"), 450);
-        }
-        dropped.style.left = `${dropped.dataset.homeX}px`;
-        dropped.style.top = `${dropped.dataset.homeY}px`;
+  function safeLoad() {
+    try {
+      const x = JSON.parse(localStorage.getItem(SAVE_KEY));
+      if (!x || typeof x !== "object") return null;
+      const d = defaults();
+      return {
+        ...d,
+        ...x,
+        clues: { ...d.clues, ...x.clues },
+        chapters: d.chapters.map((v, i) => !!x.chapters?.[i]),
+        medicines: d.medicines.map((v, i) => !!x.medicines?.[i]),
+        settings: { ...d.settings, ...x.settings },
+        chapterProgress: { ...d.chapterProgress, ...x.chapterProgress },
+      };
+    } catch {
+      return null;
+    }
+  }
+  function save(checkScene) {
+    if (checkScene) state.scene = checkScene;
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  }
+  function resetGame() {
+    const settings = { ...defaults().settings, ...state.settings };
+    state = defaults();
+    state.settings = settings;
+    localStorage.removeItem(SAVE_KEY);
+  }
+  function persistSettings() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+    document.body.classList.toggle("reduced-motion", !state.settings.motion);
+    AudioManager.applyVolumes();
+  }
+  function restoreSettings() {
+    try {
+      state.settings = {
+        ...defaults().settings,
+        ...JSON.parse(localStorage.getItem(SETTINGS_KEY)),
+      };
+    } catch {
+      state.settings = defaults().settings;
+    }
+    persistSettings();
+  }
+  function img(src, cls = "object", x = 0, y = 0, w = 80, id = "") {
+    const e = document.createElement("img");
+    e.src = src;
+    e.alt = "";
+    e.className = cls;
+    e.dataset.id = id;
+    e.style.left = (x / W) * 100 + "%";
+    e.style.top = (y / H) * 100 + "%";
+    e.style.width = (w / W) * 100 + "%";
+    e.style.zIndex = Math.floor(y);
+    e.onerror = () => {
+      e.style.display = "none";
+      console.warn("Asset gagal dimuat:", src);
+    };
+    els.world.append(e);
+    return e;
+  }
+  function setBg(src) {
+    els.bg.src = src;
+    els.bg.onerror = () => console.warn("Background gagal dimuat:", src);
+  }
+  function clear() {
+    cleanupScene();
+    [els.bg, els.world, els.fx, els.debug].forEach((layer) => {
+      layer.style.transform = "";
+      layer.style.transformOrigin = "";
+    });
+    els.world.innerHTML = "";
+    els.fx.innerHTML = "";
+    els.ui.innerHTML = "";
+    els.dialog.innerHTML = "";
+    els.modal.innerHTML = "";
+    els.debug.innerHTML = "";
+    els.cleaning.innerHTML = "";
+    els.cleaning.className = "";
+    els.fx.className = "";
+    els.view.classList.remove(
+      "lumi-vision-active",
+      "chapter3-clean-complete",
+      "ending-active",
+    );
+    els.view.style.removeProperty("--vision-x");
+    els.view.style.removeProperty("--vision-y");
+    currentTarget = null;
+    runtime = {
+      entities: [],
+      interactables: [],
+      portals: [],
+      obstacles: [],
+      dynamic: [],
+      timers: {},
+      cleanups: [],
+      updaters: new Set(),
+      completed: false,
+      camera: null,
+    };
+    dialogActive = cutsceneActive = miniGameActive = pauseActive = false;
+    keys.clear();
+    sceneToken++;
+  }
+  function cleanupScene() {
+    if (!runtime) return;
+    if (runtime.dialog?.typeAudio) runtime.dialog.typeAudio.pause();
+    AudioManager.stopAllLoops();
+    runtime.investigating?.cancel?.();
+    runtime.cleaning?.cancel?.(true);
+    (runtime.cleanups || []).splice(0).forEach((fn) => {
+      try {
+        fn();
+      } catch (error) {
+        console.warn("Scene cleanup gagal", error);
       }
     });
-  });
-}
-
-function attachDrag(obj, boundsEl, onDrop) {
-  let ox = 0, oy = 0;
-  obj.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    obj.setPointerCapture(e.pointerId);
-    obj.classList.add("dragging");
-    const scale = getScale(boundsEl);
-    const r = obj.getBoundingClientRect();
-    ox = (e.clientX - r.left) / scale;
-    oy = (e.clientY - r.top) / scale;
-  });
-  obj.addEventListener("pointermove", e => {
-    if (!obj.classList.contains("dragging")) return;
-    const scale = getScale(boundsEl);
-    const b = boundsEl.getBoundingClientRect();
-    obj.style.left = `${clamp((e.clientX - b.left) / scale - ox, 8, boundsEl.offsetWidth - obj.offsetWidth - 8)}px`;
-    obj.style.top = `${clamp((e.clientY - b.top) / scale - oy, 54, boundsEl.offsetHeight - obj.offsetHeight - 8)}px`;
-  });
-  obj.addEventListener("pointerup", e => {
-    if (!obj.classList.contains("dragging")) return;
-    obj.releasePointerCapture(e.pointerId);
-    obj.classList.remove("dragging");
-    onDrop(obj);
-  });
-}
-
-function dustGame(area, missionIndex) {
-  const mission = MISSIONS[2][missionIndex];
-  dustMissionGame(area, mission, 2, missionIndex);
-}
-
-function dustMissionGame(area, mission, chapterNumber, missionIndex) {
-  area.style.cursor = `url("${ASSETS.mini.dust.cursor}") 12 12, pointer`;
-  showCleaningCursor("cloth", area);
-  scrubObject(area, [mission.clean, mission.overlay, 420, 135, mission.w, mission.h], missionIndex, new Set(), 1, () => completeMission(chapterNumber, missionIndex), true, area.style.cursor);
-}
-
-function waterGame(area, missionIndex) {
-  const mission = MISSIONS[3][missionIndex];
-  waterMissionGame(area, mission, 3, missionIndex);
-}
-
-function waterMissionGame(area, mission, chapterNumber, missionIndex) {
-  area.style.cursor = `url("${ASSETS.mini.water.cursor}") 12 12, pointer`;
-  const w = ASSETS.mini.water;
-  if (!mission.id.includes("bucket")) {
-    showCleaningCursor("mop", area);
-    scrubObject(area, [mission.clean, mission.overlay, 390, 210, mission.w, mission.h], missionIndex, new Set(), 1, () => completeMission(chapterNumber, missionIndex), true, area.style.cursor);
-    return;
+    Object.values(runtime.timers || {}).forEach((id) => clearTimeout(id));
   }
-  const bucket = img(w.bucketOpen, "Ember terbuka", "bucket");
-  bucket.style.left = "500px";
-  bucket.style.top = "210px";
-  const mosquito = img(w.mosquito, "Nyamuk", "mosquito");
-  mosquito.style.left = "670px";
-  mosquito.style.top = "190px";
-  let closed = false;
-  bucket.addEventListener("click", () => {
-    if (closed) return;
-    closed = true;
-    bucket.src = w.bucketClosed;
-    mosquito.remove();
-    addClean(10);
-    playSound("clean");
-    toast("Ember tertutup. Nyamuk pergi!");
-    completeMission(chapterNumber, missionIndex);
-  });
-  area.append(bucket, mosquito);
-}
-
-function scrubSet(area, objects, done) {
-  const completed = new Set();
-  objects.forEach((o, i) => scrubObject(area, o, i, completed, objects.length, () => {
-    if (completed.size === objects.length) done();
-  }, true));
-}
-
-function scrubObject(area, obj, index, completed, total, done, callEach = false, cursor = "pointer") {
-  const [cleanSrc, overlaySrc, x, y, w, h] = obj;
-  const box = el("div", "scrub");
-  box.style.left = `${x}px`;
-  box.style.top = `${y}px`;
-  box.style.width = `${w}px`;
-  box.style.height = `${h}px`;
-  box.style.cursor = cursor;
-  const clean = img(cleanSrc, "");
-  const overlay = img(overlaySrc, "");
-  const badge = el("div", "badge", "0%");
-  box.append(clean, overlay, badge);
-  let active = false, progress = 0, lastX = 0, lastY = 0;
-  const scrub = e => {
-    if (!active || completed.has(index)) return;
-    e.preventDefault();
-    const scale = getScale(area);
-    const dx = (e.clientX - lastX) / scale;
-    const dy = (e.clientY - lastY) / scale;
-    const moved = Math.hypot(dx, dy);
-    lastX = e.clientX;
-    lastY = e.clientY;
-    if (moved < 3) return;
-    progress = clamp(progress + moved * 0.12, 0, 100);
-    overlay.style.opacity = `${1 - progress / 100}`;
-    badge.textContent = `${Math.round(progress)}%`;
-    if (progress >= 100) {
-      completed.add(index);
-      badge.textContent = "Bersih";
-      addClean(10);
-      playSound("clean");
-      toast("+10 Bersih!");
-      setProgress(completed.size, total);
-      if (callEach || completed.size === total) done();
+  function sceneTimeout(
+    fn,
+    ms,
+    id = `timer-${performance.now()}-${Math.random()}`,
+  ) {
+    const token = sceneToken;
+    const handle = setTimeout(() => {
+      if (runtime.timers) delete runtime.timers[id];
+      if (token === sceneToken) fn();
+    }, ms);
+    runtime.timers[id] = handle;
+    return handle;
+  }
+  function addCleanup(fn) {
+    runtime.cleanups.push(fn);
+    return fn;
+  }
+  function addUpdater(fn) {
+    runtime.updaters.add(fn);
+    return addCleanup(() => runtime.updaters?.delete(fn));
+  }
+  function cameraTarget() {
+    const camera = runtime.camera;
+    if (!camera) return { x: 0, y: 0 };
+    const lookX = player.moving
+      ? player.dir === "left"
+        ? -55
+        : player.dir === "right"
+          ? 55
+          : 0
+      : 0;
+    const lookY = player.moving
+      ? player.dir === "up"
+        ? -38
+        : player.dir === "down"
+          ? 38
+          : 0
+      : 0;
+    return {
+      x: Math.max(
+        W - W * camera.zoom,
+        Math.min(0, W / 2 - (player.x + lookX) * camera.zoom),
+      ),
+      y: Math.max(
+        H - H * camera.zoom,
+        Math.min(0, H / 2 - (player.y + lookY) * camera.zoom),
+      ),
+    };
+  }
+  function applyCamera() {
+    const camera = runtime.camera;
+    if (!camera) return;
+    const rect = els.view.getBoundingClientRect();
+    const transform = `translate3d(${(camera.x * rect.width) / W}px,${(camera.y * rect.height) / H}px,0) scale(${camera.zoom})`;
+    [els.bg, els.world, els.fx, els.debug].forEach((layer) => {
+      layer.style.transformOrigin = "0 0";
+      layer.style.transform = transform;
+    });
+  }
+  function initCamera() {
+    runtime.camera = { x: 0, y: 0, zoom: 1.28 };
+    const target = cameraTarget();
+    runtime.camera.x = target.x;
+    runtime.camera.y = target.y;
+    applyCamera();
+  }
+  function updateCamera(dt) {
+    if (!runtime.camera || !player.el) return;
+    if (miniGameActive || dialogActive || cutsceneActive || pauseActive) {
+      applyCamera();
+      return;
     }
-  };
-  box.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    box.setPointerCapture?.(e.pointerId);
-    active = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  });
-  box.addEventListener("pointermove", scrub);
-  const endScrub = e => {
-    active = false;
-    if (e?.pointerId !== undefined && box.hasPointerCapture?.(e.pointerId)) {
-      box.releasePointerCapture(e.pointerId);
-    }
-  };
-  box.addEventListener("pointerup", endScrub);
-  box.addEventListener("pointercancel", endScrub);
-  box.addEventListener("pointerleave", endScrub);
-  area.append(box);
-}
-
-function finalGame(area, missionIndex) {
-  area.style.cursor = `url("${ASSETS.mini.dust.cursor}") 12 12, pointer`;
-  showCleaningCursor("cloth", area);
-  const f = ASSETS.mini.final;
-  const aura = img(f.dirtyAura, "", "aura");
-  const germ = img(f.germ, "Kuman", "germ");
-  germ.style.left = "590px";
-  germ.style.top = "210px";
-  area.append(aura, germ);
-  aura.style.opacity = `${1 - gameState.chapter.missionsDone.length / MISSIONS[5].length}`;
-  const mission = MISSIONS[5][missionIndex];
-  scrubObject(area, [mission.clean, mission.overlay, 450, 230, mission.w, mission.h], missionIndex, new Set(), 1, () => {
-    germ.remove();
-    aura.src = f.cleanAura;
-    aura.style.opacity = "1";
-    completeMission(5, missionIndex);
-  }, true, area.style.cursor);
-}
-
-function finalChapterGame(area, missionIndex) {
-  const mission = MISSIONS[5][missionIndex];
-  if (mission.kind === "trash") {
-    trashMissionGame(area, mission, 5, missionIndex);
-    return;
+    const target = cameraTarget();
+    const follow = state.settings.motion ? 1 - Math.exp(-dt * 8.5) : 1;
+    if (Math.abs(target.x - runtime.camera.x) > 2)
+      runtime.camera.x += (target.x - runtime.camera.x) * follow;
+    if (Math.abs(target.y - runtime.camera.y) > 2)
+      runtime.camera.y += (target.y - runtime.camera.y) * follow;
+    applyCamera();
   }
-  if (mission.kind === "dust") {
-    dustMissionGame(area, mission, 5, missionIndex);
-    return;
+  function worldToScreen(x, y) {
+    const camera = runtime.camera || { x: 0, y: 0, zoom: 1 };
+    return { x: x * camera.zoom + camera.x, y: y * camera.zoom + camera.y };
   }
-  if (mission.kind === "water") {
-    waterMissionGame(area, mission, 5, missionIndex);
-    return;
+  function screenToWorld(x, y) {
+    const camera = runtime.camera || { x: 0, y: 0, zoom: 1 };
+    return { x: (x - camera.x) / camera.zoom, y: (y - camera.y) / camera.zoom };
   }
-  finalGame(area, missionIndex);
-}
-
-function showQuiz() {
-  hideCleaningCursor();
-  gameState.scene = "Chapter 5 Quiz";
-  updateScenarioMusic(false);
-  gameState.chapter.remaining = 60;
-  gameState.chapter.max = 60;
-  gameState.chapter.timerLabel = "Timer Quiz";
-  startTimer();
-  const questions = [
-    ["Kenapa sampah tidak boleh dibiarkan menumpuk?", "Karena dapat menjadi sarang kuman.", ["Karena dapat menjadi sarang kuman.", "Karena membuat lantai lebih hangat.", "Karena menghemat tempat."]],
-    ["Kenapa genangan air harus dikeringkan?", "Karena dapat menjadi tempat berkembang biak nyamuk.", ["Karena dapat menjadi tempat berkembang biak nyamuk.", "Karena membuat debu menempel.", "Karena membuat ruangan lebih gelap."]],
-    ["Apa manfaat ruangan yang rapi?", "Mengurangi risiko tersandung dan membuat rumah lebih aman.", ["Mengurangi risiko tersandung dan membuat rumah lebih aman.", "Membuat sampah hilang sendiri.", "Membuat nyamuk cepat tidur."]]
-  ];
-  let i = 0;
-  const quiz = el("div", "quiz");
-  sceneEl.append(quiz);
-  const render = () => {
-    const q = questions[i];
-    quiz.innerHTML = `<h2>Quiz Edukasi</h2><p>${q[0]}</p>`;
-    const opts = el("div", "quiz-options");
-    q[2].forEach(answer => opts.append(btn(answer, () => {
-      if (answer === q[1]) {
-        gameState.totalEducationPoints += 10;
-        playSound("success");
-        toast("+10 Edukasi!");
-      } else {
-        playSound("wrong");
-        toast(`Jawaban benar: ${q[1]}`);
+  function face(a, b) {
+    const dx = b.x - a.x,
+      dy = b.y - a.y;
+    a.dir =
+      Math.abs(dx) > Math.abs(dy)
+        ? dx < 0
+          ? "left"
+          : "right"
+        : dy < 0
+          ? "up"
+          : "down";
+  }
+  function dist(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+  function rectHit(x, y, w, h, r) {
+    return (
+      x + w / 2 > r.x &&
+      x - w / 2 < r.x + r.w &&
+      y + h / 2 > r.y &&
+      y - h / 2 < r.y + r.h
+    );
+  }
+  function collisionBox(who, x = who.x, y = who.y) {
+    // Kotak kuning adalah satu-satunya collider Andi, baik untuk interaksi
+    // maupun untuk menahan Andi saat menyentuh obstacle merah.
+    if (who === player) return { x, y: y - 46, w: 32, h: 26 };
+    return { x, y, w: who.w, h: who.h };
+  }
+  function valid(x, y, who = player) {
+    const box = collisionBox(who, x, y);
+    if (
+      box.x - box.w / 2 < runtime.bounds?.l ||
+      box.x + box.w / 2 > runtime.bounds?.r ||
+      box.y - box.h / 2 < runtime.bounds?.t ||
+      box.y + box.h / 2 > runtime.bounds?.b
+    )
+      return false;
+    if (runtime.obstacles.some((r) => rectHit(box.x, box.y, box.w, box.h, r)))
+      return false;
+    return !runtime.entities.some((e) => {
+      if (e === who || e.solid === false) return false;
+      const other = collisionBox(e);
+      return (
+        Math.abs(other.x - box.x) < (other.w + box.w) / 2 &&
+        Math.abs(other.y - box.y) < (other.h + box.h) / 2
+      );
+    });
+  }
+  function obstacle(x, y, w, h, id) {
+    runtime.obstacles.push({ x, y, w, h, id });
+    drawDebug();
+  }
+  function bounds(l = 55, t = 120, r = 1617, b = 900) {
+    runtime.bounds = { l, t, r, b };
+  }
+  function findSafeSpawn(x, y, who) {
+    if (valid(x, y, who)) return { x, y };
+    const offsets = [24, 48, 72, 108, 150, 210, 285, 360];
+    for (const radius of offsets) {
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
+        const candidate = {
+          x: x + Math.cos(angle) * radius,
+          y: y + Math.sin(angle) * radius,
+        };
+        if (valid(candidate.x, candidate.y, who)) return candidate;
       }
-      i++;
-      setProgress(MISSIONS[5].length + i, MISSIONS[5].length + questions.length);
-      if (i >= questions.length) {
-        quiz.remove();
-        completeChapter(5);
-      } else render();
-    }, "alt")));
-    quiz.append(opts);
-  };
-  render();
-}
-
-function completeMission(chapterNumber, missionIndex) {
-  if (!gameState.chapter.missionsDone.includes(missionIndex)) {
-    gameState.chapter.missionsDone.push(missionIndex);
+    }
+    const fallback = {
+      x: Math.max(
+        runtime.bounds.l + who.w,
+        Math.min(runtime.bounds.r - who.w, x),
+      ),
+      y: Math.max(
+        runtime.bounds.t + who.h,
+        Math.min(runtime.bounds.b - who.h, y),
+      ),
+    };
+    return valid(fallback.x, fallback.y, who)
+      ? fallback
+      : {
+          x: (runtime.bounds.l + runtime.bounds.r) / 2,
+          y: (runtime.bounds.t + runtime.bounds.b) / 2,
+        };
   }
-  updateChapterProgress(chapterNumber);
-  saveGame();
-  const allDone = gameState.chapter.missionsDone.length >= MISSIONS[chapterNumber].length;
-  if (chapterNumber === 5 && allDone) {
-    showQuiz();
-    return;
+  function addPlayer(x, y, withLumi = false) {
+    player.held = null;
+    player.dir = "up";
+    player.frame = 0;
+    player.anim = 0;
+    player.interactTimer = 0;
+    player.moving = false;
+    const spawn = findSafeSpawn(x, y, player);
+    x = spawn.x;
+    y = spawn.y;
+    player.x = x;
+    player.y = y;
+    runtime.entities.push(player);
+    player.el = img(ASSETS.andi.idle.up, "entity andi", x, y, 154, "andi");
+    initCamera();
+    if (withLumi) addLumi();
   }
-  if (allDone) {
-    completeChapter(chapterNumber);
-    return;
+  function addLumi() {
+    const l = { x: player.x + 55, y: player.y + 30, solid: false };
+    runtime.lumi = l;
+    l.el = img(ASSETS.lumi.normal, "entity lumi", l.x, l.y, 52, "lumi");
   }
-  startExploration(chapterNumber);
-  toast("Area ini sudah bersih. Cari titik berikutnya.");
-}
-
-function updateChapterProgress(chapterNumber) {
-  const total = chapterNumber === 5 ? MISSIONS[chapterNumber].length + 3 : MISSIONS[chapterNumber].length;
-  gameState.chapter.progress = Math.round(gameState.chapter.missionsDone.length / total * 100);
-  updateHUD();
-}
-
-function completeChapter(n) {
-  if (!gameState.chapter || gameState.chapter.paused) return;
-  playSound("success");
-  gameState.chapter.paused = true;
-  updateScenarioMusic(false);
-  if (timer) clearInterval(timer);
-  timer = null;
-  const chapter = CHAPTERS[n];
-  if (!gameState.completedChapters.includes(n)) {
-    gameState.completedChapters.push(n);
-    gameState.totalCleaningPoints += gameState.chapter.cleaning;
+  function portalFx(x, y) {
+    const halo = document.createElement("div");
+    halo.className = "portal-halo";
+    halo.style.left = `${(x / W) * 100}%`;
+    halo.style.top = `${(y / H) * 100}%`;
+    for (let i = 0; i < 7; i++) {
+      const p = document.createElement("i");
+      p.style.setProperty("--i", i);
+      halo.append(p);
+    }
+    els.fx.append(halo);
+    return halo;
   }
-  if (!gameState.medicinesOwned.includes(chapter.med)) gameState.medicinesOwned.push(chapter.med);
-  gameState.currentChapter = Math.min(5, n + 1);
-  saveGame();
-  showDialogue(chapterRewardDialogue(n), () => showEduCard(chapter.edu, () => showLevelComplete(n, () => {
-    if (n === 5) showEnding();
-    else showMotherProgress(n, () => startChapter(n + 1));
-  })));
-}
+  function npc(id, src, x, y, cls = "npc", patrol = null, folder = null) {
+    const n = {
+      id,
+      x,
+      y,
+      w: 44,
+      h: 28,
+      dir: "down",
+      solid: true,
+      patrol,
+      folder,
+      frame: 0,
+      wait: Math.random() * 2 + 1,
+    };
+    const isChild = cls.split(" ").includes("nina");
+    n.el = img(src, "entity npc " + cls, x, y, isChild ? 142 : 158, id);
+    runtime.entities.push(n);
+    return n;
+  }
+  function interact(id, x, y, label, action, critical = false, el = null) {
+    const it = { id, x, y, label, action, critical, enabled: true, el };
+    runtime.interactables.push(it);
+    return it;
+  }
+  function autoPortal(x, y, action, el = null, enabled = () => true) {
+    const portal = {
+      x,
+      y,
+      radius: 120,
+      elapsed: 0,
+      triggered: false,
+      action,
+      el,
+      enabled,
+    };
+    runtime.portals.push(portal);
+    addUpdater((dt) => {
+      const active =
+        enabled() &&
+        !dialogActive &&
+        !cutsceneActive &&
+        !transitionActive &&
+        !pauseActive &&
+        !miniGameActive;
+      const playerBox = collisionBox(player);
+      const dx =
+        Math.abs(playerBox.x - portal.x) / (portal.radius + playerBox.w / 2);
+      const dy =
+        Math.abs(playerBox.y - portal.y) /
+        (portal.radius * 0.78 + playerBox.h / 2);
+      const inside = active && dx * dx + dy * dy <= 1;
+      let countdown = els.ui.querySelector(".portal-countdown");
+      if (!inside) {
+        portal.elapsed = 0;
+        countdown?.remove();
+        return;
+      }
+      if (portal.triggered) return;
+      portal.elapsed = Math.min(3, portal.elapsed + dt);
+      if (!countdown) {
+        countdown = document.createElement("div");
+        countdown.className = "portal-countdown";
+        els.ui.append(countdown);
+      }
+      countdown.innerHTML = `<span>ANDA TELAH MASUK KE AREA PORTAL</span><strong>${Math.max(1, Math.ceil(3 - portal.elapsed))}</strong><small>Tetap di area untuk berpindah</small>`;
+      if (portal.elapsed >= 3) {
+        portal.triggered = true;
+        countdown.remove();
+        action();
+      }
+    });
+    return portal;
+  }
+  function interactionPoint() {
+    const box = interactionBox();
+    return { x: box.x, y: box.y };
+  }
+  function interactionBox() {
+    const body = collisionBox(player);
+    const gap = 1;
+    const horizontal = { w: 32, h: 26 };
+    const vertical = { w: 26, h: 32 };
+    if (player.dir === "up")
+      return {
+        x: body.x,
+        y: body.y - body.h / 2 - vertical.h / 2 - gap,
+        ...vertical,
+      };
+    if (player.dir === "down")
+      return {
+        x: body.x,
+        y: body.y + body.h / 2 + vertical.h / 2 + gap,
+        ...vertical,
+      };
+    if (player.dir === "left")
+      return {
+        x: body.x - body.w / 2 - horizontal.w / 2 - gap,
+        y: body.y,
+        ...horizontal,
+      };
+    return {
+      x: body.x + body.w / 2 + horizontal.w / 2 + gap,
+      y: body.y,
+      ...horizontal,
+    };
+  }
+  function followInteraction(it, owner) {
+    it.owner = owner;
+    it.x = owner.x;
+    it.y = owner.y;
+    it.radius = owner.id === "nina" ? 76 : 88;
+    it.oncePerScene = true;
+    return it;
+  }
+  function renderEntity(e) {
+    if (!e.el) return;
+    e.el.style.left = (e.x / W) * 100 + "%";
+    e.el.style.top = (e.y / H) * 100 + "%";
+    e.el.style.zIndex = Math.floor(e.y);
+    if (e === player) {
+      let src = ASSETS.andi.idle[e.dir];
+      e.el.classList.toggle("interacting", e.interactTimer > 0);
+      if (e.interactTimer <= 0 && e.moving)
+        src = ASSETS.andi.walk[e.dir][Math.floor(e.frame) % 4];
+      if (e.el.getAttribute("src") !== src) e.el.src = src;
+    }
+  }
+  function drawDebug() {
+    if (!els.debug || !runtime.obstacles) return;
+    els.debug.innerHTML = "";
+    els.debug.classList.toggle("active", debugCollisions);
+    if (!debugCollisions) return;
+    const rect = (x, y, w, h, label, cls = "debugrect") => {
+      const d = document.createElement("div");
+      d.className = cls;
+      d.textContent = label || "";
+      Object.assign(d.style, {
+        left: `${(x / W) * 100}%`,
+        top: `${(y / H) * 100}%`,
+        width: `${(w / W) * 100}%`,
+        height: `${(h / H) * 100}%`,
+      });
+      els.debug.append(d);
+    };
+    runtime.obstacles.forEach((r) => rect(r.x, r.y, r.w, r.h, r.id));
+    if (runtime.bounds) {
+      const b = runtime.bounds;
+      rect(b.l, b.t, b.r - b.l, b.b - b.t, "bounds", "debugbounds");
+    }
+    runtime.entities
+      .filter((e) => e !== player)
+      .forEach((e) => {
+        const box = collisionBox(e);
+        rect(
+          box.x - box.w / 2,
+          box.y - box.h / 2,
+          box.w,
+          box.h,
+          e.id || "NPC",
+          "debugentity",
+        );
+      });
+    const detector = interactionBox();
+    rect(
+      detector.x - detector.w / 2,
+      detector.y - detector.h / 2,
+      detector.w,
+      detector.h,
+      "Andi/interaksi",
+      "debugplayerinteraction",
+    );
+    runtime.interactables.forEach((i) => {
+      const r = i.radius || 58;
+      rect(i.x - r, i.y - r * 0.78, r * 2, r * 1.56, i.id, "debugcircle");
+    });
+    runtime.portals?.forEach((p) =>
+      rect(
+        p.x - p.radius,
+        p.y - p.radius * 0.78,
+        p.radius * 2,
+        p.radius * 1.56,
+        "portal/otomatis",
+        "debugcircle",
+      ),
+    );
+  }
+  function lock() {
+    player.moving = false;
+  }
+  function toast(t) {
+    const e = document.createElement("div");
+    e.className = "toast";
+    e.textContent = t;
+    /* UI tidak mengikuti transform kamera, jadi pemberitahuan selalu terlihat. */
+    els.ui.append(e);
+    sceneTimeout(() => e.remove(), 1750);
+  }
+  function objective(title, lines = []) {
+    els.ui.querySelector(".objective")?.remove();
+    const e = document.createElement("div");
+    e.className = `objective panel${runtime.objectiveMinimized ? " minimized" : ""}`;
+    e.innerHTML =
+      `<div class="objective-head"><strong>TUJUAN</strong><button class="objective-toggle" type="button" aria-label="${runtime.objectiveMinimized ? "Buka" : "Minimalkan"} tujuan" aria-expanded="${!runtime.objectiveMinimized}">${runtime.objectiveMinimized ? "+" : "−"}</button></div><div class="objective-body"><div class="objective-title">${title}</div>` +
+      lines
+        .map(
+          (x) =>
+            `<div class="goal"><img src="${x[1] ? ASSETS.ui.done : ASSETS.ui.empty}"><span>${x[0]}</span></div>`,
+        )
+        .join("") +
+      `</div>`;
+    e.querySelector(".objective-toggle").onclick = () => {
+      runtime.objectiveMinimized = !runtime.objectiveMinimized;
+      e.classList.toggle("minimized", runtime.objectiveMinimized);
+      const button = e.querySelector(".objective-toggle");
+      button.textContent = runtime.objectiveMinimized ? "+" : "−";
+      button.setAttribute("aria-expanded", String(!runtime.objectiveMinimized));
+      button.setAttribute(
+        "aria-label",
+        `${runtime.objectiveMinimized ? "Buka" : "Minimalkan"} tujuan`,
+      );
+    };
+    els.ui.append(e);
+  }
+  function chapterHud(n, title, clean = null) {
+    const health = MOTHER_PROGRESS[state.medicines.filter(Boolean).length];
+    els.ui.innerHTML = `<div class="chapter-hud panel"><div class="hud-title"><small>CHAPTER ${n}</small><strong>${title}</strong></div><div class="status"><span>PROGRESS <b>${clean ?? 0}%</b></span><div class="bar"><i style="width:${clean ?? 0}%"></i></div></div><div class="mother-status"><span>KONDISI IBU <b>${health}%</b></span><div class="bar mother-bar"><i style="width:${health}%"></i></div></div><div class="medicine-slots">${ASSETS.meds.map((src, i) => `<span class="medicine-slot" data-slot="${i}"><img src="${state.medicines[i] ? src : ASSETS.ui.slot}" alt="Slot obat ${i + 1}"></span>`).join("")}</div><div class="timer-wrap"><small>WAKTU</small><strong class="chapter-timer">${formatTime(CHAPTER_TIME_LIMITS[n])}</strong></div><button class="hud-pause" type="button" aria-label="Jeda dan pengaturan">⏸</button></div><div class="controls">WASD bergerak · E interaksi · ESC jeda</div>`;
+    els.ui.querySelector(".hud-pause").onclick = pause;
+  }
+  function formatTime(value) {
+    const seconds = Math.max(0, Math.ceil(Number(value) || 0));
+    return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+  function updateChapterTimer() {
+    const timer = els.ui.querySelector(".chapter-timer");
+    if (!timer || !runtime.chapterTimer) return;
+    timer.textContent = formatTime(runtime.chapterTimer.remaining);
+    timer
+      .closest(".timer-wrap")
+      ?.classList.toggle("warning", runtime.chapterTimer.remaining <= 10);
+  }
+  function timerMayRun() {
+    return (
+      runtime.chapterTimer?.started &&
+      !runtime.chapterTimer.expired &&
+      !runtime.completed &&
+      !dialogActive &&
+      !cutsceneActive &&
+      !pauseActive &&
+      !transitionActive &&
+      !els.modal.children.length
+    );
+  }
+  function updateChapterClock(dt) {
+    if (!timerMayRun()) return;
+    runtime.chapterTimer.remaining = Math.max(
+      0,
+      runtime.chapterTimer.remaining - dt,
+    );
+    updateChapterTimer();
+    if (runtime.chapterTimer.remaining <= 0) chapterTimeExpired();
+  }
+  function chapterTimeExpired() {
+    if (!runtime.chapterTimer || runtime.chapterTimer.expired) return;
+    runtime.chapterTimer.expired = true;
+    miniGameActive = false;
+    lock();
+    els.modal.innerHTML = `<div class="completion time-up"><div class="card panel"><h1>WAKTU HABIS</h1><p>Andi belum berhasil menyelesaikan ruangan tepat waktu.</p><button class="btn" id="retryChapter">ULANGI CHAPTER</button><button class="btn" id="timeMenu">KEMBALI KE MENU</button></div></div>`;
+    $("#retryChapter").onclick = () =>
+      loadScene(`Chapter${runtime.chapterTimer.chapter}`);
+    $("#timeMenu").onclick = () => transition("MainMenu");
+  }
+  function recordMistake(message) {
+    const now = performance.now();
+    if (runtime.lastMistake && now - runtime.lastMistake < 650) return false;
+    runtime.lastMistake = now;
+    runtime.mistakes = (runtime.mistakes || 0) + 1;
+    if (runtime.chapterTimer && !runtime.chapterTimer.expired) {
+      runtime.chapterTimer.remaining = Math.max(
+        0,
+        runtime.chapterTimer.remaining - 5,
+      );
+      updateChapterTimer();
+      showTimePenalty(5);
+    }
+    toast(message || "Terjadi kesalahan.");
+    if (runtime.chapterTimer?.remaining <= 0) chapterTimeExpired();
+    return true;
+  }
+  function showTimePenalty(seconds) {
+    const popup = document.createElement("div");
+    popup.className = "time-penalty-popup";
+    popup.innerHTML = `<strong>−${seconds}</strong><span>DETIK</span>`;
+    els.ui.append(popup);
+    sceneTimeout(() => popup.remove(), state.settings.motion ? 1150 : 650);
+  }
+  function updateClean(v) {
+    runtime.clean = Math.max(0, Math.min(100, v));
+    const b = els.ui.querySelector(".status b"),
+      i = els.ui.querySelector(".bar i");
+    if (b) b.textContent = runtime.clean + "%";
+    if (i) i.style.width = runtime.clean + "%";
+  }
+  function showPrompt() {
+    let p = els.ui.querySelector(".prompt");
+    runtime.interactables.forEach((i) => {
+      if (i.owner) {
+        i.x = i.owner.x;
+        i.y = i.owner.y;
+      }
+    });
+    const detector = interactionPoint();
+    const available = runtime.interactables.filter(
+      (i) => i.enabled && dist(detector, i) <= (i.radius || INTERACTION_RADIUS),
+    );
+    available.sort(
+      (a, b) =>
+        b.critical - a.critical || dist(detector, a) - dist(detector, b),
+    );
+    currentTarget = available[0] || null;
+    if (currentTarget) {
+      if (!p) {
+        p = document.createElement("div");
+        p.className = "prompt";
+        els.ui.append(p);
+      }
+      p.textContent = "[E] " + currentTarget.label;
+    } else p?.remove();
+  }
+  function startDialog(lines, onEnd) {
+    dialogActive = true;
+    lock();
+    runtime.dialog = {
+      lines,
+      index: 0,
+      onEnd,
+      typed: 0,
+      complete: false,
+      lockUntil: performance.now() + 140,
+    };
+    drawDialog();
+  }
+  function drawDialogLegacy() {
+    const d = runtime.dialog,
+      l = d.lines[d.index],
+      portraitByCharacter = {
+        andi: l.p ? ASSETS.andi.portrait[l.p] : ASSETS.andi.idle.down,
+        tabib: ASSETS.portraits.tabib,
+        witch: ASSETS.portraits.witch || ASSETS.npc.witch,
+        bima: ASSETS.portraits.bima,
+        nina: ASSETS.portraits.nina,
+        sari: ASSETS.portraits.sari,
+        mother: ASSETS.portraits.mother,
+      },
+      portrait = l.who ? portraitByCharacter[l.who] || "" : "";
+    els.dialog.innerHTML = `<div class="dialogbox ${portrait ? "" : "noportrait"}">${portrait ? `<img class="portrait" src="${portrait}">` : ""}<div class="name">${l.name || "Narator"}</div><div class="text">${l.text}</div><div class="next">E / ENTER ▾</div></div>`;
+  }
+  function drawDialog() {
+    const d = runtime.dialog,
+      l = d.lines[d.index];
+    if (d.typeAudio) {
+      d.typeAudio.pause();
+      d.typeAudio = null;
+    }
+    const portraits = {
+      andi: l.p ? ASSETS.andi.portrait[l.p] : ASSETS.andi.portrait.neutral,
+      tabib: ASSETS.portraits.tabib,
+      witch: ASSETS.portraits.witch,
+      bima: ASSETS.portraits.bima,
+      nina: ASSETS.portraits.nina,
+      sari: ASSETS.portraits.sari,
+      mother: ASSETS.portraits.mother,
+    };
+    const portrait = l.who ? portraits[l.who] || "" : "";
+    d.typed = 0;
+    d.complete = !state.settings.motion;
+    d.lockUntil = performance.now() + 120;
+    els.dialog.innerHTML = `<div class="dialogbox ${portrait ? "" : "noportrait"} portrait-${l.who || "none"}">${portrait ? `<div class="portrait-wrap"><img class="portrait" src="${portrait}" alt=""></div>` : ""}<div class="dialog-copy"><div class="name"></div><div class="text"></div></div><div class="next">E / ENTER / SPACE &#9662;</div></div>`;
+    els.dialog.querySelector(".name").textContent = l.name || "Narator";
+    const textEl = els.dialog.querySelector(".text");
+    if (d.complete) textEl.textContent = l.text;
+    else {
+      const token = sceneToken,
+        line = d.index;
+      const type = () => {
+        if (
+          token !== sceneToken ||
+          !runtime.dialog ||
+          runtime.dialog.index !== line
+        )
+          return;
+        d.typed = Math.min(l.text.length, d.typed + 1);
+        textEl.textContent = l.text.slice(0, d.typed);
+        const char = l.text[d.typed - 1];
+        if (d.typed % 2 === 0 && char && !/[\s.,!?;:'"()\-]/.test(char))
+          d.typeAudio = AudioManager.playSFX("dialog_type", {
+            level: 0.52,
+            vary: 0.04,
+            cooldown: 34,
+          });
+        d.complete = d.typed >= l.text.length;
+        if (!d.complete)
+          d.typeTimer = sceneTimeout(
+            type,
+            { slow: 42, normal: 22, fast: 10 }[state.settings.dialogSpeed] ||
+              22,
+            "dialogType",
+          );
+      };
+      type();
+    }
+  }
+  function advanceDialog() {
+    if (!dialogActive || pauseActive) return;
+    const d = runtime.dialog;
+    if (!d || performance.now() < d.lockUntil) return;
+    if (!d.complete) {
+      clearTimeout(d.typeTimer);
+      if (d.typeAudio) {
+        d.typeAudio.pause();
+        d.typeAudio = null;
+      }
+      d.complete = true;
+      els.dialog.querySelector(".text").textContent = d.lines[d.index].text;
+      d.lockUntil = performance.now() + 100;
+      return;
+    }
+    if (++d.index < d.lines.length) drawDialog();
+    else {
+      if (d.typeAudio) {
+        d.typeAudio.pause();
+        d.typeAudio = null;
+      }
+      AudioManager.playSFX("dialog_next", { level: 0.55, cooldown: 80 });
+      dialogActive = false;
+      els.dialog.innerHTML = "";
+      const cb = d.onEnd;
+      runtime.dialog = null;
+      cb?.();
+    }
+  }
+  function burst(x, y) {
+    const wrap = document.createElement("div");
+    wrap.className = "clean-burst";
+    wrap.style.left = `${(x / W) * 100}%`;
+    wrap.style.top = `${(y / H) * 100}%`;
+    for (let i = 0; i < 8; i++) {
+      const spark = document.createElement("i");
+      spark.style.setProperty("--a", `${i * 45}deg`);
+      wrap.append(spark);
+    }
+    els.fx.append(wrap);
+    sceneTimeout(() => wrap.remove(), 850);
+  }
+  function punch() {
+    if (!state.settings.motion) return;
+    els.scene.classList.remove("camera-punch");
+    void els.scene.offsetWidth;
+    els.scene.classList.add("camera-punch");
+    sceneTimeout(() => els.scene.classList.remove("camera-punch"), 360);
+  }
+  function startInvestigationSession(item, onComplete) {
+    if (runtime.investigating || item.marked) return;
+    miniGameActive = true;
+    lock();
+    const overlay = document.createElement("div");
+    overlay.className = "investigation-session";
+    overlay.innerHTML =
+      '<div class="cleaning-help">Tahan dan gerakkan cahaya mengikuti seluruh noda</div><div class="investigation-zone"><i></i></div><div class="investigation-light"></div>';
+    els.cleaning.replaceChildren(overlay);
+    els.cleaning.className = "active investigation-active";
+    const zone = overlay.querySelector(".investigation-zone");
+    const light = overlay.querySelector(".investigation-light");
+    const bar = zone.querySelector("i");
+    const screen = worldToScreen(item.x, item.y);
+    const zoom = runtime.camera?.zoom || 1;
+    Object.assign(zone.style, {
+      left: `${(screen.x / W) * 100}%`,
+      top: `${(screen.y / H) * 100}%`,
+      width: `${((item.w * zoom) / W) * 100}%`,
+      height: `${((item.h * zoom) / H) * 100}%`,
+    });
+    let down = false,
+      last = null,
+      progress = 0;
+    const screenPoint = (event) => {
+      const rect = els.view.getBoundingClientRect();
+      return {
+        x: ((event.clientX - rect.left) / rect.width) * W,
+        y: ((event.clientY - rect.top) / rect.height) * H,
+      };
+    };
+    const finish = (success) => {
+      overlay.remove();
+      els.cleaning.className = "";
+      runtime.investigating = null;
+      miniGameActive = false;
+      if (success) onComplete();
+    };
+    overlay.onpointerdown = (event) => {
+      down = true;
+      last = screenPoint(event);
+      overlay.setPointerCapture?.(event.pointerId);
+    };
+    overlay.onpointerup = () => {
+      down = false;
+      last = null;
+    };
+    overlay.onpointercancel = () => {
+      down = false;
+      last = null;
+    };
+    overlay.onpointermove = (event) => {
+      const p = screenPoint(event);
+      light.style.left = `${(p.x / W) * 100}%`;
+      light.style.top = `${(p.y / H) * 100}%`;
+      if (!down || !last) return;
+      const world = screenToWorld(p.x, p.y);
+      const area = {
+        x: item.x - item.w / 2,
+        y: item.y - item.h / 2,
+        w: item.w,
+        h: item.h,
+      };
+      const travel = Math.hypot(p.x - last.x, p.y - last.y);
+      if (
+        rectHit(world.x, world.y, 2, 2, area) &&
+        travel >= 5 &&
+        travel <= 70
+      ) {
+        progress = Math.min(100, progress + travel * 0.16);
+        bar.style.width = `${progress}%`;
+      }
+      last = p;
+      if (progress >= 100) finish(true);
+    };
+    runtime.investigating = { cancel: () => finish(false), item };
+  }
+  function startCleaningSession({ item, tool = "cloth", onComplete }) {
+    if (runtime.cleaning || item.done) return;
+    miniGameActive = true;
+    lock();
+    const overlay = document.createElement("div");
+    overlay.className = `cleaning-session ${tool}`;
+    overlay.innerHTML = `<div class="cleaning-title">${item.name || item.type || "Area Kotor"}</div><div class="cleaning-help">${item.help || "Tahan dan gosok bolak-balik · ESC untuk batal"}</div><div class="cleaning-focus"><img class="cleaning-focus-item" src="${item.el?.src || ASSETS.final.germ}" alt=""><div class="cleaning-zone"><div class="cleaning-progress"><i></i></div></div></div><img class="cleaning-cursor" src="${tool === "mop" ? ASSETS.water.mop : ASSETS.dust.cloth}" alt="">`;
+    els.cleaning.replaceChildren(overlay);
+    els.cleaning.className = "active";
+    const zone = overlay.querySelector(".cleaning-zone"),
+      bar = overlay.querySelector(".cleaning-progress i"),
+      cursor = overlay.querySelector(".cleaning-cursor"),
+      focusItem = overlay.querySelector(".cleaning-focus-item");
+    Object.assign(cursor.style, { left: "50%", top: "56%" });
+    if (item.el) item.el.style.visibility = "hidden";
+    let down = false,
+      lastPoint = null,
+      lastVector = null,
+      loopActive = false;
+    const scrubSound = tool === "mop" ? "mop_scrub" : "wipe_clean";
+    let cursorX = W * 0.5,
+      cursorY = H * 0.56,
+      targetX = cursorX,
+      targetY = cursorY;
+    let cursorFrame = 0;
+    const animateCursor = () => {
+      cursorX += (targetX - cursorX) * 0.42;
+      cursorY += (targetY - cursorY) * 0.42;
+      cursor.style.left = `${(cursorX / W) * 100}%`;
+      cursor.style.top = `${(cursorY / H) * 100}%`;
+      cursorFrame = requestAnimationFrame(animateCursor);
+    };
+    cursorFrame = requestAnimationFrame(animateCursor);
+    const paint = () => {
+      bar.style.width = `${item.progress}%`;
+      focusItem.style.opacity = `${Math.max(0.12, 1 - item.progress / 108)}`;
+    };
+    const end = (cancelled = false, silent = false) => {
+      if (!runtime.cleaning) return;
+      overlay.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("pointermove", onMove, true);
+      document.removeEventListener("pointerup", onUp, true);
+      document.removeEventListener("pointercancel", onUp, true);
+      cancelAnimationFrame(cursorFrame);
+      AudioManager.stopLoop(scrubSound);
+      loopActive = false;
+      els.cleaning.replaceChildren();
+      els.cleaning.className = "";
+      runtime.cleaning = null;
+      miniGameActive = false;
+      if (cancelled && item.el) {
+        item.el.style.visibility = "";
+        item.el.style.opacity = "1";
+      }
+      if (cancelled && !silent)
+        toast(`Progress tersimpan: ${Math.round(item.progress)}%`);
+    };
+    const finish = () => {
+      item.progress = 100;
+      item.done = true;
+      paint();
+      const removeDirt =
+        item.removeOnClean ||
+        item.el?.classList.contains("dirt") ||
+        item.el?.classList.contains("hidden-stain") ||
+        item.type === "dust" ||
+        item.type === "water";
+      if (removeDirt) item.el?.remove();
+      else if (item.cleanSrc) {
+        item.el.src = item.cleanSrc;
+        item.el.style.visibility = "";
+        item.el.style.opacity = "1";
+      } else {
+        item.el?.classList.add("cleaned");
+        sceneTimeout(() => item.el?.remove(), 500);
+      }
+      item.interactable.enabled = false;
+      burst(item.x, item.y);
+      end(false);
+      AudioManager.playSFX("objective_complete", {
+        level: 0.72,
+        cooldown: 120,
+      });
+      onComplete?.(item);
+    };
+    const screenPoint = (event) => {
+      const source = event.touches?.[0] || event.changedTouches?.[0] || event;
+      const rect = els.view.getBoundingClientRect();
+      return {
+        x: ((source.clientX - rect.left) / rect.width) * W,
+        y: ((source.clientY - rect.top) / rect.height) * H,
+        clientX: source.clientX,
+        clientY: source.clientY,
+      };
+    };
+    const onDown = (event) => {
+      event.preventDefault();
+      down = true;
+      lastPoint = screenPoint(event);
+      if (event.pointerId !== undefined)
+        overlay.setPointerCapture?.(event.pointerId);
+    };
+    const onUp = () => {
+      down = false;
+      lastPoint = lastVector = null;
+      AudioManager.stopLoop(scrubSound);
+      loopActive = false;
+    };
+    const onMove = (event) => {
+      const screen = screenPoint(event);
+      targetX = screen.x;
+      targetY = screen.y;
+      const pressed =
+        down ||
+        (typeof event.buttons === "number" && (event.buttons & 1) === 1) ||
+        event.touches?.length > 0;
+      if (!pressed) return;
+      if (!lastPoint) {
+        lastPoint = screen;
+        return;
+      }
+      event.preventDefault();
+      const visibleZone = zone.getBoundingClientRect();
+      const inside =
+        screen.clientX >= visibleZone.left &&
+        screen.clientX <= visibleZone.right &&
+        screen.clientY >= visibleZone.top &&
+        screen.clientY <= visibleZone.bottom;
+      if (!inside) {
+        lastPoint = screen;
+        AudioManager.stopLoop(scrubSound);
+        loopActive = false;
+        return;
+      }
+      const vx = screen.x - lastPoint.x,
+        vy = screen.y - lastPoint.y,
+        distance = Math.hypot(vx, vy);
+      if (distance < 4) return;
+      if (!loopActive) {
+        AudioManager.startLoop(scrubSound, { level: 0.5 });
+        loopActive = true;
+      }
+      cursor.style.setProperty(
+        "--tool-angle",
+        `${Math.max(-18, Math.min(18, vx * 0.45))}deg`,
+      );
+      const reversal =
+        lastVector && vx * lastVector.x + vy * lastVector.y < 0 ? 1.32 : 1;
+      item.progress = Math.min(
+        100,
+        item.progress + Math.min(distance, 42) * 0.16 * reversal,
+      );
+      lastVector = { x: vx, y: vy };
+      lastPoint = screen;
+      paint();
+      if (item.progress >= 100) finish();
+    };
+    overlay.addEventListener("pointerdown", onDown);
+    document.addEventListener("pointermove", onMove, {
+      capture: true,
+      passive: false,
+    });
+    document.addEventListener("pointerup", onUp, true);
+    document.addEventListener("pointercancel", onUp, true);
+    runtime.cleaning = { cancel: end, item };
+    paint();
+  }
+  function startTrashSorting(onComplete, amount = 4) {
+    if (runtime.trashSorting) return;
+    miniGameActive = true;
+    lock();
+    const catalog = [
+      ["banana", "organic", "Kulit pisang"],
+      ["food", "organic", "Sisa makanan"],
+      ["paper", "nonorganic", "Kertas"],
+      ["can", "nonorganic", "Kaleng"],
+      ["bag", "nonorganic", "Plastik"],
+      ["bottle", "nonorganic", "Botol plastik"],
+    ];
+    const picked = [...catalog]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.max(2, Math.min(amount, catalog.length)));
+    const overlay = document.createElement("div");
+    overlay.className = "trash-sort-session";
+    overlay.innerHTML = `<section class="trash-sort-card"><h1>PILAH SAMPAH</h1><p>Seret setiap sampah ke tempat sampah yang sesuai.</p><div class="trash-sort-items">${picked.map(([id, type, label], i) => `<button class="trash-sort-item" draggable="true" data-index="${i}" data-type="${type}" aria-label="${label}"><img src="${ASSETS.trash[id]}" alt="${label}"><span>${label}</span></button>`).join("")}</div><div class="trash-sort-bins"><button class="trash-sort-bin" data-type="organic"><img src="${ASSETS.trash.organic}" alt=""><b>ORGANIK</b></button><button class="trash-sort-bin" data-type="nonorganic"><img src="${ASSETS.trash.nonorganic}" alt=""><b>ANORGANIK</b></button></div><small>Klik sampah lalu klik tong juga bisa digunakan.</small></section>`;
+    els.cleaning.replaceChildren(overlay);
+    els.cleaning.className = "active trash-sorting-active";
+    let selected = null,
+      remaining = picked.length;
+    const close = (success) => {
+      els.cleaning.replaceChildren();
+      els.cleaning.className = "";
+      runtime.trashSorting = null;
+      miniGameActive = false;
+      if (success) {
+        AudioManager.playSFX("objective_complete", {
+          level: 0.72,
+          cooldown: 120,
+        });
+        onComplete?.();
+      }
+    };
+    const sortInto = (item, binType) => {
+      if (!item || item.dataset.sorted) return;
+      if (item.dataset.type !== binType) {
+        recordMistake("Tong sampahnya belum sesuai.");
+        item.classList.add("wrong");
+        sceneTimeout(() => item.classList.remove("wrong"), 420);
+        return;
+      }
+      item.dataset.sorted = "1";
+      item.classList.add("sorted");
+      selected?.classList.remove("selected");
+      selected = null;
+      remaining--;
+      AudioManager.playSFX("trash_dispose", {
+        level: 0.78,
+        vary: 0.04,
+        cooldown: 90,
+      });
+      if (!remaining) sceneTimeout(() => close(true), 380);
+    };
+    overlay.querySelectorAll(".trash-sort-item").forEach((item) => {
+      item.addEventListener("dragstart", (event) =>
+        event.dataTransfer.setData("text/plain", item.dataset.index),
+      );
+      item.onclick = () => {
+        if (item.dataset.sorted) return;
+        selected?.classList.remove("selected");
+        selected = item;
+        item.classList.add("selected");
+      };
+    });
+    overlay.querySelectorAll(".trash-sort-bin").forEach((bin) => {
+      bin.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        bin.classList.add("over");
+      });
+      bin.addEventListener("dragleave", () => bin.classList.remove("over"));
+      bin.addEventListener("drop", (event) => {
+        event.preventDefault();
+        bin.classList.remove("over");
+        sortInto(
+          overlay.querySelector(
+            `.trash-sort-item[data-index="${event.dataTransfer.getData("text/plain")}"]`,
+          ),
+          bin.dataset.type,
+        );
+      });
+      bin.onclick = () => sortInto(selected, bin.dataset.type);
+    });
+    runtime.trashSorting = { cancel: () => close(false) };
+  }
+  function addCleanable(config) {
+    runtime.cleanables ||= [];
+    const item = { progress: 0, done: false, w: 160, h: 120, ...config };
+    item.el =
+      config.el ||
+      img(
+        config.src,
+        "object dirt",
+        item.x,
+        item.y,
+        item.visualW || 115,
+        item.id,
+      );
+    item.interactable = interact(
+      item.id,
+      item.x,
+      item.y,
+      "Bersihkan",
+      () =>
+        startCleaningSession({
+          item,
+          tool: item.tool,
+          onComplete: item.onComplete,
+        }),
+      !!item.critical,
+      item.el,
+    );
+    runtime.cleanables.push(item);
+    return item;
+  }
+  function cut(bg, lines, next) {
+    clear();
+    cutsceneActive = true;
+    setBg(bg);
+    els.fx.innerHTML = '<div class="cutshade"></div>';
+    startDialog(lines, () => {
+      cutsceneActive = false;
+      next();
+    });
+  }
+  function transition(name) {
+    if (transitionActive) return;
+    transitionActive = true;
+    if (/^(Forest|Chapter\d)$/.test(name))
+      AudioManager.playSFX("portal_enter", { level: 0.8, cooldown: 500 });
+    lock();
+    els.fade.style.opacity = 1;
+    setTimeout(() => {
+      loadScene(name);
+      requestAnimationFrame(() => {
+        els.fade.style.opacity = 0;
+        setTimeout(() => {
+          transitionActive = false;
+          els.fade.style.removeProperty("background");
+        }, 430);
+      });
+    }, 420);
+  }
+  function calculateChapterRating(n, strategyStars = 0) {
+    const limit = CHAPTER_TIME_LIMITS[n];
+    const timeLeft = Math.max(0, runtime.chapterTimer?.remaining ?? 0);
+    const mistakes = Math.max(0, runtime.mistakes || 0);
+    let stars =
+      timeLeft >= 20 && mistakes <= 2
+        ? 3
+        : timeLeft >= 15 || mistakes <= 4
+          ? 2
+          : 1;
+    return {
+      stars,
+      timeLeft: Math.ceil(timeLeft),
+      timeUsed: Math.max(0, Math.round(limit - timeLeft)),
+      mistakes,
+      completionPercent: 100,
+      completed: true,
+    };
+  }
+  function completeCard(n, result, next) {
+    runtime.completed = true;
+    lock();
+    AudioManager.playSFX("chapter_complete", { level: 0.9, cooldown: 1000 });
+    const names = [
+      "Pilah Sampah",
+      "Hentikan Sumbernya",
+      "Lumi Vision",
+      "Strategi Membersihkan",
+      "Ujian Terakhir",
+    ];
+    const health = MOTHER_PROGRESS[n];
+    els.modal.innerHTML = `<div class="completion"><div class="card panel result-card"><small>CHAPTER SELESAI</small><h1>${names[n - 1]}</h1><div class="stars">${[1, 2, 3].map((star) => `<img style="--star-delay:${star * 0.16}s" src="${star <= result.stars ? ASSETS.ui.star1 : ASSETS.ui.star0}" alt="${star <= result.stars ? "Bintang" : "Kosong"}">`).join("")}</div><div class="result-grid"><span>Sisa waktu <b>${formatTime(result.timeLeft)}</b></span><span>Waktu digunakan <b>${formatTime(result.timeUsed)}</b></span><span>Kesalahan <b>${result.mistakes}</b></span><span>Progress <b>100%</b></span><span>Kondisi Ibu <b>${health}%</b></span><span>Obat terkumpul <b>${Math.max(n, state.medicines.filter(Boolean).length)}/5</b></span></div><button class="btn" id="continueResult">LANJUTKAN</button></div></div>`;
+    $("#continueResult").onclick = next;
+  }
+  function showEducationCard(n, next) {
+    const lessons = [
+      [
+        "Sampah dan Kesehatan",
+        "Sampah yang dibiarkan menumpuk dapat menjadi sarang kuman dan menyebabkan penyakit. Buanglah sampah pada tempatnya dan pisahkan sesuai jenisnya.",
+      ],
+      [
+        "Debu dan Pernapasan",
+        "Debu dapat mengganggu pernapasan dan membuat ruangan tidak sehat. Bersihkan permukaan dan hentikan sumber debu secara rutin.",
+      ],
+      [
+        "Kotoran yang Tak Terlihat",
+        "Ruangan yang tampak bersih belum tentu bebas kotoran. Periksa sudut dan tempat tersembunyi dengan teliti.",
+      ],
+      [
+        "Kerapian dan Keselamatan",
+        "Barang yang tersusun rapi membuat rumah lebih nyaman serta mengurangi risiko tersandung dan terluka.",
+      ],
+      [
+        "Rumah Bersih, Keluarga Sehat",
+        "Kebiasaan menjaga kebersihan melindungi keluarga dari sampah, debu, genangan air, dan sumber penyakit.",
+      ],
+    ];
+    const [title, text] = lessons[n - 1];
+    els.modal.innerHTML = `<div class="education"><div class="education-card"><span class="education-label">PELAJARAN CHAPTER ${n}</span><img src="${ASSETS.edu[n - 1]}" alt=""><h1>${title}</h1><p>${text}</p><button class="btn" id="continueEducation">LANJUT</button></div></div>`;
+    $("#continueEducation").onclick = next;
+  }
+  function giveMedicine(n) {
+    if (state.medicines[n - 1]) return motherProgress(n);
+    const witchRewards = [
+      "Kau berhasil memilah sumber penyakit. Terimalah Obat Kesadaran; semoga ia membantu ibumu membuka mata.",
+      "Kau menghentikan kotoran dari sumbernya. Obat Suara ini akan memanggil kembali suara ibumu.",
+      "Ketelitianmu menemukan bahaya yang tersembunyi. Obat Kekuatan ini akan mengembalikan tenaganya.",
+      "Kau membersihkan dengan urutan yang bijak. Obat Kehangatan ini akan membawa hangat kembali ke tubuhnya.",
+      "Semua pelajaran telah kau satukan. Terimalah Obat Pemulihan, obat terakhir untuk menyempurnakan kesembuhannya.",
+    ];
+    const andiRewards = [
+      "Obat pertama... Ibu, tunggu aku.",
+      "Obat kedua. Aku mulai melihat harapan.",
+      "Obat ketiga. Aku tidak akan berhenti sekarang.",
+      "Tinggal satu ujian lagi setelah ini.",
+      "Akhirnya lengkap. Aku akan segera kembali kepada Ibu.",
+    ];
+    cut(
+      ASSETS.witchCuts.reward,
+      [
+        {
+          name: "Penyihir",
+          who: "witch",
+          text: witchRewards[n - 1],
+        },
+        {
+          name: "Andi",
+          who: "andi",
+          p: "relieved",
+          text: andiRewards[n - 1],
+        },
+      ],
+      () => {
+        els.modal.innerHTML = `<div class="medicine-reward"><div class="medicine-aura"></div><img class="medicine reward-medicine" src="${ASSETS.meds[n - 1]}" alt="${MEDICINE_NAMES[n - 1]}"><h1>${MEDICINE_NAMES[n - 1]} didapatkan!</h1><p>Satu langkah lagi menuju kesembuhan Ibu.</p><button class="btn" id="medNext">LANJUT</button></div>`;
+        sceneTimeout(
+          () => {
+            AudioManager.playSFX("medicine_obtained", {
+              level: 0.9,
+              cooldown: 500,
+            });
+            state.medicines[n - 1] = true;
+            state.motherProgress = n;
+            save("WitchHouse");
+            els.modal
+              .querySelector(".reward-medicine")
+              ?.classList.add("medicine-earned");
+            $("#medNext").disabled = false;
+          },
+          state.settings.motion ? 1100 : 0,
+          "medicine-reward",
+        );
+        $("#medNext").disabled = true;
+        $("#medNext").onclick = () => motherProgress(n);
+      },
+    );
+  }
+  function motherProgress(n) {
+    cut(
+      ASSETS.mother[n - 1],
+      [
+        {
+          name: "Narator",
+          text: [
+            "Ibu masih terlelap, tetapi napasnya terasa lebih tenang.",
+            "Perlahan, Ibu membuka matanya.",
+            "Jari Ibu bergerak kecil. Harapan itu tumbuh.",
+            "Ibu kini mampu duduk. Kehangatan kembali ke rumah.",
+            "Warna kembali ke wajah Ibu. Ia telah pulih.",
+          ][n - 1],
+        },
+      ],
+      () =>
+        n < 5
+          ? transition(n === 4 ? "FinalWarning" : "WitchHouse")
+          : transition("MotherRecovery"),
+    );
+  }
 
-function chapterRewardDialogue(n) {
-  const data = {
-    1: [
-      { speaker: "Andi", text: "Satu ruangan berhasil bersih. Semoga ini membantu Ibu.", portrait: ASSETS.andi.relieved, side: "left" },
-      { speaker: "Penyihir", text: "Kau telah mendapatkan Obat Kesadaran.", portrait: ASSETS.characters.witchPortrait, side: "right" }
+  const openingLines = [
+    [
+      {
+        name: "Narator",
+        text: "Beberapa hari terakhir, kesehatan Ibu Sari semakin memburuk.",
+      },
+      { name: "Narator", text: "Hari demi hari, tubuhnya semakin lemah." },
     ],
-    2: [
-      { speaker: "Andi", text: "Menghapus debu ternyata butuh kesabaran.", portrait: ASSETS.andi.tired, side: "left" },
-      { speaker: "Penyihir", text: "Ketekunanmu memberi hasil. Ini Obat Suara.", portrait: ASSETS.characters.witchPortrait, side: "right" }
+    [
+      {
+        name: "Andi",
+        who: "andi",
+        p: "worried",
+        text: "Bu... bagaimana perasaan Ibu?",
+      },
+      { name: "Andi", who: "andi", p: "sad", text: "Ibu?" },
+      {
+        name: "Andi",
+        who: "andi",
+        p: "determined",
+        text: "Aku akan mencari cara supaya Ibu sembuh.",
+      },
     ],
-    3: [
-      { speaker: "Penyihir", text: "Kau mendapatkan Obat Kekuatan.", portrait: ASSETS.characters.witchPortrait, side: "right" }
+    [
+      {
+        name: "Andi",
+        who: "andi",
+        p: "worried",
+        text: "Tabib, apakah Ibu bisa disembuhkan?",
+      },
+      {
+        name: "Tabib",
+        who: "tabib",
+        text: "Aku sudah melakukan apa yang kubisa.",
+      },
+      {
+        name: "Andi",
+        who: "andi",
+        p: "surprised",
+        text: "Tidak ada cara lain?",
+      },
+      {
+        name: "Tabib",
+        who: "tabib",
+        text: "Ada seorang penyihir tua di ujung hutan yang mungkin dapat membantumu.",
+      },
+      {
+        name: "Tabib",
+        who: "tabib",
+        text: "Aku tidak mengetahui jalan pastinya. Tetapi warga desa mungkin mengetahui sesuatu.",
+      },
+      {
+        name: "Andi",
+        who: "andi",
+        p: "determined",
+        text: "Aku akan mencarinya.",
+      },
     ],
-    4: [
-      { speaker: "Penyihir", text: "Kau mendapatkan Obat Kehangatan.", portrait: ASSETS.characters.witchPortrait, side: "right" }
-    ],
-    5: [
-      { speaker: "Penyihir", text: "Kau berhasil, Andi. Ini Obat Pemulihan.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-      { speaker: "Andi", text: "Ini obat terakhir... Ibu bisa sembuh.", portrait: ASSETS.andi.emotional, side: "left" }
-    ]
-  };
-  return data[n];
-}
-
-function showEduCard(type, done) {
-  const c = EDU[type];
-  modal(c[0], c[1], [btn("Lanjut", () => { closeModal(); done(); })], c[2]);
-}
-
-function showLevelComplete(n, done) {
-  modal("Chapter Selesai", `Andi mendapatkan obat ajaib ke-${n}.`, [btn("Lanjut", () => { closeModal(); done(); })], ASSETS.medicines[n - 1]);
-}
-
-function showMotherProgress(n, done) {
-  setScene("Mother Progress Cutscene", ASSETS.cutscenes.mother[CHAPTERS[n].mother]);
-  showDialogue(motherProgressDialogue(n), done);
-}
-
-function motherProgressDialogue(n) {
-  const art = ASSETS.cutscenes.mother[CHAPTERS[n].mother];
-  const data = {
-    1: [
-      { art, speaker: "Andi", text: "Ibu... matanya bergerak!", portrait: ASSETS.andi.surprised, side: "left" },
-      { speaker: "Ibu", text: "Andi...", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Ibu mulai sadar. Aku harus melanjutkan.", portrait: ASSETS.andi.emotional, side: "left" }
-    ],
-    2: [
-      { art, speaker: "Ibu", text: "Andi... kamu di sini?", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Iya, Bu. Aku di sini.", portrait: ASSETS.andi.relieved, side: "left" },
-      { speaker: "Ibu", text: "Terima kasih...", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Aku belum selesai. Aku akan membawa obat berikutnya.", portrait: ASSETS.andi.determined, side: "left" }
-    ],
-    3: [
-      { art, speaker: "Ibu", text: "Andi... Ibu bisa duduk sekarang.", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Ibu semakin kuat!", portrait: ASSETS.andi.happy, side: "left" },
-      { speaker: "Ibu", text: "Kamu pasti lelah.", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Tidak apa-apa, Bu. Aku akan menyelesaikan semuanya.", portrait: ASSETS.andi.determined, side: "left" }
-    ],
-    4: [
-      { art, speaker: "Ibu", text: "Andi... Ibu merasa jauh lebih baik.", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Ibu hampir pulih.", portrait: ASSETS.andi.emotional, side: "left" },
-      { speaker: "Ibu", text: "Kamu sudah berjuang banyak.", portrait: ASSETS.characters.mother, side: "right" },
-      { speaker: "Andi", text: "Tinggal satu ruangan lagi, Bu.", portrait: ASSETS.andi.determined, side: "left" }
-    ]
-  };
-  return data[n] || [{ art, speaker: "Andi", text: "Ibu semakin membaik.", portrait: ASSETS.andi.relieved, side: "left" }];
-}
-
-function showEnding() {
-  showAestheticEnding();
-}
-
-function showAestheticEnding() {
-  hideCleaningCursor();
-  const lightScene = setScene("Ending Light", ASSETS.background.chapters[5]);
-  lightScene.append(el("div", "ending-light"));
-  setTimeout(() => {
-    setScene("Ending", ASSETS.background.endingHospital);
-    showDialogue(endingDialogue(), showFinalMessage);
-  }, 950);
-}
-
-function endingDialogue() {
-  return [
-    { art: ASSETS.background.endingHospital, speaker: "Narator", text: "Cahaya dari obat terakhir menyelimuti tangan Andi. Untuk pertama kalinya setelah perjalanan panjang itu, langkahnya terasa ringan." },
-    { art: ASSETS.cutscenes.ending, speaker: "Andi", text: "Ibu... aku pulang.", portrait: ASSETS.andi.worried, side: "left" },
-    { speaker: "Ibu", text: "Andi...?", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Ibu... Ibu bisa bicara lagi?", portrait: ASSETS.andi.emotional, side: "left" },
-    { speaker: "Ibu", text: "Ibu mendengar suaramu. Jauh sekali... seperti kamu terus memanggil Ibu untuk kembali.", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Aku takut terlambat, Bu.", portrait: ASSETS.andi.emotional, side: "left" },
-    { speaker: "Ibu", text: "Tapi kamu tidak menyerah.", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Aku membersihkan ruangan-ruangan itu satu per satu. Sampah, debu, genangan air, barang berantakan... semuanya ternyata punya arti.", portrait: ASSETS.andi.emotional, side: "left" },
-    { speaker: "Ibu", text: "Apa yang kamu pelajari, Nak?", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Aku belajar bahwa kebersihan bukan cuma membuat rumah terlihat indah. Kebersihan menjaga napas, menjaga langkah, dan menjaga orang yang kita sayangi.", portrait: ASSETS.andi.relieved, side: "left" },
-    { speaker: "Ibu", text: "Kalau begitu, kamu bukan hanya membawa obat untuk Ibu.", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Andi", text: "Maksud Ibu?", portrait: ASSETS.andi.relieved, side: "left" },
-    { speaker: "Ibu", text: "Kamu membawa pulang pelajaran untuk hidup.", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Penyihir", text: "Rumah yang bersih menyimpan kehangatan. Hati yang peduli menyimpan kekuatan.", portrait: ASSETS.characters.witchPortrait, side: "right" },
-    { speaker: "Andi", text: "Mulai sekarang, aku akan menjaga rumah seperti Ibu menjagaku.", portrait: ASSETS.andi.happy, side: "left" },
-    { speaker: "Ibu", text: "Dan Ibu akan menjaganya bersamamu.", portrait: ASSETS.characters.mother, side: "right" },
-    { speaker: "Narator", text: "Di ruangan yang kini terasa hangat, Andi mengerti bahwa cinta tidak selalu hadir dalam hal besar. Kadang, cinta hadir dalam hal sederhana: merapikan, membersihkan, dan menjaga." }
   ];
-}
 
-function showFinalMessage() {
-  hideCleaningCursor();
-  const scene = setScene("Pesan Akhir", ASSETS.background.endingHospital);
-  gameState.dialogOpen = true;
-  scene.innerHTML = `
-    <section class="final-message-screen fade-in">
-      <div class="final-message-overlay"></div>
-      <div class="final-message-card soft-glow">
-        <p class="final-message-label">Pesan Akhir</p>
-        <h1 class="final-message-title"></h1>
-        <p class="final-message-subtitle"></p>
-        <div class="final-message-buttons">
-          <button class="game-btn" id="playAgainBtn">Main Lagi</button>
-          <button class="game-btn secondary" id="backToMenuBtn">Kembali ke Menu</button>
-        </div>
-      </div>
-    </section>
-  `;
+  function showHowToPlay(returnToPause = false) {
+    pauseActive = returnToPause || /^Chapter/.test(state.scene);
+    els.modal.innerHTML = `<div class="settings-overlay how-overlay"><div class="how-card panel"><header class="how-header"><span class="how-kicker">PANDUAN PERJALANAN</span><h1>CARA MAIN</h1><p>Kuasai kontrol, temukan sumber masalah, dan pulihkan setiap ruangan sebelum waktu habis.</p></header><section class="how-controls" aria-label="Kontrol permainan"><article><div class="how-keys"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div><div><strong>BERGERAK</strong><small>Gunakan juga tombol panah</small></div></article><article><div class="how-key-single"><kbd>E</kbd></div><div><strong>INTERAKSI</strong><small>Ambil atau gunakan benda</small></div></article><article><div class="how-key-single how-key-magic"><kbd>Q</kbd></div><div><strong>LUMI VISION</strong><small>Temukan kotoran tersembunyi</small></div></article><article><div class="how-key-single"><kbd>ESC</kbd></div><div><strong>JEDA</strong><small>Buka menu permainan</small></div></article></section><section class="how-mission"><div class="how-section-title"><span>✦</span><div><strong>ALUR MISI</strong><small>Lima langkah menuju rumah yang sehat</small></div><span>✦</span></div><ol><li><i>1</i><span><b>Pilah</b><small>Buang sampah sesuai jenisnya.</small></span></li><li><i>2</i><span><b>Cegah</b><small>Hentikan sumber kotoran.</small></span></li><li><i>3</i><span><b>Temukan</b><small>Gunakan Lumi Vision.</small></span></li><li><i>4</i><span><b>Bersihkan</b><small>Pilih strategi yang tepat.</small></span></li><li><i>5</i><span><b>Pulihkan</b><small>Satukan seluruh pelajaran.</small></span></li></ol></section><aside class="how-tip"><span>★</span><p><strong>RAIH 3 BINTANG</strong><small>Bergerak cepat dan hindari kesalahan. Sisa waktu menentukan hasil akhir.</small></p></aside><button class="btn how-back" id="closeHow">KEMBALI KE MENU</button></div></div>`;
+    $("#closeHow").onclick = () =>
+      returnToPause ? pause() : loadScene("MainMenu");
+  }
+  function showSettings(returnToPause = false) {
+    pauseActive = returnToPause || /^Chapter/.test(state.scene);
+    els.modal.innerHTML = `<div class="settings-overlay"><div class="settings-card panel"><h1>PENGATURAN</h1><label>Animasi <select id="motionSetting"><option value="on">Aktif</option><option value="off">Nonaktif</option></select></label><label>Kecepatan teks <select id="textSpeed"><option value="slow">Lambat</option><option value="normal">Normal</option><option value="fast">Cepat</option></select></label><label>Volume utama <span class="volume-value" id="masterVolumeValue"></span><input id="masterVolume" type="range" min="0" max="100" step="1"></label><label>Volume musik <span class="volume-value" id="musicVolumeValue"></span><input id="musicVolume" type="range" min="0" max="100" step="1"></label><label>Volume efek suara <span class="volume-value" id="sfxVolumeValue"></span><input id="sfxVolume" type="range" min="0" max="100" step="1"></label><label class="mute-setting"><input id="muteSetting" type="checkbox"> Bisukan semua audio</label><button class="btn" id="fullscreenSetting">LAYAR PENUH</button><button class="btn" id="saveSettings">SIMPAN</button><button class="btn secondary" id="cancelSettings">KEMBALI</button></div></div>`;
+    $("#motionSetting").value = state.settings.motion ? "on" : "off";
+    $("#textSpeed").value = state.settings.dialogSpeed;
+    [
+      ["masterVolume", state.settings.masterVolume],
+      ["musicVolume", state.settings.musicVolume],
+      ["sfxVolume", state.settings.sfxVolume],
+    ].forEach(([id, value]) => {
+      const input = $("#" + id),
+        output = $("#" + id + "Value");
+      input.value = value;
+      output.textContent = value + "%";
+      input.oninput = () => (output.textContent = input.value + "%");
+    });
+    $("#muteSetting").checked = state.settings.muted;
+    $("#fullscreenSetting").onclick = async () => {
+      try {
+        if (!document.fullscreenElement)
+          await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch {
+        toast("Mode layar penuh tidak didukung browser.");
+      }
+    };
+    $("#saveSettings").onclick = () => {
+      state.settings.motion = $("#motionSetting").value === "on";
+      state.settings.dialogSpeed = $("#textSpeed").value;
+      state.settings.masterVolume = Number($("#masterVolume").value);
+      state.settings.musicVolume = Number($("#musicVolume").value);
+      state.settings.sfxVolume = Number($("#sfxVolume").value);
+      state.settings.muted = $("#muteSetting").checked;
+      persistSettings();
+      const loaded = safeLoad();
+      if (loaded) save(state.scene);
+      returnToPause ? pause() : loadScene("MainMenu");
+    };
+    $("#cancelSettings").onclick = () =>
+      returnToPause ? pause() : loadScene("MainMenu");
+  }
+  function confirmReset() {
+    els.modal.innerHTML = `<div class="settings-overlay"><div class="settings-card panel"><h1>RESET PROGRESS</h1><p>Apakah kamu yakin ingin menghapus seluruh progress?</p><button class="btn secondary" id="cancelReset">BATAL</button><button class="btn danger" id="confirmReset">YA, RESET</button></div></div>`;
+    $("#cancelReset").onclick = () => loadScene("MainMenu");
+    $("#confirmReset").onclick = () => {
+      resetGame();
+      loadScene("MainMenu");
+      toast("Progress berhasil direset.");
+    };
+  }
+  function showCredits() {
+    els.modal.innerHTML = `<div class="credits-overlay"><div class="credits-card panel"><span class="credits-kicker">SEBUAH PERJALANAN UNTUK IBU</span><img src="${ASSETS.menu.logo}" alt="For Mother"><h1>KREDIT</h1><div class="credits-list"><div><small>DIBUAT OLEH</small><strong>${CREDIT_INFO.creator}</strong><span>${CREDIT_INFO.members.join("<br>")}</span></div><div><small>WAKTU PEMBUATAN</small><strong>${CREDIT_INFO.created}</strong></div><div><small>DEPLOYMENT</small><strong>${CREDIT_INFO.deployment}</strong></div><div><small>ASSET VISUAL</small><strong>${CREDIT_INFO.visualAssets}</strong></div><div><small>ASSET AUDIO</small><strong>${CREDIT_INFO.audioAssets}</strong></div><div><small>TEKNOLOGI</small><strong>${CREDIT_INFO.technology}</strong></div></div><p>Terima kasih telah menemani Andi dalam perjalanan menjaga kesehatan dan orang yang ia sayangi.</p><button class="btn" id="closeCredits">KEMBALI KE MENU</button></div></div>`;
+    $("#closeCredits").onclick = () => loadScene("MainMenu");
+  }
+  function startFromMenu(nextScene, beforeStart) {
+    const menu = els.modal.querySelector(".menu");
+    if (!menu || menu.classList.contains("menu-starting")) return;
+    beforeStart?.();
+    menu.classList.add("menu-starting");
+    menu
+      .querySelectorAll("button")
+      .forEach((button) => (button.disabled = true));
+    els.fade.style.background = "#070403";
+    sceneTimeout(
+      () => transition(nextScene),
+      state.settings.motion ? 950 : 0,
+      "menu-cinematic-start",
+    );
+  }
 
-  const card = scene.querySelector(".final-message-card");
-  const title = scene.querySelector(".final-message-title");
-  const subtitle = scene.querySelector(".final-message-subtitle");
-  const buttons = scene.querySelector(".final-message-buttons");
-  const message = "Rumah yang bersih bukan hanya tempat untuk pulang,\ntetapi tempat di mana kesehatan, kasih sayang,\ndan harapan tumbuh bersama.";
-  const subtitleText = "Jaga kebersihan. Jaga keluarga. Jaga kehidupan.";
-  let index = 0;
-  let finished = false;
-  const completeText = () => {
-    if (typingTimer) clearInterval(typingTimer);
-    typingTimer = null;
-    title.textContent = message;
-    subtitle.textContent = subtitleText;
-    card.classList.add("done");
-    buttons.classList.add("show");
-    finished = true;
-    gameState.dialogOpen = false;
+  const SCENES = {
+    MainMenu() {
+      clear();
+      els.bg.removeAttribute("src");
+      els.bg.onerror = null;
+      state.scene = "MainMenu";
+      const has = !!safeLoad();
+      restoreSettings();
+      els.modal.innerHTML = `<div class="menu"><div class="menu-ambience"></div><nav class="menu-utilities" aria-label="Menu bantuan"><button class="menu-icon-button" id="how" type="button" aria-label="Cara Main" data-tooltip="Cara Main"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.2c2.8-.8 5.5-.2 8.5 1.7v12c-3-1.9-5.7-2.5-8.5-1.7zM20.5 5.2c-2.8-.8-5.5-.2-8.5 1.7v12c3-1.9 5.7-2.5 8.5-1.7z"/><path d="M12 6.9v12"/></svg></button><button class="menu-icon-button" id="settings" type="button" aria-label="Pengaturan" data-tooltip="Pengaturan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 3.4h4.6l.7 2.1c.5.2 1 .5 1.5.8l2.1-.5 2.3 4-1.5 1.6v1.2l1.5 1.6-2.3 4-2.1-.5c-.5.3-1 .6-1.5.8l-.7 2.1H9.7L9 18.5c-.5-.2-1-.5-1.5-.8l-2.1.5-2.3-4 1.5-1.6v-1.2L3.1 9.8l2.3-4 2.1.5c.5-.3 1-.6 1.5-.8z"/><circle cx="12" cy="12" r="3.2"/></svg></button></nav><section class="menu-content"><span class="menu-eyebrow">A FANTASY EDUCATIONAL JOURNEY</span><img class="logo" src="${ASSETS.menu.logo}" alt="For Mother"><p class="menu-tagline">Sebuah perjalanan kecil untuk cinta yang begitu besar.</p><div class="buttons menu-actions"><div class="menu-main-actions"><button class="btn menu-primary" id="new">MULAI PERJALANAN</button><button class="btn menu-continue" id="cont" ${has ? "" : "disabled"}>LANJUTKAN</button></div><button class="btn menu-skip" id="skipPrologue"><span>SKIP PROLOG</span><small>Mulai langsung dari Desa</small></button><div class="menu-secondary"><button class="menu-text-action danger" id="reset" type="button">RESET PROGRESS</button><span aria-hidden="true">•</span><button class="menu-text-action" id="credits" type="button">KREDIT</button></div></div></section><small class="menu-version">FOR MOTHER · 2026</small></div>`;
+      const menuVideo = document.createElement("video");
+      menuVideo.className = "menu-background-video";
+      menuVideo.src = ASSETS.menu.bg;
+      menuVideo.autoplay = true;
+      menuVideo.muted = true;
+      menuVideo.loop = true;
+      menuVideo.playsInline = true;
+      menuVideo.preload = "auto";
+      menuVideo.setAttribute("aria-hidden", "true");
+      els.modal.querySelector(".menu").prepend(menuVideo);
+      menuVideo.play().catch(() => {});
+      $("#new").onclick = () => {
+        startFromMenu("Opening1", resetGame);
+      };
+      $("#skipPrologue").onclick = () => {
+        startFromMenu("Village", () => {
+          resetGame();
+          state.storyStage = 1;
+          save("Village");
+        });
+      };
+      $("#cont").onclick = () => {
+        const loaded = safeLoad() || defaults();
+        const allChaptersComplete = loaded.chapters.every(Boolean);
+        const destination = allChaptersComplete
+          ? "Ending"
+          : loaded.scene === "MainMenu"
+            ? "Opening1"
+            : loaded.scene;
+        startFromMenu(destination, () => {
+          state = loaded;
+          restoreSettings();
+        });
+      };
+      $("#how").onclick = () => showHowToPlay();
+      $("#settings").onclick = () => showSettings();
+      $("#reset").onclick = confirmReset;
+      $("#credits").onclick = showCredits;
+    },
+    Opening1() {
+      cut(ASSETS.opening[0], openingLines[0], () => transition("Opening2"));
+    },
+    Opening2() {
+      cut(ASSETS.opening[1], openingLines[1], () => transition("Opening3"));
+    },
+    Opening3() {
+      cut(ASSETS.opening[2], openingLines[2], () => {
+        state.storyStage = 1;
+        save("Village");
+        transition("Village");
+      });
+    },
+    Village() {
+      clear();
+      state.scene = "Village";
+      setBg(ASSETS.bg.village);
+      bounds(28, 25, 1645, 930);
+      /* Collision Desa mengikuti blok merah pada referensi. Kotak-kotak ini
+         men-tile bentuk siku tanpa menutup jalan utama dan bukaan selatan. */
+      obstacle(28, 25, 450, 225, "desa_kiri_atas");
+      obstacle(478, 25, 500, 240, "desa_rumah_atas");
+      obstacle(978, 25, 667, 140, "desa_hutan_atas");
+      // Sisakan ruang bebas di sekitar portal supaya area portal tidak tertutup
+      // collider merah hutan.
+      obstacle(1225, 165, 30, 150, "desa_hutan_kiri_portal");
+      obstacle(1495, 165, 150, 150, "desa_hutan_kanan_portal");
+      obstacle(805, 25, 170, 140, "desa_batu_atas");
+
+      obstacle(28, 250, 340, 95, "desa_atap_rumah_kiri");
+      obstacle(28, 345, 445, 205, "desa_rumah_kiri");
+      obstacle(28, 550, 35, 50, "desa_pagar_kiri");
+      obstacle(695, 343, 132, 107, "desa_sumur");
+      obstacle(1128, 205, 120, 125, "desa_pagar_portal");
+
+      obstacle(1360, 335, 285, 72, "desa_hutan_kanan_tengah");
+      obstacle(1148, 420, 497, 220, "desa_rumah_kanan");
+      obstacle(1298, 640, 347, 45, "desa_pagar_kanan_bawah");
+
+      obstacle(0, 687, 660, 254, "desa_bawah_kiri");
+      obstacle(896, 687, 776, 254, "desa_bawah_kanan");
+      addPlayer(820, 790);
+      const sari = npc("sari", ASSETS.npc.sari, 520, 520),
+        bima = npc("bima", ASSETS.npc.bima, 910, 430),
+        nina = npc("nina", ASSETS.npc.nina, 1100, 610, "nina");
+      const portal = img(
+        ASSETS.portal.village,
+        "object portal",
+        1420,
+        125,
+        185,
+        "portal",
+      );
+      portalFx(1420, 125);
+      portal.style.opacity = Object.values(state.clues).every(Boolean)
+        ? "1"
+        : ".48";
+      const clue = (key, n, lines) =>
+        followInteraction(
+          interact(
+            key,
+            n.x,
+            n.y,
+            "Bicara",
+            () => {
+              face(player, n);
+              face(n, player);
+              startDialog(lines, () => {
+                if (!state.clues[key]) {
+                  state.clues[key] = true;
+                  toast("Petunjuk ditemukan");
+                  AudioManager.playSFX("objective_complete", {
+                    level: 0.7,
+                    cooldown: 120,
+                  });
+                  if (Object.values(state.clues).every(Boolean))
+                    AudioManager.playSFX("portal_activate", {
+                      level: 0.8,
+                      cooldown: 500,
+                    });
+                  save("Village");
+                }
+                setupObjective();
+              });
+            },
+            true,
+            n.el,
+          ),
+          n,
+        );
+      clue("sari", sari, [
+        {
+          name: "Bu Sari",
+          who: "sari",
+          text: "Tabib pernah bercerita tentang batu bertanda ungu. Carilah gerbang dengan tanda itu.",
+        },
+      ]);
+      clue("bima", bima, [
+        {
+          name: "Pak Bima",
+          who: "bima",
+          text: "Penyihir di ujung hutan? Sudah lama aku tidak mendengar orang membicarakannya.",
+        },
+        {
+          name: "Pak Bima",
+          who: "bima",
+          text: "Tapi aku pernah melihat cahaya aneh di sisi utara desa.",
+        },
+      ]);
+      clue("nina", nina, [
+        {
+          name: "Nina",
+          who: "nina",
+          text: "Aku pernah melihat gerbang batu dekat pepohonan.",
+        },
+        {
+          name: "Nina",
+          who: "nina",
+          text: "Aku tidak pernah berani mendekatinya.",
+        },
+      ]);
+      autoPortal(
+        1420,
+        255,
+        () => {
+          state.storyStage = 2;
+          save("Forest");
+          transition("Forest");
+        },
+        portal,
+        () => Object.values(state.clues).every(Boolean),
+      );
+      runtime.portals[runtime.portals.length - 1].radius = 118;
+      setupObjective();
+      function setupObjective() {
+        const c = state.clues;
+        objective(
+          Object.values(c).every(Boolean)
+            ? "Temukan gerbang misterius"
+            : "Cari informasi tentang penyihir",
+          [
+            ["Bicara dengan Bu Sari", c.sari],
+            ["Bicara dengan Pak Bima", c.bima],
+            ["Bicara dengan Nina", c.nina],
+          ],
+        );
+        portal.style.opacity = Object.values(c).every(Boolean) ? "1" : ".48";
+      }
+    },
+    Forest() {
+      clear();
+      state.scene = "Forest";
+      setBg(ASSETS.bg.forest);
+      bounds(45, 65, 1625, 915);
+      obstacle(0, 0, 555, 420, "pepohonan_kiri_atas");
+      obstacle(0, 420, 285, 255, "semak_kiri_tengah");
+      obstacle(0, 885, 1672, 56, "batas_bawah");
+      obstacle(510, 0, 500, 245, "pepohonan_atas_tengah");
+      obstacle(1030, 0, 642, 270, "rumah_dan_hutan_atas");
+      obstacle(1370, 270, 302, 275, "rumah_penyihir");
+      obstacle(1280, 545, 392, 396, "hutan_kanan_bawah");
+      obstacle(490, 735, 185, 150, "batu_bawah");
+      obstacle(700, 760, 580, 181, "semak_bawah_tengah");
+      obstacle(315, 430, 155, 120, "batu_kiri_jalur");
+      obstacle(570, 300, 175, 125, "batu_tengah_atas");
+      addPlayer(245, 830);
+      const door = { x: 1330, y: 395 };
+      interact(
+        "witchDoor",
+        door.x,
+        door.y,
+        "Dekati rumah",
+        () => transition("WitchApproach"),
+        true,
+      );
+      objective("Cari rumah penyihir");
+      toast("Ikuti jalan bercahaya menuju rumah.");
+    },
+    WitchApproach() {
+      cut(
+        ASSETS.witchCuts.approach,
+        [
+          {
+            name: "Andi",
+            who: "andi",
+            p: "determined",
+            text: "Aku tidak boleh terlambat. Ibu menungguku.",
+          },
+          {
+            name: "Narator",
+            text: "Andi berjalan menuju rumah tua di ujung hutan.",
+          },
+        ],
+        () =>
+          cut(
+            ASSETS.witchCuts.meet,
+            [
+              {
+                name: "Penyihir",
+                who: "witch",
+                text: "Kau datang dengan hati yang berat, Nak.",
+              },
+              {
+                name: "Andi",
+                who: "andi",
+                p: "surprised",
+                text: "Kamu tahu kenapa aku datang?",
+              },
+              {
+                name: "Penyihir",
+                who: "witch",
+                text: "Aku melihat rasa sayangmu kepada ibumu. Namun obat itu membutuhkan ketekunan.",
+              },
+              {
+                name: "Andi",
+                who: "andi",
+                p: "determined",
+                text: "Aku siap melakukan apa saja.",
+              },
+            ],
+            () => transition("WitchMission"),
+          ),
+      );
+    },
+    WitchMission() {
+      cut(
+        ASSETS.witchCuts.mission,
+        [
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Ada lima ruangan ajaib yang dipenuhi debu, genangan, sampah, dan kekacauan.",
+          },
+          {
+            name: "Andi",
+            who: "andi",
+            p: "neutral",
+            text: "Apa hubungannya membersihkan ruangan dengan menyembuhkan Ibu?",
+          },
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Sampah membawa kuman, debu mengganggu napas, dan genangan mengundang nyamuk.",
+          },
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Ketika kita merapikan sumbernya, kita menjaga orang-orang yang kita sayangi.",
+          },
+        ],
+        () => {
+          state.storyStage = 3;
+          save("WitchHouse");
+          transition("WitchHouse");
+        },
+      );
+    },
+    WitchHouse() {
+      clear();
+      state.scene = "WitchHouse";
+      setBg(ASSETS.bg.witch);
+      bounds(48, 22, 1625, 920);
+      /* Perimeter bertingkat dan furnitur mengikuti anotasi rumah penyihir. */
+      obstacle(48, 22, 395, 198, "witch_dinding_kiri_atas");
+      obstacle(443, 22, 385, 198, "witch_jendela_atas");
+      obstacle(828, 22, 155, 225, "witch_jendela_kanan");
+      obstacle(983, 22, 650, 225, "witch_rak_atas_kanan");
+      obstacle(48, 220, 315, 145, "witch_rak_kiri");
+      obstacle(363, 220, 130, 65, "witch_lemari_kiri");
+      obstacle(493, 220, 135, 45, "witch_peti_atas");
+      obstacle(1135, 247, 83, 35, "witch_rak_kanan_step");
+      obstacle(1218, 247, 415, 205, "witch_meja_racik_kanan");
+
+      obstacle(48, 365, 175, 80, "witch_sudut_portal_atas");
+      obstacle(48, 675, 170, 80, "witch_sudut_portal_bawah");
+      obstacle(48, 755, 170, 165, "witch_dekorasi_kiri_bawah");
+      obstacle(365, 590, 300, 115, "witch_meja_besar");
+      obstacle(400, 705, 115, 85, "witch_bangku_meja");
+      obstacle(218, 890, 955, 30, "witch_batas_bawah_tengah");
+
+      obstacle(1218, 452, 125, 90, "witch_bangku_kanan");
+      obstacle(1268, 612, 365, 70, "witch_meja_kanan_bawah");
+      obstacle(1075, 660, 195, 205, "witch_peti_kanan_bawah");
+      obstacle(1173, 865, 460, 55, "witch_batas_bawah_kanan");
+      addPlayer(830, 790, true);
+      /* Setiap kembali ke hub, Andi wajib menerima arahan chapter terbaru. */
+      runtime.witchTalked = state.currentChapter > 5;
+      const w = npc("witch", ASSETS.npc.witch, 900, 430, "witch");
+      const p = img(
+        ASSETS.portal.witch,
+        "object portal",
+        160,
+        500,
+        220,
+        "portalWitch",
+      );
+      const portalHalo = portalFx(160, 500);
+      p.style.display = "none";
+      portalHalo.style.display = "none";
+      followInteraction(
+        interact(
+          "witch",
+          w.x,
+          w.y,
+          "Bicara",
+          () =>
+            startDialog(
+              [
+                {
+                  name: "Penyihir",
+                  who: "witch",
+                  text: `Ruangan ke-${state.currentChapter} menantimu. Bersihkan dengan teliti.`,
+                },
+              ],
+              () => {
+                runtime.witchTalked = true;
+                p.style.display = "";
+                portalHalo.style.display = "";
+                AudioManager.playSFX("portal_activate", {
+                  level: 0.82,
+                  cooldown: 500,
+                });
+                objective(
+                  `Masuki portal menuju ujian ke-${state.currentChapter}`,
+                );
+                toast("Portal telah terbuka. Masuklah saat kamu siap.");
+              },
+            ),
+          false,
+          w.el,
+        ),
+        w,
+      );
+      autoPortal(
+        210,
+        570,
+        () => {
+          if (state.currentChapter > 5) toast("Semua ujian telah selesai.");
+          else transition("Chapter" + state.currentChapter);
+        },
+        p,
+        () => runtime.witchTalked,
+      );
+      addUpdater(() => {
+        if (runtime.witchTalked) {
+          els.ui.querySelector(".portal-locked-notice")?.remove();
+          return;
+        }
+        const nearPortal = dist(player, { x: 210, y: 570 }) < 150;
+        let notice = els.ui.querySelector(".portal-locked-notice");
+        if (nearPortal && !notice) {
+          notice = document.createElement("div");
+          notice.className = "portal-locked-notice";
+          notice.innerHTML = `<strong>PORTAL BELUM AKTIF</strong><span>Bicaralah dengan penyihir terlebih dahulu.</span>`;
+          els.ui.append(notice);
+        } else if (!nearPortal) notice?.remove();
+      });
+      objective(
+        runtime.witchTalked
+          ? `Masuki ujian ke-${state.currentChapter}`
+          : "Bicaralah dengan penyihir sebelum memasuki portal",
+      );
+      if (state.currentChapter === 1 && !state.chapters[0])
+        cutsceneActive = false;
+    },
+    Chapter1() {
+      setupChapter(1, "Pilah Sampah", ASSETS.bg.c1, 10);
+      runtime.sorted = 0;
+      runtime.total = 6;
+      runtime.held = null;
+      const bins = [
+        ["organic", 320, 330, ASSETS.trash.organic],
+        ["nonorganic", 1350, 330, ASSETS.trash.nonorganic],
+      ];
+      bins.forEach(([type, x, y, src]) => {
+        const e = img(src, "object", x, y, 145);
+        interact("bin_" + type, x, y, "Buang", () => dropTrash(type), true, e);
+      });
+      const data = [
+        ["banana", "organic", 520, 650],
+        ["food", "organic", 720, 580],
+        ["paper", "nonorganic", 900, 670],
+        ["can", "nonorganic", 1080, 570],
+        ["bag", "nonorganic", 660, 400],
+        ["bottle", "nonorganic", 1120, 420],
+      ];
+      data.forEach(([id, type, x, y]) => {
+        const e = img(ASSETS.trash[id], "object", x, y, 72, id);
+        const it = interact(
+          id,
+          x,
+          y,
+          "Ambil",
+          () => {
+            if (runtime.held)
+              return toast("Kamu hanya dapat membawa satu benda.");
+            runtime.held = { id, type, e, it };
+            AudioManager.playSFX("trash_pickup", {
+              level: 0.8,
+              vary: 0.04,
+              cooldown: 100,
+            });
+            it.enabled = false;
+            e.classList.add("held-item", "carried-trash");
+            e.style.pointerEvents = "none";
+            updateHeldItemPosition();
+            toast("Sampah diambil");
+          },
+          false,
+          e,
+        );
+      });
+      objective("Pilah semua sampah dengan benar");
+      function dropTrash(type) {
+        if (!runtime.held) return toast("Ambil sampah terlebih dahulu.");
+        if (runtime.held.type !== type)
+          return recordMistake("Jenis tong salah. Sampah masih dibawa.");
+        const held = runtime.held;
+        runtime.held = null;
+        AudioManager.playSFX("trash_dispose", {
+          level: 0.8,
+          vary: 0.04,
+          cooldown: 100,
+        });
+        held.e.classList.add("trash-drop-success");
+        sceneTimeout(() => held.e.remove(), state.settings.motion ? 360 : 0);
+        runtime.sorted = Math.min(runtime.total, runtime.sorted + 1);
+        updateClean(Math.round((runtime.sorted / runtime.total) * 100));
+        if (runtime.sorted === runtime.total) finishChapter(1);
+      }
+    },
+    Chapter2() {
+      setupChapter(2, "Hentikan Sumbernya", ASSETS.bg.c2, 35);
+      const saved = state.chapterProgress.chapter2 || {};
+      runtime.sources = {
+        window: false,
+        pipe: false,
+        bin: false,
+        ...saved.sources,
+      };
+      runtime.dirt = [];
+      runtime.spawnClock = 0;
+      runtime.hudClock = 0;
+      runtime.stableClock = 0;
+      runtime.dirtSequence = 0;
+      const spawnPoints = {
+        dust: [
+          [510, 610],
+          [700, 480],
+          [620, 700],
+          [790, 570],
+        ],
+        water: [
+          [850, 650],
+          [1000, 520],
+          [970, 720],
+          [1120, 610],
+        ],
+        trash: [
+          [1160, 650],
+          [1320, 570],
+          [1240, 730],
+          [1090, 470],
+        ],
+      };
+      const sourceFor = { dust: "window", water: "pipe", trash: "bin" };
+      const sourceEls = {};
+      [
+        [
+          "window",
+          770,
+          150,
+          ASSETS.dust.windowOpen,
+          "Tutup Jendela",
+          770,
+          290,
+          175,
+        ],
+        [
+          "pipe",
+          1135,
+          365,
+          ASSETS.dust.pipeBroken,
+          "Perbaiki Kebocoran",
+          1115,
+          465,
+          145,
+        ],
+        ["bin", 1250, 420, ASSETS.dust.binFallen, "Tegakkan Tempat Sampah"],
+      ].forEach(
+        ([
+          id,
+          x,
+          y,
+          src,
+          label,
+          interactionX = x,
+          interactionY = y,
+          width = 120,
+        ]) => {
+          const doneSrc =
+            id === "window"
+              ? ASSETS.dust.windowClosed
+              : id === "pipe"
+                ? ASSETS.dust.pipeFixed
+                : ASSETS.dust.binUp;
+          const e = (sourceEls[id] = img(
+            runtime.sources[id] ? doneSrc : src,
+            "object source-prop",
+            x,
+            y,
+            width,
+            id,
+          ));
+          const sourceInteraction = interact(
+            id,
+            interactionX,
+            interactionY,
+            label,
+            () => {
+              if (runtime.sources[id]) return;
+              runtime.sources[id] = true;
+              AudioManager.playSFX(
+                id === "window" ? "window_close" : "objective_complete",
+                { level: 0.8, cooldown: 150 },
+              );
+              e.src =
+                id === "window"
+                  ? ASSETS.dust.windowClosed
+                  : id === "pipe"
+                    ? ASSETS.dust.pipeFixed
+                    : ASSETS.dust.binUp;
+              toast("Sumber dihentikan");
+              sourceInteraction.enabled = false;
+              e.classList.add("source-fixed");
+              state.chapterProgress.chapter2 = {
+                sources: { ...runtime.sources },
+              };
+              save("Chapter2");
+              updateChapter2Hud();
+            },
+            true,
+            e,
+          );
+          sourceInteraction.enabled = !runtime.sources[id];
+        },
+      );
+      ["dust", "water", "trash"].forEach((type) =>
+        spawnPoints[type]
+          .slice(0, 2)
+          .forEach((point) => spawnDirt(type, point)),
+      );
+      updateChapter2Hud();
+      addUpdater((dt) => {
+        runtime.spawnClock += dt;
+        runtime.hudClock += dt;
+        if (runtime.hudClock >= 0.18) {
+          runtime.hudClock = 0;
+          updateChapter2Progress();
+        }
+        if (runtime.spawnClock >= 7) {
+          runtime.spawnClock = 0;
+          let spawned = false;
+          ["dust", "water", "trash"].forEach((type) => {
+            if (runtime.sources[sourceFor[type]] || activeCount(type) >= 3)
+              return;
+            const open = spawnPoints[type].find(
+              ([x, y]) =>
+                !runtime.dirt.some((d) => !d.done && dist({ x, y }, d) < 65),
+            );
+            if (open) {
+              spawnDirt(type, open);
+              spawned = true;
+            }
+          });
+          if (spawned)
+            toast("Sumber yang belum dihentikan membuat kotoran baru!");
+        }
+        const stable =
+          Object.values(runtime.sources).every(Boolean) &&
+          runtime.dirt.every((d) => d.done) &&
+          !runtime.cleaning;
+        runtime.stableClock = stable ? runtime.stableClock + dt : 0;
+        if (runtime.stableClock >= 2.5) finishChapter(2);
+      });
+      function activeCount(type) {
+        return runtime.dirt.filter((d) => d.type === type && !d.done).length;
+      }
+      function spawnDirt(type, point) {
+        const assets =
+          type === "dust"
+            ? [ASSETS.dust.table, ASSETS.dust.tableClean, "cloth"]
+            : type === "water"
+              ? [ASSETS.water.large, ASSETS.water.dry, "mop"]
+              : [ASSETS.dust.trashPile, null, null];
+        const id = `${type}-${++runtime.dirtSequence}`;
+        let item;
+        if (type === "trash") {
+          const e = img(assets[0], "object dirt", point[0], point[1], 82, id);
+          item = {
+            id,
+            type,
+            x: point[0],
+            y: point[1],
+            progress: 0,
+            done: false,
+            el: e,
+          };
+          item.interactable = interact(
+            id,
+            item.x,
+            item.y,
+            "Pilah sampah",
+            () =>
+              startTrashSorting(() => {
+                item.done = true;
+                e.remove();
+                item.interactable.enabled = false;
+                burst(item.x, item.y);
+                updateChapter2Hud();
+              }, 4),
+            false,
+            e,
+          );
+          runtime.dirt.push(item);
+        } else {
+          item = addCleanable({
+            id,
+            type,
+            x: point[0],
+            y: point[1],
+            src: assets[0],
+            cleanSrc: assets[1],
+            tool: assets[2],
+            onComplete: updateChapter2Hud,
+          });
+          runtime.dirt.push(item);
+        }
+        updateChapter2Hud();
+      }
+      function updateChapter2Hud() {
+        const active = ["dust", "water", "trash"].map(activeCount);
+        updateChapter2Progress();
+        objective("Hentikan sumber, lalu bersihkan semua kotoran", [
+          ["Jendela tertutup", runtime.sources.window],
+          ["Kebocoran diperbaiki", runtime.sources.pipe],
+          ["Tempat sampah berdiri", runtime.sources.bin],
+          [`Sisa debu: ${active[0]}`, active[0] === 0],
+          [`Sisa genangan: ${active[1]}`, active[1] === 0],
+          [`Sisa sampah: ${active[2]}`, active[2] === 0],
+        ]);
+      }
+      function updateChapter2Progress() {
+        const sourcesDone = Object.values(runtime.sources).filter(
+          Boolean,
+        ).length;
+        const cleaned = runtime.dirt.reduce(
+          (sum, d) => sum + (d.done ? 1 : d.progress / 100),
+          0,
+        );
+        const dirtScore = runtime.dirt.length
+          ? cleaned / runtime.dirt.length
+          : 1;
+        updateClean(
+          Math.round(((sourcesDone / 3) * 0.45 + dirtScore * 0.55) * 100),
+        );
+      }
+    },
+    Chapter3() {
+      setupChapter(
+        3,
+        "Lumi Vision: Hidden Dirt Investigation",
+        ASSETS.bg.c3,
+        0,
+      );
+      runtime.phase = "INTRO";
+      runtime.vision = false;
+      runtime.visionEnergy = 100;
+      runtime.marked = 0;
+      runtime.cleaned = 0;
+      runtime.hintClock = 0;
+      runtime.revealStarted = false;
+      const visionRadius = 315;
+      const visionHud = document.createElement("div");
+      visionHud.className = "vision-hud panel";
+      visionHud.innerHTML =
+        '<button class="vision-button" type="button">Q · LUMI VISION</button><div class="vision-energy"><i></i></div><small>ENERGI LUMI</small>';
+      els.ui.append(visionHud);
+      const energyBar = visionHud.querySelector(".vision-energy i");
+      const visionButton = visionHud.querySelector(".vision-button");
+      const definitions = [
+        {
+          id: "corner-dust",
+          name: "Debu di sudut",
+          x: 565,
+          y: 345,
+          w: 125,
+          h: 90,
+          src: ASSETS.final.germ,
+          tool: "cloth",
+          help: "Gerakkan kemoceng perlahan di seluruh debu",
+        },
+        {
+          id: "under-table",
+          name: "Noda bawah meja",
+          x: 720,
+          y: 505,
+          w: 155,
+          h: 105,
+          src: ASSETS.final.dark,
+          tool: "cloth",
+          help: "Gosok noda memanjang secara bolak-balik",
+        },
+        {
+          id: "footprints",
+          name: "Jejak kaki samar",
+          x: 900,
+          y: 400,
+          w: 165,
+          h: 100,
+          src: ASSETS.water.foot,
+          tool: "cloth",
+          help: "Ikuti urutan jejak menggunakan kain",
+        },
+        {
+          id: "hidden-trash",
+          name: "Sampah tersembunyi",
+          x: 1130,
+          y: 520,
+          w: 135,
+          h: 105,
+          src: ASSETS.dust.trashPile,
+          tool: "cloth",
+          help: "Gerakkan alat untuk mengangkat seluruh sampah",
+        },
+        {
+          id: "water-mark",
+          name: "Noda air",
+          x: 520,
+          y: 705,
+          w: 155,
+          h: 110,
+          src: ASSETS.water.small,
+          tool: "mop",
+          help: "Dorong air menuju tepi dengan pel",
+        },
+        {
+          id: "under-rug",
+          name: "Debu bawah karpet",
+          x: 820,
+          y: 690,
+          w: 170,
+          h: 115,
+          src: ASSETS.final.mud,
+          tool: "cloth",
+          help: "Bersihkan seluruh area di bawah karpet",
+        },
+        {
+          id: "behind-box",
+          name: "Noda belakang furnitur",
+          x: 1240,
+          y: 700,
+          w: 150,
+          h: 110,
+          src: ASSETS.final.drink,
+          tool: "mop",
+          help: "Sikat noda membandel sampai seluruhnya pudar",
+        },
+      ];
+      runtime.stains = definitions.map((data, index) => {
+        const el = img(
+          data.src,
+          "object hidden-stain",
+          data.x,
+          data.y,
+          82,
+          data.id,
+        );
+        el.style.opacity = "0";
+        const stain = {
+          ...data,
+          index,
+          el,
+          hidden: true,
+          detected: false,
+          marked: false,
+          revealed: false,
+          cleaned: false,
+          progress: 0,
+        };
+        const marker = document.createElement("div");
+        marker.className = "lumi-marker";
+        marker.style.left = `${(data.x / W) * 100}%`;
+        marker.style.top = `${(data.y / H) * 100}%`;
+        els.fx.append(marker);
+        stain.marker = marker;
+        const inspect = interact(
+          data.id,
+          data.x,
+          data.y,
+          "Tandai noda",
+          () => {
+            if (
+              runtime.phase !== "INVESTIGATION" ||
+              !runtime.vision ||
+              !stain.detected ||
+              stain.marked
+            )
+              return;
+            player.interactTimer = 0.22;
+            markStain(stain);
+          },
+          false,
+          el,
+        );
+        inspect.radius = 90;
+        inspect.enabled = false;
+        stain.inspect = inspect;
+        return stain;
+      });
+      function setVision(on) {
+        const allowed =
+          runtime.phase === "INVESTIGATION" &&
+          !dialogActive &&
+          !cutsceneActive &&
+          !pauseActive;
+        const wasActive = runtime.vision;
+        runtime.vision = !!on && allowed && runtime.visionEnergy > 0;
+        if (runtime.vision && !wasActive)
+          AudioManager.playSFX("lumi_vision_activate", {
+            level: 0.75,
+            cooldown: 350,
+          });
+        els.view.classList.toggle("lumi-vision-active", runtime.vision);
+        runtime.lumi.el.classList.toggle("vision-glow", runtime.vision);
+        visionButton.classList.toggle("active", runtime.vision);
+      }
+      function toggleVision() {
+        if (
+          runtime.phase !== "INVESTIGATION" ||
+          dialogActive ||
+          cutsceneActive ||
+          pauseActive
+        )
+          return toast("Lumi Vision belum dapat digunakan.");
+        if (!runtime.vision && runtime.visionEnergy < 8)
+          return toast("Energi Lumi belum cukup.");
+        setVision(!runtime.vision);
+      }
+      function markStain(stain) {
+        if (stain.marked) return;
+        stain.marked = true;
+        AudioManager.playSFX("hidden_dirt_found", {
+          level: 0.8,
+          vary: 0.03,
+          cooldown: 120,
+        });
+        stain.hidden = false;
+        stain.inspect.enabled = false;
+        stain.marker.classList.add("marked");
+        stain.el.style.opacity = "0";
+        runtime.marked++;
+        burst(stain.x, stain.y);
+        objective(
+          `Kotoran ditemukan: ${runtime.marked}/${runtime.stains.length}`,
+        );
+        runtime.hintClock = 0;
+        if (runtime.marked === runtime.stains.length) beginReveal();
+      }
+      function beginReveal() {
+        if (runtime.revealStarted) return;
+        runtime.revealStarted = true;
+        runtime.phase = "REVEAL";
+        cutsceneActive = true;
+        setVision(false);
+        currentTarget = null;
+        els.ui.querySelector(".prompt")?.remove();
+        runtime.lumi.x = W / 2;
+        runtime.lumi.y = H / 2;
+        renderEntity(runtime.lumi);
+        els.fx.classList.add("chapter3-reveal");
+        runtime.stains.forEach((stain, i) =>
+          sceneTimeout(
+            () => {
+              stain.revealed = true;
+              stain.el.style.opacity = "1";
+              stain.el.classList.add("revealed");
+              stain.marker.classList.add("revealing");
+            },
+            100 + i * 100,
+            `reveal-${i}`,
+          ),
+        );
+        sceneTimeout(
+          () =>
+            startDialog(
+              [
+                { name: "Lumi", text: "Semua sumber kotoran sudah ditemukan!" },
+                {
+                  name: "Andi",
+                  who: "andi",
+                  p: "surprised",
+                  text: "Jadi selama ini semua noda itu tersembunyi di ruangan ini?",
+                },
+                {
+                  name: "Lumi",
+                  text: "Benar. Sekarang cahayaku dapat memperlihatkan semuanya.",
+                },
+                {
+                  name: "Andi",
+                  who: "andi",
+                  p: "determined",
+                  text: "Baik. Saatnya membersihkannya sampai tuntas.",
+                },
+              ],
+              beginCleaning,
+            ),
+          950,
+          "chapter3RevealDialog",
+        );
+      }
+      function beginCleaning() {
+        cutsceneActive = false;
+        runtime.phase = "CLEANING";
+        els.fx.classList.remove("chapter3-reveal");
+        runtime.lumi.x = player.x + 55;
+        runtime.lumi.y = player.y + 25;
+        renderEntity(runtime.lumi);
+        visionButton.disabled = true;
+        objective("Noda dibersihkan: 0/7");
+        runtime.stains.forEach((stain) => {
+          stain.marker.classList.remove("revealing");
+          const clean = interact(
+            `clean-${stain.id}`,
+            stain.x,
+            stain.y,
+            `Bersihkan · ${stain.name}`,
+            () => {
+              if (runtime.phase !== "CLEANING" || stain.cleaned) return;
+              if (stain.id === "hidden-trash") {
+                startTrashSorting(() => {
+                  stain.el.remove();
+                  cleanStain(stain);
+                }, 5);
+                return;
+              }
+              const item = {
+                ...stain,
+                done: false,
+                cleanSrc: null,
+                interactable: clean,
+                help: stain.help,
+              };
+              startCleaningSession({
+                item,
+                tool: stain.tool,
+                onComplete: () => cleanStain(stain),
+              });
+            },
+            false,
+            stain.el,
+          );
+          stain.cleanInteraction = clean;
+        });
+      }
+      function cleanStain(stain) {
+        if (stain.cleaned) return;
+        stain.cleaned = true;
+        stain.cleanInteraction.enabled = false;
+        stain.marker.classList.add("cleaned");
+        stain.blocker?.classList.remove("shifted");
+        runtime.cleaned++;
+        updateClean(
+          Math.round((runtime.cleaned / runtime.stains.length) * 100),
+        );
+        objective(`Noda dibersihkan: ${runtime.cleaned}/7`);
+        if (runtime.cleaned === runtime.stains.length) completeChapter3();
+      }
+      function completeChapter3() {
+        if (runtime.phase === "COMPLETE") return;
+        runtime.phase = "COMPLETE";
+        runtime.completed = true;
+        setVision(false);
+        els.view.classList.add("chapter3-clean-complete");
+        startDialog(
+          [
+            {
+              name: "Andi",
+              who: "andi",
+              p: "relieved",
+              text: "Sekarang aku mengerti. Ruangan yang terlihat bersih belum tentu benar-benar bersih.",
+            },
+            {
+              name: "Lumi",
+              text: "Karena itulah kita harus memeriksa tempat yang sering terlewat.",
+            },
+            {
+              name: "Penyihir",
+              who: "witch",
+              text: "Ketelitianmu telah membuka jalan menuju obat ketiga.",
+            },
+          ],
+          () => {
+            runtime.completed = false;
+            finishChapter(3);
+          },
+        );
+      }
+      runtime.onQ = toggleVision;
+      runtime.onEmptyInteract = () => {
+        if (runtime.phase === "INVESTIGATION" && runtime.vision)
+          toast('Lumi: "Sepertinya tidak ada kotoran tersembunyi di sini."');
+      };
+      visionButton.onclick = toggleVision;
+      addUpdater((dt) => {
+        if (runtime.phase === "INVESTIGATION") {
+          runtime.visionEnergy = Math.max(
+            0,
+            Math.min(
+              100,
+              runtime.visionEnergy + (runtime.vision ? -18 : 12) * dt,
+            ),
+          );
+          if (runtime.visionEnergy <= 0 && runtime.vision) {
+            setVision(false);
+            toast("Energi Lumi habis. Tunggu hingga terisi kembali.");
+          }
+          runtime.hintClock += dt;
+          if (runtime.hintClock > 42 && runtime.marked < 7) {
+            runtime.hintClock = 0;
+            toast(
+              runtime.marked < 3
+                ? "Lumi: Dekati kilau samar, lalu klik nodanya."
+                : "Lumi: Aku masih merasakan noda di sisi ruangan.",
+            );
+          }
+        }
+        energyBar.style.width = `${runtime.visionEnergy}%`;
+        const light = worldToScreen(runtime.lumi.x, runtime.lumi.y);
+        els.view.style.setProperty("--vision-x", `${(light.x / W) * 100}%`);
+        els.view.style.setProperty("--vision-y", `${(light.y / H) * 100}%`);
+        runtime.stains.forEach((stain) => {
+          if (runtime.phase !== "INVESTIGATION" || stain.marked) return;
+          const near =
+            runtime.vision && dist(runtime.lumi, stain) <= visionRadius;
+          if (near) stain.detected = true;
+          stain.el.style.opacity = near
+            ? `${Math.max(0.25, 1 - dist(runtime.lumi, stain) / visionRadius)}`
+            : "0";
+          stain.el.classList.toggle("vision-detected", near);
+          stain.inspect.enabled = near;
+        });
+      });
+      startDialog(
+        [
+          {
+            name: "Andi",
+            who: "andi",
+            p: "neutral",
+            text: "Ruangan ini terlihat bersih. Apa ujiannya sudah selesai?",
+          },
+          {
+            name: "Lumi",
+            text: "Belum. Tidak semua kotoran dapat terlihat dengan mata biasa.",
+          },
+          {
+            name: "Lumi",
+            text: "Gunakan Lumi Vision dan periksa setiap sudut ruangan.",
+          },
+        ],
+        () => {
+          runtime.phase = "INVESTIGATION";
+          objective(
+            "Kotoran ditemukan: 0/7 · Dekati noda dan tekan E untuk menandai.",
+          );
+        },
+      );
+    },
+    Chapter4() {
+      setupChapter(4, "Strategi Membersihkan", ASSETS.bg.c4, 0);
+      runtime.step = 0;
+      runtime.eff = 100;
+      runtime.mopped = false;
+      const tasks = [
+        ["RAPikan", ASSETS.messy.books, ASSETS.messy.neatBooks, 1, 450, 430],
+        ["Buang sampah", ASSETS.dust.trashPile, null, 2, 700, 600],
+        [
+          "Bersihkan debu",
+          ASSETS.dust.shelf,
+          ASSETS.dust.shelfClean,
+          3,
+          930,
+          400,
+        ],
+        [
+          "Hilangkan noda",
+          ASSETS.final.drink,
+          ASSETS.final.patch,
+          4,
+          1120,
+          620,
+        ],
+        ["Pel lantai", ASSETS.water.large, ASSETS.water.dry, 5, 1320, 450],
+      ];
+      tasks.forEach(([name, src, done, order, x, y], i) => {
+        const e = img(src, "object", x, y, 110);
+        const scrubItem = {
+          id: "task" + i,
+          name,
+          x,
+          y,
+          w: 160,
+          h: 120,
+          progress: 0,
+          done: false,
+          el: e,
+          cleanSrc: done,
+          removeOnClean: order >= 3,
+        };
+        const it = interact(
+          "task" + i,
+          x,
+          y,
+          name,
+          () => {
+            if (e.dataset.done) return;
+            const completeTask = () => {
+              if (order !== runtime.step + 1) {
+                recordMistake("Urutan membersihkan kurang efisien.");
+                runtime.eff = Math.max(0, runtime.eff - 10);
+                if (order === 3 && runtime.mopped) {
+                  runtime.mopped = false;
+                  runtime.eff -= 5;
+                  toast(
+                    "Debu mengotori lantai lagi. Kamu harus mengepel ulang.",
+                  );
+                }
+              }
+              e.dataset.done = "1";
+              if (order === 2) e.remove();
+              else if (done) e.src = done;
+              if (order === 1)
+                AudioManager.playSFX("objective_complete", {
+                  level: 0.72,
+                  cooldown: 120,
+                });
+              it.enabled = false;
+              runtime.step++;
+              if (order === 5) runtime.mopped = true;
+              updateClean(Math.round((runtime.step / 5) * 100));
+              updateChapter4Objective();
+              if (runtime.step === 5) {
+                const stars = runtime.eff >= 90 ? 3 : runtime.eff >= 70 ? 2 : 1;
+                finishChapter(4, stars);
+              }
+            };
+            if (order === 2) startTrashSorting(completeTask, 5);
+            else if (order >= 3)
+              startCleaningSession({
+                item: scrubItem,
+                tool: order === 5 ? "mop" : "cloth",
+                onComplete: completeTask,
+              });
+            else completeTask();
+          },
+          false,
+          e,
+        );
+        scrubItem.interactable = it;
+      });
+      updateChapter4Objective();
+      function updateChapter4Objective() {
+        objective(
+          "Bersihkan ruangan sesuai urutan",
+          tasks.map(([name], index) => [
+            `${index + 1}. ${name}`,
+            !!runtime.interactables.find(
+              (item) => item.id === `task${index}` && !item.enabled,
+            ),
+          ]),
+        );
+      }
+    },
+    FinalWarning() {
+      cut(
+        ASSETS.bg.witch,
+        [
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Empat ruangan sebelumnya telah mengajarkanmu caranya.",
+          },
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Di ruangan terakhir, tidak ada lagi petunjuk.",
+          },
+          {
+            name: "Andi",
+            who: "andi",
+            p: "determined",
+            text: "Aku sudah siap.",
+          },
+          {
+            name: "Penyihir",
+            who: "witch",
+            text: "Buktikan bahwa perjalananmu tidak sia-sia.",
+          },
+        ],
+        () => transition("Chapter5"),
+      );
+    },
+    Chapter5() {
+      setupChapter(5, "Ujian Terakhir", ASSETS.bg.c5, 0);
+      runtime.flags = {
+        source: false,
+        trash: false,
+        organize: false,
+        dust: false,
+        stain: false,
+        puddle: false,
+        hidden: false,
+      };
+      const tasks = [
+        [
+          "source",
+          ASSETS.dust.windowOpen,
+          ASSETS.dust.windowClosed,
+          835,
+          350,
+          "Hentikan sumber",
+        ],
+        ["trash", ASSETS.dust.trashPile, null, 520, 650, "Pilah sampah"],
+        [
+          "organize",
+          ASSETS.messy.toys,
+          ASSETS.messy.neatToys,
+          730,
+          430,
+          "Rapikan barang",
+        ],
+        [
+          "dust",
+          ASSETS.dust.window,
+          ASSETS.dust.windowClean,
+          930,
+          610,
+          "Bersihkan debu",
+        ],
+        [
+          "stain",
+          ASSETS.final.mud,
+          ASSETS.final.patch,
+          1120,
+          430,
+          "Hilangkan noda",
+        ],
+        [
+          "puddle",
+          ASSETS.water.large,
+          ASSETS.water.dry,
+          1320,
+          650,
+          "Pel genangan",
+        ],
+        [
+          "hidden",
+          ASSETS.final.dirty,
+          ASSETS.final.clean,
+          585,
+          430,
+          "Bersihkan kotoran tersembunyi",
+        ],
+      ];
+      tasks.forEach(([id, src, done, x, y, label]) => {
+        const visualX = id === "source" ? 835 : x;
+        const visualY = id === "source" ? 170 : y;
+        const e = img(
+          src,
+          "object",
+          visualX,
+          visualY,
+          id === "source" ? 255 : 105,
+        );
+        if (id === "hidden") e.style.opacity = "0";
+        const scrub = ["dust", "stain", "puddle", "hidden"].includes(id);
+        const scrubItem = {
+          id,
+          name: label,
+          x,
+          y,
+          w: id === "hidden" ? 190 : 160,
+          h: 125,
+          progress: 0,
+          done: false,
+          el: e,
+          cleanSrc: done,
+          removeOnClean: scrub,
+        };
+        const it = interact(
+          id,
+          x,
+          y,
+          label,
+          () => {
+            if (id === "hidden" && !runtime.visionSeen)
+              return toast(
+                "Ada sesuatu yang tidak terlihat jelas. Gunakan Lumi Vision.",
+              );
+            if (runtime.flags[id]) return;
+            const completeTask = () => {
+              runtime.flags[id] = true;
+              if (id === "trash") e.remove();
+              else if (done) e.src = done;
+              if (id === "source" || id === "organize")
+                AudioManager.playSFX(
+                  id === "source" ? "window_close" : "objective_complete",
+                  { level: 0.75, cooldown: 120 },
+                );
+              it.enabled = false;
+              const count = Object.values(runtime.flags).filter(Boolean).length;
+              updateClean(count === 7 ? 99 : Math.round((count / 7) * 99));
+              if (
+                visibleTasksDone() &&
+                !runtime.visionSeen &&
+                !runtime.visionHintShown
+              ) {
+                runtime.visionHintShown = true;
+                objective("Gunakan Lumi Vision untuk mencari noda tersembunyi");
+                startDialog([
+                  {
+                    name: "Lumi",
+                    text: "Noda tidak selalu terlihat. Coba gunakan Lumi Vision.",
+                  },
+                ]);
+              }
+              if (count === 7) finalGerm();
+            };
+            if (id === "trash") startTrashSorting(completeTask, 6);
+            else if (scrub)
+              startCleaningSession({
+                item: scrubItem,
+                tool: id === "puddle" || id === "stain" ? "mop" : "cloth",
+                onComplete: completeTask,
+              });
+            else completeTask();
+          },
+          id === "source",
+          e,
+        );
+        scrubItem.interactable = it;
+        if (id === "hidden") {
+          it.enabled = false;
+          runtime.hiddenFinal = { e, it };
+        }
+      });
+      function visibleTasksDone() {
+        return ["source", "trash", "organize", "dust", "stain", "puddle"].every(
+          (id) => runtime.flags[id],
+        );
+      }
+      runtime.onQ = () => {
+        if (!visibleTasksDone())
+          return toast("Selesaikan semua misi yang terlihat terlebih dahulu.");
+        if (runtime.visionSeen)
+          return toast("Lumi sudah menunjukkan tempatnya.");
+        runtime.visionSeen = true;
+        AudioManager.playSFX("lumi_vision_activate", {
+          level: 0.8,
+          cooldown: 350,
+        });
+        AudioManager.playSFX("hidden_dirt_found", {
+          level: 0.75,
+          cooldown: 350,
+        });
+        els.fx.innerHTML = '<div class="vision"></div>';
+        runtime.hiddenFinal.e.style.opacity = "1";
+        runtime.hiddenFinal.it.enabled = true;
+        toast("Lumi melihat kotoran tersembunyi!");
+      };
+      objective("Bersihkan ruangan terakhir");
+      function finalGerm() {
+        startDialog(
+          [
+            {
+              name: "Andi",
+              who: "andi",
+              p: "surprised",
+              text: "Masih ada sesuatu...",
+            },
+          ],
+          () => {
+            const e = img(ASSETS.final.germ, "object", 840, 300, 100);
+            const lastItem = {
+              id: "last",
+              name: "Kuman terakhir",
+              x: 840,
+              y: 300,
+              w: 145,
+              h: 115,
+              progress: 0,
+              done: false,
+              el: e,
+              cleanSrc: ASSETS.final.clean,
+              removeOnClean: true,
+            };
+            const lastIt = interact(
+              "last",
+              840,
+              300,
+              "Bersihkan kuman terakhir",
+              () =>
+                startCleaningSession({
+                  item: lastItem,
+                  tool: "cloth",
+                  onComplete: () => {
+                    updateClean(100);
+                    finishChapter(5);
+                  },
+                }),
+              true,
+              e,
+            );
+            lastItem.interactable = lastIt;
+            objective("Gunakan Lumi Vision dan temukan kuman terakhir");
+          },
+        );
+      }
+    },
+    FinalMedicine() {
+      giveMedicine(5);
+    },
+    MotherRecovery() {
+      cut(
+        ASSETS.mother[4],
+        [
+          { name: "Ibu", who: "mother", text: "Andi..." },
+          { name: "Andi", who: "andi", p: "emotional", text: "Ibu!" },
+          { name: "Ibu", who: "mother", text: "Kamu sudah pulang." },
+          {
+            name: "Andi",
+            who: "andi",
+            p: "happy",
+            text: "Aku sangat merindukan Ibu.",
+          },
+        ],
+        () => {
+          state.gameCompleted = true;
+          save("Ending");
+          transition("Ending");
+        },
+      );
+    },
+    Ending() {
+      clear();
+      state.scene = "Ending";
+      setBg(ASSETS.ending.bg);
+      els.view.classList.add("ending-active");
+      const totalStars = Object.values(state.ratings).reduce(
+        (sum, rating) => sum + (rating.stars || 0),
+        0,
+      );
+      els.modal.innerHTML = `<div class="ending ending-cinematic"><div class="ending-letterbox" aria-hidden="true"></div><div class="ending-sunlight" aria-hidden="true"></div><div class="ending-rays" aria-hidden="true"></div><div class="ending-particles" aria-hidden="true">${Array.from({ length: 24 }, (_, i) => `<i style="--i:${i}"></i>`).join("")}</div><section class="ending-card"><header class="ending-header"><span class="ending-kicker">PERJALANAN ANDI TELAH SELESAI</span><img class="ending-logo" src="${ASSETS.menu.logo}" alt="For Mother"><div class="ending-divider"><i></i><span>◆</span><i></i></div><h1>IBU TELAH PULIH</h1></header><blockquote>“Kebersihan adalah bentuk kecil dari kasih sayang yang besar.”</blockquote><p>Kebersihan bukan hanya membuat tempat terlihat rapi. Menjaga lingkungan tetap bersih berarti menjaga kesehatan orang yang kita sayangi.</p><div class="ending-stats"><span><small>CHAPTER</small><b>5/5</b><em>Selesai</em></span><span><small>BINTANG</small><b>${totalStars}/15</b><em>Terkumpul</em></span><span><small>KONDISI IBU</small><b>100%</b><em>Pulih</em></span></div><h2>Terima kasih telah bermain</h2><div class="ending-actions"><button class="btn ending-primary" id="replay">MAIN LAGI</button><button class="btn ending-secondary" id="menu">MAIN MENU</button></div></section><div class="ending-final-line">FOR MOTHER <span>·</span> SEBUAH PERJALANAN TENTANG KASIH SAYANG</div></div>`;
+      $("#replay").onclick = () => {
+        resetGame();
+        transition("Opening1");
+      };
+      $("#menu").onclick = () => transition("MainMenu");
+    },
   };
-  const next = () => {
-    playSound("dialog");
-    if (!finished) {
-      completeText();
+
+  function setupChapter(n, title, bg, clean) {
+    clear();
+    state.scene = "Chapter" + n;
+    setBg(bg);
+    bounds(55, 185, 1617, 885);
+    obstacle(0, 0, 1672, 175, "dinding_atas");
+    obstacle(0, 900, 1672, 41, "dinding_bawah");
+    addChapterFurnitureCollisions(n);
+    addPlayer(830, 815, true);
+    chapterHud(n, title, clean);
+    runtime.clean = clean;
+    runtime.mistakes = 0;
+    runtime.chapterTimer = {
+      chapter: n,
+      limit: CHAPTER_TIME_LIMITS[n],
+      remaining: CHAPTER_TIME_LIMITS[n],
+      started: false,
+      expired: false,
+    };
+    requestAnimationFrame(() => {
+      if (runtime.chapterTimer?.chapter === n)
+        runtime.chapterTimer.started = true;
+    });
+    miniGameActive = false;
+    runtime.lumi.el.src =
+      n === 3
+        ? ASSETS.lumi.normal
+        : n === 5
+          ? ASSETS.lumi.worried
+          : ASSETS.lumi.normal;
+    save("Chapter" + n);
+  }
+  function addChapterFurnitureCollisions(n) {
+    const collisionPresets = {
+      1: [
+        [0, 175, 105, 325, "c1_dinding_kiri"],
+        [105, 175, 150, 155, "c1_rak_kiri"],
+        [255, 175, 205, 95, "c1_pintu_atas"],
+        [460, 175, 465, 85, "c1_dinding_jendela"],
+        [925, 175, 470, 145, "c1_meja_tempat_sampah"],
+        [1395, 175, 277, 275, "c1_rak_kanan"],
+        [0, 500, 105, 330, "c1_sudut_kiri_bawah"],
+        [0, 760, 145, 140, "c1_tanaman_kiri"],
+        [1450, 450, 222, 310, "c1_peralatan_kanan"],
+        [1510, 700, 162, 200, "c1_tanaman_kanan"],
+      ],
+      2: [
+        [0, 175, 120, 250, "c2_dinding_kiri"],
+        [120, 175, 285, 215, "c2_rak_kiri"],
+        [405, 175, 125, 75, "c2_sudut_jendela_kiri"],
+        [530, 175, 420, 75, "c2_jendela"],
+        [950, 175, 85, 105, "c2_sapu_atas"],
+        [1035, 175, 230, 220, "c2_lemari_kanan"],
+        [1265, 175, 407, 255, "c2_dinding_kanan_atas"],
+        [0, 425, 305, 360, "c2_meja_kiri"],
+        [0, 785, 235, 115, "c2_sudut_kiri_bawah"],
+        [1300, 430, 372, 355, "c2_meja_kanan"],
+        [1420, 785, 252, 115, "c2_sudut_kanan_bawah"],
+      ],
+      3: [
+        [0, 175, 105, 330, "c3_dinding_kiri"],
+        [105, 175, 420, 235, "c3_rak_kiri"],
+        [525, 175, 505, 75, "c3_jendela_atas"],
+        [1030, 175, 300, 170, "c3_lemari_kanan"],
+        [1330, 175, 342, 275, "c3_dinding_kanan_atas"],
+        [0, 505, 365, 330, "c3_area_pel_kiri"],
+        [0, 835, 315, 65, "c3_batas_kiri_bawah"],
+        [1320, 450, 352, 385, "c3_meja_kanan"],
+        [1390, 835, 282, 65, "c3_batas_kanan_bawah"],
+      ],
+      4: [
+        [0, 175, 105, 250, "c4_dinding_kiri"],
+        [105, 175, 335, 170, "c4_rak_kiri"],
+        [440, 175, 700, 75, "c4_dinding_atas"],
+        [1140, 175, 390, 210, "c4_sofa"],
+        [1530, 175, 142, 245, "c4_sudut_kanan"],
+        [0, 420, 255, 300, "c4_meja_kiri"],
+        [0, 720, 135, 180, "c4_tanaman_kiri"],
+        [1280, 400, 260, 305, "c4_peti_mainan"],
+        [1510, 420, 162, 330, "c4_lemari_kanan"],
+        [940, 720, 470, 180, "c4_deret_tempat_sampah"],
+        [1410, 750, 262, 150, "c4_tanaman_kanan"],
+      ],
+      5: [
+        [0, 175, 135, 310, "c5_dinding_kiri"],
+        [135, 175, 390, 190, "c5_rak_kiri"],
+        [525, 175, 95, 85, "c5_tumpukan_buku_atas"],
+        [620, 175, 400, 115, "c5_meja_kristal"],
+        [1020, 175, 105, 90, "c5_tanaman_atas"],
+        [1125, 175, 245, 135, "c5_lemari_atas_kanan"],
+        [1370, 175, 302, 340, "c5_pintu_kanan"],
+        [0, 485, 120, 250, "c5_sudut_kiri_tengah"],
+        [120, 505, 330, 205, "c5_meja_kiri"],
+        [0, 710, 235, 190, "c5_peti_kiri_bawah"],
+        [1370, 515, 302, 195, "c5_meja_kanan"],
+        [1160, 700, 330, 200, "c5_peti_kanan_bawah"],
+        [1490, 710, 182, 190, "c5_sudut_kanan_bawah"],
+      ],
+    };
+    (collisionPresets[n] || []).forEach(([x, y, w, h, id]) =>
+      obstacle(x, y, w, h, id),
+    );
+  }
+  function finishChapter(n, stars = 0) {
+    if (runtime.completed) return;
+    runtime.completed = true;
+    AudioManager.stopAllLoops();
+    punch();
+    const result = calculateChapterRating(n, stars);
+    state.ratings[`chapter${n}`] = result;
+    if (!state.chapters[n - 1]) {
+      state.chapters[n - 1] = true;
+      state.currentChapter = Math.min(6, n + 1);
+      save("WitchHouse");
     }
+    save("WitchHouse");
+    completeCard(n, result, () =>
+      showEducationCard(n, () =>
+        n === 5 ? transition("FinalMedicine") : giveMedicine(n),
+      ),
+    );
+  }
+
+  function loadScene(name) {
+    clear();
+    document.body.classList.toggle("reduced-motion", !state.settings.motion);
+    const fn = SCENES[name] || SCENES.MainMenu;
+    fn();
+    state.scene = name;
+    const musicMap = {
+      MainMenu: [AUDIO_ASSETS.music.calm, 1],
+      Opening1: [AUDIO_ASSETS.music.sad, 0.88],
+      Opening2: [AUDIO_ASSETS.music.emotional, 0.9],
+      Opening3: [AUDIO_ASSETS.music.magical, 0.82],
+      Village: [AUDIO_ASSETS.music.exploration, 0.9],
+      Forest: [AUDIO_ASSETS.music.emotional, 0.82],
+      WitchApproach: [AUDIO_ASSETS.music.magical, 0.78],
+      WitchMission: [AUDIO_ASSETS.music.magical, 0.76],
+      WitchHouse: [AUDIO_ASSETS.music.magical, 0.76],
+      FinalWarning: [AUDIO_ASSETS.music.magical, 0.76],
+      FinalMedicine: [AUDIO_ASSETS.music.magical, 0.78],
+      MotherRecovery: [AUDIO_ASSETS.music.ending, 0.95],
+      Ending: [AUDIO_ASSETS.music.ending, 1],
+    };
+    const mapped =
+      musicMap[name] ||
+      (/^Chapter[1-5]$/.test(name)
+        ? [AUDIO_ASSETS.music.exploration, 0.72]
+        : null);
+    if (mapped) AudioManager.playMusic(mapped[0], mapped[1]);
+    /* Scene post-hooks keep recurring systems bounded and deterministic. */
+    if (name === "Village") {
+      const patrols = {
+        sari: [[430, 470, 180, 100], "bu sari"],
+        bima: [[850, 390, 180, 100], "pak bima"],
+        nina: [[1080, 560, 150, 90], "nina"],
+      };
+      runtime.entities
+        .filter((e) => patrols[e.id])
+        .forEach((e) => {
+          e.patrol = patrols[e.id][0];
+          e.folder = patrols[e.id][1];
+          e.frame = 0;
+        });
+    }
+  }
+  function pause() {
+    if (state.scene === "MainMenu" || transitionActive) return;
+    pauseActive = true;
+    AudioManager.setPaused(true);
+    lock();
+    els.modal.innerHTML = `<div class="pause"><div class="card panel"><h1>JEDA</h1><button class="btn" id="resume">LANJUTKAN</button><button class="btn" id="restart" ${/^Chapter/.test(state.scene) ? "" : "disabled"}>ULANGI CHAPTER</button><button class="btn" id="set">PENGATURAN</button><button class="btn" id="home">MAIN MENU</button></div></div>`;
+    $("#resume").onclick = () => {
+      pauseActive = false;
+      AudioManager.setPaused(false);
+      els.modal.innerHTML = "";
+    };
+    $("#restart").onclick = () => {
+      pauseActive = false;
+      AudioManager.setPaused(false);
+      const chapter = Number(state.scene.replace("Chapter", ""));
+      if (chapter === 2) delete state.chapterProgress.chapter2;
+      runtime.cleaning?.cancel?.(true, true);
+      runtime.investigating?.cancel?.();
+      runtime.trashSorting?.cancel?.();
+      save(state.scene);
+      loadScene(state.scene);
+    };
+    $("#set").onclick = () => showSettings(true);
+    $("#home").onclick = () => transition("MainMenu");
+  }
+  function move(dt) {
+    if (
+      !player.el ||
+      dialogActive ||
+      cutsceneActive ||
+      transitionActive ||
+      pauseActive ||
+      miniGameActive ||
+      runtime.completed
+    ) {
+      lock();
+      return;
+    }
+    let dx =
+        (keys.has("d") || keys.has("arrowright") ? 1 : 0) -
+        (keys.has("a") || keys.has("arrowleft") ? 1 : 0),
+      dy =
+        (keys.has("s") || keys.has("arrowdown") ? 1 : 0) -
+        (keys.has("w") || keys.has("arrowup") ? 1 : 0);
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len;
+    dy /= len;
+    player.moving = !!(dx || dy);
+    if (player.moving) {
+      player.dir =
+        Math.abs(dx) > Math.abs(dy)
+          ? dx < 0
+            ? "left"
+            : "right"
+          : dy < 0
+            ? "up"
+            : "down";
+      const distance = player.speed * dt;
+      const steps = Math.max(1, Math.ceil(distance / 8));
+      for (let step = 0; step < steps; step++) {
+        const nx = player.x + (dx * distance) / steps,
+          ny = player.y + (dy * distance) / steps;
+        if (valid(nx, player.y)) player.x = nx;
+        if (valid(player.x, ny)) player.y = ny;
+      }
+      player.frame += dt * 8;
+    }
+    if (player.interactTimer > 0) player.interactTimer -= dt;
+    renderEntity(player);
+    updateHeldItemPosition();
+    if (runtime.lumi) {
+      runtime.lumi.x += (player.x + 55 - runtime.lumi.x) * Math.min(1, dt * 5);
+      runtime.lumi.y += (player.y + 25 - runtime.lumi.y) * Math.min(1, dt * 5);
+      renderEntity(runtime.lumi);
+    }
+  }
+  function updateHeldItemPosition() {
+    if (!runtime.held?.e) return;
+    const offset = HELD_ITEM_OFFSETS[player.dir] || HELD_ITEM_OFFSETS.down;
+    runtime.held.e.style.left = ((player.x + offset.x) / W) * 100 + "%";
+    runtime.held.e.style.top = ((player.y + offset.y) / H) * 100 + "%";
+    runtime.held.e.style.zIndex = Math.floor(player.y) + offset.z;
+  }
+  function updateNPC(dt) {
+    runtime.entities
+      ?.filter((e) => e !== player && e.patrol)
+      .forEach((n) => {
+        if (dialogActive || pauseActive) return;
+        n.wait -= dt;
+        if (n.wait <= 0) {
+          n.tx = n.patrol[0] + Math.random() * n.patrol[2];
+          n.ty = n.patrol[1] + Math.random() * n.patrol[3];
+          n.wait = 3 + Math.random() * 3;
+        }
+        if (n.tx) {
+          let dx = n.tx - n.x,
+            dy = n.ty - n.y,
+            l = Math.hypot(dx, dy);
+          if (l > 8) {
+            dx /= l;
+            dy /= l;
+            const beforeX = n.x,
+              beforeY = n.y,
+              distance = 55 * dt;
+            const steps = Math.max(1, Math.ceil(distance / 7));
+            for (let step = 0; step < steps; step++) {
+              const nx = n.x + (dx * distance) / steps,
+                ny = n.y + (dy * distance) / steps;
+              if (valid(nx, n.y, n)) n.x = nx;
+              if (valid(n.x, ny, n)) n.y = ny;
+            }
+            if (Math.hypot(n.x - beforeX, n.y - beforeY) < 0.2) {
+              n.tx = null;
+              n.ty = null;
+              n.wait = 0.8 + Math.random();
+            }
+            face(n, { x: n.tx, y: n.ty });
+            n.frame = (n.frame || 0) + dt * 7;
+            if (n.folder) {
+              const src =
+                ASSETS.npc.walk[n.folder][n.dir][Math.floor(n.frame) % 4];
+              if (n.el.getAttribute("src") !== src) n.el.src = src;
+            }
+            renderEntity(n);
+          } else {
+            n.tx = null;
+            n.ty = null;
+            const idleSrc =
+              n.id === "sari"
+                ? ASSETS.npc.sari
+                : n.id === "bima"
+                  ? ASSETS.npc.bima
+                  : n.id === "nina"
+                    ? ASSETS.npc.nina
+                    : null;
+            if (idleSrc && n.el.getAttribute("src") !== idleSrc)
+              n.el.src = idleSrc;
+            renderEntity(n);
+          }
+        }
+      });
+  }
+  function loop(now) {
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+    if (!pauseActive) {
+      move(dt);
+      updateNPC(dt);
+      updateCamera(dt);
+      runtime.updaters?.forEach((update) => update(dt));
+      updateChapterClock(dt);
+      showPrompt();
+      if (debugCollisions) drawDebug();
+    }
+    requestAnimationFrame(loop);
+  }
+  addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k))
+      e.preventDefault();
+    keys.add(k);
+    if (e.repeat) return;
+    if (k === "f2") {
+      e.preventDefault();
+      debugCollisions = !debugCollisions;
+      drawDebug();
+      toast(`Debug collision ${debugCollisions ? "aktif" : "nonaktif"}`);
+      return;
+    }
+    if (k === "escape") {
+      if (runtime.trashSorting) {
+        runtime.trashSorting.cancel();
+        return;
+      }
+      if (runtime.investigating) {
+        runtime.investigating.cancel();
+        return;
+      }
+      if (runtime.cleaning) {
+        runtime.cleaning.cancel(true);
+        return;
+      }
+      if (pauseActive) {
+        pauseActive = false;
+        AudioManager.setPaused(false);
+        els.modal.innerHTML = "";
+      } else pause();
+      return;
+    }
+    if ((k === "e" || k === "enter" || k === " ") && dialogActive) {
+      advanceDialog();
+      return;
+    }
+    if (k === "e" && !dialogActive && !pauseActive) {
+      if (currentTarget) {
+        player.interactTimer = 0.22;
+        face(player, currentTarget);
+        const t = currentTarget;
+        currentTarget = null;
+        if (t.oncePerScene) t.enabled = false;
+        t.action();
+      } else runtime.onEmptyInteract?.();
+    }
+    if (k === "q" && !dialogActive && !pauseActive) runtime.onQ?.();
+  });
+  addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+  addEventListener("blur", () => keys.clear());
+  els.dialog.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (dialogActive) advanceDialog();
+  });
+  addEventListener("pointerdown", () => AudioManager.unlock(), {
+    capture: true,
+  });
+  addEventListener("keydown", () => AudioManager.unlock(), { capture: true });
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.target.closest("button:not(:disabled)"))
+        AudioManager.playSFX("ui_click", { level: 0.55, cooldown: 45 });
+    },
+    true,
+  );
+  window.ForMotherQA = {
+    W,
+    H,
+    INTERACTION_RADIUS,
+    ASSETS,
+    getState: () => structuredClone(state),
+    distancePrompt: (d) => d <= INTERACTION_RADIUS,
+    valid,
+    loadScene,
+    getAudioState: () => ({
+      track: AudioManager.currentTrack,
+      unlocked: AudioManager.unlocked,
+      settings: { ...state.settings },
+    }),
   };
-  typingTimer = setInterval(() => {
-    index++;
-    title.textContent = message.slice(0, index);
-    if (index >= message.length) completeText();
-  }, 34);
-  scene.querySelector(".final-message-screen").addEventListener("click", next);
-  dialogNext = next;
-
-  scene.querySelector("#playAgainBtn").addEventListener("click", () => {
-    playSound("tap");
-    resetGame(false);
-    showOpening();
-  });
-  scene.querySelector("#backToMenuBtn").addEventListener("click", () => {
-    playSound("tap");
-    showMainMenu();
-  });
-}
-
-function addClean(v) {
-  gameState.chapter.cleaning = Math.max(0, gameState.chapter.cleaning + v);
-  updateHUD();
-}
-
-function setProgress(done, total) {
-  gameState.chapter.progress = Math.round(done / total * 100);
-  updateHUD();
-}
-
-function modal(title, text, actions, icon) {
-  closeModal();
-  const shade = el("div", "shade");
-  const card = el("div", "modal-card");
-  if (icon) card.append(img(icon, "", "edu-icon"));
-  card.insertAdjacentHTML("beforeend", `<h2>${title}</h2><p>${text}</p>`);
-  const row = el("div", "actions");
-  actions.forEach(a => row.append(a));
-  card.append(row);
-  shade.append(card);
-  game.append(shade);
-}
-
-function closeModal() {
-  game.querySelector(".shade")?.remove();
-}
-
-function dialog(entry, text) {
-  if (typeof entry === "string") entry = { speaker: entry, text };
-  const box = el("div", "dialog");
-  if (!entry.portrait) box.classList.add("no-portrait");
-  if (entry.portrait && entry.side === "right") box.classList.add("portrait-right");
-  const portrait = el("div", `portrait-wrap ${entry.portrait ? "" : "empty"} ${entry.side === "right" ? "right" : ""}`.trim());
-  if (entry.portrait) portrait.append(img(entry.portrait, entry.speaker, "portrait"));
-  const content = el("div", `dialog-content ${entry.side === "right" ? "right" : ""}`.trim());
-  content.innerHTML = `<div class="speaker">${entry.speaker}</div><div class="dialog-text"></div><div class="hint">Klik / Enter / Space</div>`;
-  box.append(portrait, content);
-  typeDialogText(box, entry.text);
-  return box;
-}
-
-function updateDialogPortrait(box, entry) {
-  const oldPortrait = box.querySelector(".portrait-wrap");
-  const oldContent = box.querySelector(".dialog-content");
-  box.classList.toggle("no-portrait", !entry.portrait);
-  box.classList.toggle("portrait-right", Boolean(entry.portrait && entry.side === "right"));
-  oldPortrait.className = `portrait-wrap ${entry.portrait ? "" : "empty"} ${entry.side === "right" ? "right" : ""}`.trim();
-  oldContent.className = `dialog-content ${entry.side === "right" ? "right" : ""}`.trim();
-  oldPortrait.innerHTML = "";
-  if (entry.portrait) oldPortrait.append(img(entry.portrait, entry.speaker, "portrait"));
-}
-
-function typeDialogText(box, text) {
-  if (typingTimer) clearInterval(typingTimer);
-  const target = box.querySelector(".dialog-text");
-  const hint = box.querySelector(".hint");
-  activeTypingBox = box;
-  activeTypingFullText = text;
-  target.textContent = "";
-  if (hint) hint.textContent = "Mengetik...";
-  let index = 0;
-  typingTimer = setInterval(() => {
-    index++;
-    target.textContent = text.slice(0, index);
-    if (index >= text.length) {
-      clearInterval(typingTimer);
-      typingTimer = null;
-      activeTypingBox = null;
-      activeTypingFullText = "";
-      if (hint) hint.textContent = "Klik / Enter / E";
-    }
-  }, 24);
-}
-
-function finishTypingIfNeeded() {
-  if (!typingTimer || !activeTypingBox) return false;
-  clearInterval(typingTimer);
-  typingTimer = null;
-  activeTypingBox.querySelector(".dialog-text").textContent = activeTypingFullText;
-  const hint = activeTypingBox.querySelector(".hint");
-  if (hint) hint.textContent = "Klik / Enter / E";
-  activeTypingBox = null;
-  activeTypingFullText = "";
-  return true;
-}
-
-function tempDialog(speaker, text) {
-  sceneEl.querySelector(".dialog")?.remove();
-  showDialogue([{ speaker, text, portrait: speaker === "Penyihir" ? ASSETS.characters.witchPortrait : null, side: "right" }], () => {});
-}
-
-function hubDialogue() {
-  const key = gameState.completedChapters.length >= 5 ? "done" : gameState.currentChapter;
-  return HUB_DIALOGUES[key].map(([speaker, text, andiPortrait]) => ({
-    speaker,
-    text,
-    portrait: speaker === "Andi" ? (andiPortrait || ASSETS.andi.neutral) : ASSETS.characters.witchPortrait,
-    side: speaker === "Andi" ? "left" : "right"
-  }));
-}
-
-function note(title, text) {
-  const n = el("div", "panel small-note");
-  n.innerHTML = `<strong>${title}</strong><br>${text}`;
-  return n;
-}
-
-function toast(text) {
-  game.querySelector(".feedback")?.remove();
-  const pop = el("div", "feedback", text);
-  game.append(pop);
-  setTimeout(() => pop.remove(), 950);
-}
-
-function el(tag, cls, text) {
-  const node = document.createElement(tag);
-  if (cls) node.className = cls;
-  if (text) node.textContent = text;
-  return node;
-}
-
-function img(src, alt = "", cls = "", x, y) {
-  const image = document.createElement("img");
-  image.src = src;
-  image.alt = alt;
-  if (cls) image.className = cls;
-  if (x !== undefined) image.style.left = `${x}px`;
-  if (y !== undefined) image.style.top = `${y}px`;
-  image.addEventListener("error", () => {
-    image.style.background = "rgba(255,244,203,.65)";
-    image.style.border = "2px dashed #9b7444";
-  });
-  return image;
-}
-
-function btn(text, fn, cls = "") {
-  const b = el("button", `btn ${cls}`.trim(), text);
-  b.addEventListener("mouseenter", playHoverSound);
-  b.addEventListener("click", event => {
-    playSound(cls.includes("danger") ? "wrong" : "tap");
-    fn?.(event);
-  });
-  return b;
-}
-
-function clamp(v, min, max) {
-  return Math.min(max, Math.max(min, v));
-}
-
-function dist(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function overlap(a, b) {
-  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
-}
-
-function getScale(node) {
-  return node.getBoundingClientRect().width / node.offsetWidth || 1;
-}
-
-init();
+  loadScene("MainMenu");
+  requestAnimationFrame(loop);
+})();
