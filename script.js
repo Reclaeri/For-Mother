@@ -49,7 +49,7 @@
     2: 80,
     3: 70,
     4: 55,
-    5: 49,
+    5: 48,
   });
   const CHAPTER_INTROS = Object.freeze({
     1: ["LANGKAH PERTAMA", "Pilah seluruh sampah di ruangan."],
@@ -67,11 +67,18 @@
   ]);
   const MOTHER_PROGRESS = Object.freeze([10, 25, 45, 65, 85, 100]);
   const MEDICINE_NAMES = Object.freeze([
-    "Obat Kesadaran",
-    "Obat Suara",
-    "Obat Kekuatan",
-    "Obat Kehangatan",
-    "Obat Pemulihan",
+    "Eliksir Cahaya Harapan",
+    "Serum Embun Kehidupan",
+    "Kristal Penyembuh Lumi",
+    "Ramuan Bintang Kehidupan",
+    "Eliksir Fajar Abadi",
+  ]);
+  const MEDICINE_DESCRIPTIONS = Object.freeze([
+    "Ramuan pertama yang memberi energi lembut untuk membantu memulihkan kondisi Ibu.",
+    "Ramuan penyembuhan alami yang diracik dari embun dan kekuatan kehidupan.",
+    "Kristal ajaib yang diperkuat oleh energi cahaya Lumi.",
+    "Ramuan langka yang memberi kekuatan bagi tubuh yang lemah.",
+    "Eliksir terakhir berenergi murni yang membawa harapan baru.",
   ]);
   const CREDIT_INFO = Object.freeze({
     creator: "Kelompok 2 · Kelas XII RPL 1",
@@ -316,6 +323,7 @@
     gameCompleted: false,
     ratings: {},
     chapterProgress: {},
+    resume: null,
     settings: {
       motion: true,
       dialogSpeed: "normal",
@@ -536,6 +544,7 @@
         knowledge: d.knowledge.map((v, i) => !!x.knowledge?.[i]),
         settings: { ...d.settings, ...x.settings },
         chapterProgress: { ...d.chapterProgress, ...x.chapterProgress },
+        resume: x.resume && typeof x.resume === "object" ? x.resume : null,
       });
     } catch {
       return null;
@@ -555,8 +564,23 @@
     }
     return progress;
   }
+  function captureResume() {
+    if (!player.el || !state.scene || state.scene === "MainMenu") return;
+    state.resume = {
+      scene: state.scene,
+      player: { x: player.x, y: player.y, dir: player.dir },
+      chapter: runtime.chapterTimer?.chapter || null,
+      timerRemaining: runtime.chapterTimer?.remaining ?? null,
+      timerBonus: runtime.chapterTimer?.bonus ?? 0,
+      timerStarted: !!runtime.chapterTimer?.started,
+      clean: runtime.clean ?? null,
+      mistakes: runtime.mistakes ?? 0,
+      savedAt: Date.now(),
+    };
+  }
   function save(checkScene) {
-    if (checkScene) state.scene = checkScene;
+    if (checkScene && checkScene !== "MainMenu") state.scene = checkScene;
+    captureResume();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   }
   function resetGame() {
@@ -843,6 +867,12 @@
     player.anim = 0;
     player.interactTimer = 0;
     player.moving = false;
+    const savedPlayer = state.resume?.scene === state.scene && state.resume.player;
+    if (savedPlayer && Number.isFinite(savedPlayer.x) && Number.isFinite(savedPlayer.y)) {
+      x = savedPlayer.x;
+      y = savedPlayer.y;
+      player.dir = savedPlayer.dir || player.dir;
+    }
     const spawn = findSafeSpawn(x, y, player);
     x = spawn.x;
     y = spawn.y;
@@ -1162,7 +1192,6 @@
       intro: "Kebersihan yang bertahan lama berasal dari kebiasaan kecil yang dilakukan bersama. Setiap orang di rumah dapat membantu sesuai kemampuannya.",
       detail: "Buat jadwal sederhana, misalnya membuang sampah setiap hari, memeriksa genangan air, dan merapikan barang setelah digunakan. Saat semua orang ikut menjaga, rumah menjadi lebih sehat, nyaman, dan menyenangkan untuk keluarga.",
       points: ["Kembalikan barang ke tempatnya.", "Jangan menunda membuang sampah.", "Saling mengingatkan dengan baik."],
-      conclusion: "Sayangilah dirimu dan orang-orang di sekitarmu dengan mulai membersihkan daerah sekitar rumah. Lingkungan yang bersih membantu menjauhkan penyakit dan membuat kita semua merasa lebih nyaman.",
     },
   ]);
   const ANDI_THOUGHTS = Object.freeze({
@@ -2165,11 +2194,11 @@
   function giveMedicine(n) {
     if (state.medicines[n - 1]) return motherProgress(n);
     const witchRewards = [
-      "Kau berhasil memilah sumber penyakit. Terimalah Obat Kesadaran; semoga ia membantu ibumu membuka mata.",
-      "Kau menghentikan kotoran dari sumbernya. Obat Suara ini akan memanggil kembali suara ibumu.",
-      "Ketelitianmu menemukan bahaya yang tersembunyi. Obat Kekuatan ini akan mengembalikan tenaganya.",
-      "Kau membersihkan dengan urutan yang bijak. Obat Kehangatan ini akan membawa hangat kembali ke tubuhnya.",
-      "Semua pelajaran telah kau satukan. Terimalah Obat Pemulihan, obat terakhir untuk menyempurnakan kesembuhannya.",
+      "Kau berhasil memilah sumber penyakit. Terimalah Eliksir Cahaya Harapan; semoga ia memberi energi lembut untuk Ibumu.",
+      "Kau menghentikan kotoran dari sumbernya. Serum Embun Kehidupan ini diracik dari kekuatan alam untuk membantu penyembuhan.",
+      "Ketelitianmu menemukan bahaya yang tersembunyi. Kristal Penyembuh Lumi telah diperkuat oleh cahaya Lumi.",
+      "Kau membersihkan dengan urutan yang bijak. Ramuan Bintang Kehidupan akan memberi kekuatan bagi tubuh Ibumu yang lemah.",
+      "Semua pelajaran telah kau satukan. Terimalah Eliksir Fajar Abadi, ramuan terakhir yang membawa harapan baru.",
     ];
     const andiRewards = [
       "Obat pertama... Ibu, tunggu aku.",
@@ -2196,7 +2225,7 @@
       () => {
         const before = MOTHER_PROGRESS[n - 1];
         const after = MOTHER_PROGRESS[n];
-        els.modal.innerHTML = `<div class="medicine-reward"><div class="medicine-aura"></div><div class="lumi-particles">✦ ✧ ✦</div><img class="medicine reward-medicine" src="${ASSETS.meds[n - 1]}" alt="${MEDICINE_NAMES[n - 1]}"><h1>OBAT ${n} DIPEROLEH</h1><h2>${MEDICINE_NAMES[n - 1]}</h2><p>KONDISI IBU <b>${before}% → ${after}%</b></p><button class="btn" id="medNext">LANJUT</button></div>`;
+        els.modal.innerHTML = `<div class="medicine-reward"><div class="medicine-aura"></div><div class="lumi-particles">✦ ✧ ✦</div><img class="medicine reward-medicine" src="${ASSETS.meds[n - 1]}" alt="${MEDICINE_NAMES[n - 1]}"><h1>RAMUAN DIPEROLEH</h1><h2>${MEDICINE_NAMES[n - 1]}</h2><p>${MEDICINE_DESCRIPTIONS[n - 1]}</p><p>KONDISI IBU <b>${before}% → ${after}%</b></p><button class="btn" id="medNext">LANJUT</button></div>`;
         sceneTimeout(
           () => {
             AudioManager.playSFX("medicine_obtained", {
@@ -2388,7 +2417,7 @@
     save();
     pauseActive = returnToPause || /^Chapter/.test(state.scene);
     const found = state.medicines.filter(Boolean).length;
-    els.modal.innerHTML = `<div class="collection-overlay"><section class="collection-card medicine-collection panel" role="dialog" aria-modal="true" aria-labelledby="medicineCollectionTitle"><header><small>PERJALANAN ANDI</small><h1 id="medicineCollectionTitle">KOLEKSI OBAT</h1><p>Obat terkumpul <b>${found} / 5</b></p></header><div class="collection-progress"><i style="width:${found * 20}%"></i></div><div class="medicine-collection-grid">${ASSETS.meds.map((src, index) => { const unlocked = state.medicines[index]; return `<article class="medicine-entry ${unlocked ? "found" : "locked"}"><div class="medicine-art">${unlocked ? `<img src="${src}" alt="${MEDICINE_NAMES[index]}"><i>✦</i><i>✧</i>` : `<span>?</span>`}</div><strong>${unlocked ? `OBAT ${index + 1}` : "BELUM DITEMUKAN"}</strong><small>${unlocked ? `Didapat dari Chapter ${index + 1}` : "Selesaikan chapter untuk menemukannya"}</small></article>`; }).join("")}</div><button class="btn" id="closeCollection">← ${returnToPause ? "KEMBALI KE PERMAINAN" : "KEMBALI KE MENU"}</button></section></div>`;
+    els.modal.innerHTML = `<div class="collection-overlay"><section class="collection-card medicine-collection panel" role="dialog" aria-modal="true" aria-labelledby="medicineCollectionTitle"><header><small>PERJALANAN ANDI</small><h1 id="medicineCollectionTitle">KOLEKSI OBAT</h1><p>Obat terkumpul <b>${found} / 5</b></p></header><div class="collection-progress"><i style="width:${found * 20}%"></i></div><div class="medicine-collection-grid">${ASSETS.meds.map((src, index) => { const unlocked = state.medicines[index]; return `<article class="medicine-entry ${unlocked ? "found" : "locked"}"><div class="medicine-art">${unlocked ? `<img src="${src}" alt="${MEDICINE_NAMES[index]}"><i>✦</i><i>✧</i>` : `<span>?</span>`}</div><strong>${unlocked ? MEDICINE_NAMES[index] : "BELUM DITEMUKAN"}</strong><small>${unlocked ? MEDICINE_DESCRIPTIONS[index] : "Selesaikan chapter untuk menemukannya"}</small></article>`; }).join("")}</div><button class="btn" id="closeCollection">← ${returnToPause ? "KEMBALI KE PERMAINAN" : "KEMBALI KE MENU"}</button></section></div>`;
     $("#closeCollection").onclick = () => returnToPause ? pause() : loadScene("MainMenu");
   }
   function showLumiBook(returnToPause = false) {
@@ -4210,22 +4239,26 @@
     clear();
     state.scene = "Chapter" + n;
     setBg(bg);
+    const savedRun = state.resume?.scene === state.scene && state.resume.chapter === n
+      ? state.resume
+      : null;
+    const restoredClean = Number.isFinite(savedRun?.clean) ? savedRun.clean : clean;
     bounds(55, 185, 1617, 885);
     obstacle(0, 0, 1672, 175, "dinding_atas");
     obstacle(0, 900, 1672, 41, "dinding_bawah");
     addChapterFurnitureCollisions(n);
     addPlayer(830, 815, true);
-    chapterHud(n, title, clean);
-    runtime.clean = clean;
-    runtime.mistakes = 0;
+    chapterHud(n, title, restoredClean);
+    runtime.clean = restoredClean;
+    runtime.mistakes = savedRun?.mistakes || 0;
     runtime.chapterTimer = {
       chapter: n,
       limit: CHAPTER_TIME_LIMITS[n],
-      remaining: CHAPTER_TIME_LIMITS[n],
-      started: false,
+      remaining: Math.max(0, Math.min(CHAPTER_TIME_LIMITS[n], savedRun?.timerRemaining ?? CHAPTER_TIME_LIMITS[n])),
+      started: !!savedRun?.timerStarted,
       expired: false,
     };
-    runtime.chapterTimer.bonus = 0;
+    runtime.chapterTimer.bonus = savedRun?.timerBonus || 0;
     runtime.chapterIntroActive = true;
     runtime.queuedDialog = {
       lines: [{ name: "Andi — dalam hati", who: "andi", p: "determined", thought: true, text: ANDI_THOUGHTS[n] }],
