@@ -867,7 +867,10 @@
     player.anim = 0;
     player.interactTimer = 0;
     player.moving = false;
-    const savedPlayer = state.resume?.scene === state.scene && state.resume.player;
+    // Forest and Witch House use their authored entrance positions so the
+    // portal and story staging always begin from the intended spot.
+    const canRestorePosition = !["Forest", "WitchHouse"].includes(state.scene);
+    const savedPlayer = canRestorePosition && state.resume?.scene === state.scene && state.resume.player;
     if (savedPlayer && Number.isFinite(savedPlayer.x) && Number.isFinite(savedPlayer.y)) {
       x = savedPlayer.x;
       y = savedPlayer.y;
@@ -2426,6 +2429,8 @@
     pauseActive = returnToPause || /^Chapter/.test(state.scene);
     const found = state.knowledge.filter(Boolean).length;
     const initialPage = Math.max(0, state.knowledge.lastIndexOf(true));
+    const conclusionPage = LUMI_BOOK_DETAILS.length;
+    const totalPages = conclusionPage + 1;
     els.modal.innerHTML = `<div class="collection-overlay"><section class="collection-card lumi-book panel" role="dialog" aria-modal="true" aria-labelledby="lumiBookTitle"><header class="lumi-book-cover"><span>✦</span><div><small>CATATAN CAHAYA LUMI</small><h1 id="lumiBookTitle">BUKU PENGETAHUAN LUMI</h1><p>Pengetahuan terkumpul <b>${found} / 5</b></p></div><span>✦</span></header><div class="lumi-book-spread"></div><footer class="lumi-book-controls"><button class="book-turn" id="previousLumiPage" type="button">← SEBELUMNYA</button><span class="book-page-number"></span><button class="book-turn" id="nextLumiPage" type="button">BERIKUTNYA →</button></footer><button class="btn" id="closeLumiBook">← ${returnToPause ? "KEMBALI KE PERMAINAN" : "KEMBALI KE MENU"}</button></section></div>`;
     let pageIndex = initialPage;
     const spread = els.modal.querySelector(".lumi-book-spread");
@@ -2433,18 +2438,25 @@
     const previous = $("#previousLumiPage");
     const next = $("#nextLumiPage");
     const renderPage = () => {
-      const unlocked = state.knowledge[pageIndex];
+      const isConclusion = pageIndex === conclusionPage;
+      const unlocked = isConclusion ? state.knowledge.every(Boolean) : state.knowledge[pageIndex];
       const detail = LUMI_BOOK_DETAILS[pageIndex];
-      spread.innerHTML = unlocked
-        ? `<article class="book-page book-page-left"><span class="book-chapter">CHAPTER ${pageIndex + 1}</span><h2>${KNOWLEDGE_TITLES[pageIndex]}</h2><p>${detail.intro}</p><p>${detail.detail}</p><i>— Catatan Lumi ✦</i></article><article class="book-page book-page-right"><span class="book-label">${detail.conclusion ? "KESIMPULAN PERJALANAN" : "INGAT BAIK-BAIK"}</span>${detail.conclusion ? `<h3>Rumah bersih, hati pun tenang</h3><p class="book-conclusion">${detail.conclusion}</p><div class="book-lumi-mark">✦</div><small>Terima kasih sudah belajar dan menjaga rumah bersama Lumi.</small>` : `<h3>Kebiasaan yang bisa kamu lakukan</h3><ul>${detail.points.map((point) => `<li>${point}</li>`).join("")}</ul><div class="book-lumi-mark">✦</div><small>Ringkasan singkatnya sudah kamu pelajari bersama Lumi. Halaman ini menyimpan penjelasan lebih lengkapnya.</small>`}</article>`
-        : `<article class="book-page book-page-left book-locked"><span class="book-chapter">CHAPTER ${pageIndex + 1}</span><h2>Halaman Tersegel</h2><p>Pengetahuan ini akan terbuka setelah kamu menyelesaikan sesi Belajar Bersama Lumi di chapter ini.</p></article><article class="book-page book-page-right book-locked"><div class="book-lock">🔒</div><p>Lumi akan menuliskan catatan lengkapnya di sini setelah pelajaran ditemukan.</p></article>`;
-      pageNumber.textContent = `Halaman ${pageIndex + 1} dari 5`;
+      if (isConclusion) {
+        spread.innerHTML = unlocked
+          ? `<article class="book-page book-page-left conclusion-page"><span class="book-chapter">HALAMAN PENUTUP</span><h2>Kesimpulan Lumi</h2><p>Perjalanan ini mengajarkan bahwa perubahan besar tidak selalu dimulai dari sesuatu yang besar.</p><p>Setiap langkah kecil yang dilakukan Andi menunjukkan bahwa kepedulian, keberanian, dan kasih sayang mampu membawa perubahan.</p><p>Rumah yang kembali bersih bukan hanya karena debu dan kotoran yang hilang, tetapi karena ada seseorang yang mau berusaha dan tidak menyerah.</p></article><article class="book-page book-page-right conclusion-page"><span class="book-label">CAHAYA YANG TERSISA</span><p>Setiap obat yang berhasil ditemukan bukan hanya menyembuhkan tubuh Ibu, tetapi juga membawa kembali harapan dalam keluarga.</p><p>Lumi percaya bahwa kebaikan sekecil apa pun akan selalu memiliki arti. Karena terkadang, hal sederhana yang dilakukan dengan hati yang tulus dapat menjadi cahaya terbesar bagi orang lain.</p><p class="book-conclusion">Sayangilah dirimu dan orang-orang di sekitarmu. Mulailah dari menjaga rumah dan lingkungan di sekelilingmu, agar penyakit menjauh dan setiap orang yang pulang dapat merasa aman, sehat, dan nyaman.</p><i>— Dengan cahaya dan kasih, Lumi ✦</i></article>`
+          : `<article class="book-page book-page-left book-locked"><span class="book-chapter">HALAMAN PENUTUP</span><h2>Kesimpulan Lumi</h2><p>Halaman ini akan terbuka saat seluruh pelajaran bersama Lumi telah diselesaikan.</p></article><article class="book-page book-page-right book-locked"><div class="book-lock">🔒</div><p>Selesaikan semua Chapter untuk membaca catatan penutup Lumi.</p></article>`;
+      } else {
+        spread.innerHTML = unlocked
+          ? `<article class="book-page book-page-left"><span class="book-chapter">CHAPTER ${pageIndex + 1}</span><h2>${KNOWLEDGE_TITLES[pageIndex]}</h2><p>${detail.intro}</p><p>${detail.detail}</p><i>— Catatan Lumi ✦</i></article><article class="book-page book-page-right"><span class="book-label">INGAT BAIK-BAIK</span><h3>Kebiasaan yang bisa kamu lakukan</h3><ul>${detail.points.map((point) => `<li>${point}</li>`).join("")}</ul><div class="book-lumi-mark">✦</div><small>Ringkasan singkatnya sudah kamu pelajari bersama Lumi. Halaman ini menyimpan penjelasan lebih lengkapnya.</small></article>`
+          : `<article class="book-page book-page-left book-locked"><span class="book-chapter">CHAPTER ${pageIndex + 1}</span><h2>Halaman Tersegel</h2><p>Pengetahuan ini akan terbuka setelah kamu menyelesaikan sesi Belajar Bersama Lumi di chapter ini.</p></article><article class="book-page book-page-right book-locked"><div class="book-lock">🔒</div><p>Lumi akan menuliskan catatan lengkapnya di sini setelah pelajaran ditemukan.</p></article>`;
+      }
+      pageNumber.textContent = `Halaman ${pageIndex + 1} dari ${totalPages}`;
       previous.disabled = pageIndex === 0;
-      next.disabled = pageIndex === LUMI_BOOK_DETAILS.length - 1;
+      next.disabled = pageIndex === totalPages - 1;
     };
     const turnPage = (direction) => {
       const nextPage = pageIndex + direction;
-      if (nextPage < 0 || nextPage >= LUMI_BOOK_DETAILS.length) return;
+      if (nextPage < 0 || nextPage >= totalPages) return;
       pageIndex = nextPage;
       spread.classList.remove("page-flip-next", "page-flip-previous");
       void spread.offsetWidth;
@@ -2784,7 +2796,8 @@
       obstacle(700, 760, 580, 181, "semak_bawah_tengah");
       obstacle(315, 430, 155, 120, "batu_kiri_jalur");
       obstacle(570, 300, 175, 125, "batu_tengah_atas");
-      addPlayer(245, 830);
+      // Left-side entrance: clear of the lower bushes and boundary collider.
+      addPlayer(110, 820);
       const door = { x: 1330, y: 395 };
       interact(
         "witchDoor",

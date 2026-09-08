@@ -2577,6 +2577,7 @@ body.reduced-motion *::after {
 @keyframes paper-turn-next { 0% { transform:perspective(1200px) rotateY(0deg); filter:brightness(1); } 45% { filter:brightness(.88); } 100% { transform:perspective(1200px) rotateY(-180deg); filter:brightness(.78); } }
 @keyframes paper-turn-previous { 0% { transform:perspective(1200px) rotateY(0deg); filter:brightness(1); } 45% { filter:brightness(.88); } 100% { transform:perspective(1200px) rotateY(180deg); filter:brightness(.78); } }
 .book-conclusion { margin-top:18px !important; color:#5c3d62; font-size:clamp(16px,1.45vw,20px) !important; line-height:1.62 !important; }
+.conclusion-page { max-height:372px; overflow:auto; scrollbar-color:#a7748d #ead2a4; }.conclusion-page .book-conclusion { padding:12px; border-left:3px solid #a474aa; background:#fff3d88a; font-style:italic; }
 
 /* Ending epilogue — full cinematic presentation */
 #viewport.ending-active #bg { animation: ending-scene-reveal 12s cubic-bezier(.18,.75,.22,1) both; transform-origin: 54% 46%; }
