@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <section id="boot-screen" class="boot-screen" data-phase="team" aria-label="Memuat For Mother">
+      <div class="boot-landscape"></div><div class="boot-stars" aria-hidden="true"></div>
+      <div class="boot-brand boot-team"><span class="boot-eyebrow">SEBUAH PERSEMBAHAN DARI</span><img src="assets/Logo Tim.png" alt="Logo tim pengembang"><span class="boot-caption">Dibuat dengan hati.</span></div>
+      <div class="boot-brand boot-title"><span class="boot-eyebrow">SEBUAH PERJALANAN UNTUK PULANG</span><img src="assets/ui/logo_for_mother.png" alt="For Mother"><span class="boot-caption">Harapan tumbuh dari hal kecil.</span></div>
+      <div class="boot-bottom"><div class="boot-loading-label"><span id="boot-status" role="status">Menyiapkan perjalanan…</span><span id="boot-percent">0%</span></div><div class="boot-track" role="progressbar" aria-label="Memuat aset permainan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><p>Setiap langkah kecilmu berarti besar untuk Ibu.</p></div>
+      <button id="boot-skip" type="button">Lewati intro <span aria-hidden="true">→</span></button>
+    </section>
     <main id="game" aria-label="For Mother">
       <div id="viewport">
         <div id="scene">
@@ -24,6 +31,29 @@
         <div id="fade"></div>
       </div>
     </main>
+    <script src="js/core/gameState.js"></script>
+    <script src="js/core/audio.js"></script>
+    <script src="js/core/save.js"></script>
+    <script src="js/player/collision.js"></script>
+    <script src="js/core/difficulty.js"></script>
+    <script src="js/player/movement.js"></script>
+    <script src="js/systems/interaction.js"></script>
+    <script src="js/systems/timer.js"></script>
+    <script src="js/systems/dialog.js"></script>
+    <script src="js/systems/inventory.js"></script>
+    <script src="js/systems/cleaning.js"></script>
+    <script src="js/systems/repair.js"></script>
+    <script src="js/systems/restoration.js"></script>
+    <script src="js/ui/hud.js"></script>
+    <script src="js/ui/result.js"></script>
+    <script src="js/ui/menu.js"></script>
+    <script src="js/chapters/chapter1.js"></script>
+    <script src="js/chapters/chapter2.js"></script>
+    <script src="js/chapters/chapter3.js"></script>
+    <script src="js/chapters/chapter4.js"></script>
+    <script src="js/chapters/chapter5.js"></script>
+    <script src="js/core/scene.js"></script>
+    <script src="js/ui/boot.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
