@@ -128,7 +128,6 @@ game.showCredits = function showCredits() {
       </article>`).join("");
     const supporters = [
       { role: 'MENTOR', name: 'Kemala Putri Oktaviani', instagram: 'kkml.la', initials: 'KP', note: 'Untuk arahan dan bimbingan sepanjang perjalanan.' },
-      { role: 'SPECIAL THANKS', name: 'Muhammad Adli Irawan', instagram: 'mhmd_adli_i', initials: 'MA', note: 'Untuk dukungan yang ikut menghidupkan cerita ini.' },
     ].map(person => `<article class="credit-supporter"><div class="credit-supporter-top"><span class="credit-avatar" aria-hidden="true">${person.initials}</span><small>${person.role}</small><span class="credit-spark" aria-hidden="true">✦</span></div><h3>${person.name}</h3><p>${person.note}</p><a class="credit-social-button" href="https://www.instagram.com/${person.instagram}/" target="_blank" rel="noopener noreferrer" aria-label="Buka Instagram ${person.name} (tab baru)">${instagramIcon}<span>@${person.instagram}</span><span aria-hidden="true">↗</span></a></article>`).join('');
     const details = [
       ["GENRE GAME", "Petualangan edukasi / Puzzle / Fantasi"],
@@ -143,7 +142,7 @@ game.showCredits = function showCredits() {
       <div class="credits-team-heading"><h2>Kenali tim kami</h2><span>${game.CREDIT_INFO.creator}</span></div>
       <div class="credits-members">${members}</div>
       <div class="credits-production-heading"><span>YANG MENEMANI PERJALANAN</span></div>
-      <div class="credits-supporters">${supporters}</div>
+      <div class="credits-supporters">${supporters}<article class="credit-supporter"><div class="credit-supporter-top"><small>SPECIAL THANKS</small><span class="credit-spark" aria-hidden="true">✦</span></div><h3>Kelompok 10</h3><h3>Kelompok 11</h3><p>12 RPL 1</p></article></div>
       <div class="credits-production-heading"><span>CATATAN PRODUKSI</span></div><dl class="credits-details">${details}</dl>
       <footer class="credits-footer"><p>Terima kasih telah menemani Andi dalam perjalanan menjaga kesehatan dan orang yang ia sayangi.</p><button class="btn" id="closeCredits" type="button">KEMBALI KE MENU</button></footer>
     </section></div>`;
