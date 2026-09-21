@@ -110,7 +110,7 @@ game.CREDIT_INFO = Object.freeze({
       { name: "Revan Oknanda", instagram: "navervan", initials: "RO" },
       { name: "Muhammad Carel Azzami", instagram: "mhmmdcrlazzam", initials: "MC" },
       { name: "Alya Nur Azizah", instagram: "norshallayya", initials: "AN" },
-      { name: "Arzizah Dwiyanti Dasopang", instagram: "azizahdwiyantidasopang", initials: "AD" },
+      { name: "Arzizah Dwiyanti Dasopang", instagram: "azizahhdwiyanti", initials: "AD" },
     ],
     created: "Agustus 2026 – September 2026",
     deployment:
@@ -360,6 +360,7 @@ game.defaults = () => ({
     settings: {
       motion: true,
       dialogSpeed: "normal",
+      cursor: "gold",
       masterVolume: 100,
       musicVolume: 40,
       sfxVolume: 65,

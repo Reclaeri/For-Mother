@@ -4253,3 +4253,28 @@ body.reduced-motion .pipe-drips i { animation:none; }
 @media(max-width:480px) { .settings-screen .setting-row { flex-wrap:wrap; }.settings-screen .settings-card select { max-width:100%; }.settings-actions .btn { min-width:0; }.menu .menu-secondary .menu-text-action { min-width:0; font-size:10px; padding:10px; }.retry-actions .btn { font-size:10px; } }
 /* Leave room for settings actions without crowding the audio controls. */
 .settings-screen .settings-header { margin-bottom:16px; padding-bottom:14px; }.settings-screen .settings-section-title { margin-bottom:10px; }.settings-screen .volume-row { margin:7px 0; padding:9px 12px; }.settings-screen .settings-actions { margin-top:15px; }.settings-screen .settings-section { padding:15px; }
+
+/* Cosmetic pointer preference; mini-game tools and disabled controls retain their cursors. */
+@media (hover: hover) and (pointer: fine) {
+  body[data-cursor]:not([data-cursor="system"]),
+  body[data-cursor]:not([data-cursor="system"]) :where(*):not(:where(#cleaning, #cleaning *, :disabled, [aria-disabled="true"], .cursor-preview, .cursor-preview *)) {
+    cursor: var(--game-cursor);
+  }
+}
+.cursor-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin: 8px 0 12px;
+  padding: 8px 12px;
+  border: 1px dashed #b8c39655;
+  border-radius: 10px;
+  background: #081f1755;
+  color: #bdceba;
+  font: 10px/1.5 sans-serif;
+}
+.cursor-preview img { width: 32px; height: 32px; flex-shrink: 0; }
+.cursor-preview img[hidden] { display: none; }
+.cursor-preview * { cursor: inherit; }

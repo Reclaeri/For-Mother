@@ -56,6 +56,7 @@ game.resetGame = function resetGame() {
   };
 
 game.persistSettings = function persistSettings() {
+    game.applyCursor();
     localStorage.setItem(game.SETTINGS_KEY, JSON.stringify(game.state.settings));
     document.body.classList.toggle("reduced-motion", !game.state.settings.motion);
     game.AudioManager.applyVolumes();
