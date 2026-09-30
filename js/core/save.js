@@ -2,7 +2,7 @@
 ((game) => {
   "use strict";
 
-game.safeLoad = function safeLoad() {
+  game.safeLoad = function safeLoad() {
     try {
       const x = JSON.parse(localStorage.getItem(game.SAVE_KEY));
       if (!x || typeof x !== "object") return null;
@@ -24,8 +24,9 @@ game.safeLoad = function safeLoad() {
     }
   };
 
-game.captureResume = function captureResume() {
-    if (!game.player.el || !game.state.scene || game.state.scene === "MainMenu") return;
+  game.captureResume = function captureResume() {
+    if (!game.player.el || !game.state.scene || game.state.scene === "MainMenu")
+      return;
     game.runtime.captureChapterProgress?.();
     game.state.resume = {
       scene: game.state.scene,
@@ -40,13 +41,13 @@ game.captureResume = function captureResume() {
     };
   };
 
-game.save = function save(checkScene) {
+  game.save = function save(checkScene) {
     if (checkScene && checkScene !== "MainMenu") game.state.scene = checkScene;
     game.captureResume();
     localStorage.setItem(game.SAVE_KEY, JSON.stringify(game.state));
   };
 
-game.resetGame = function resetGame() {
+  game.resetGame = function resetGame() {
     const settings = { ...game.defaults().settings, ...game.state.settings };
     const difficulty = game.state.difficulty;
     game.state = game.defaults();
@@ -55,14 +56,20 @@ game.resetGame = function resetGame() {
     localStorage.removeItem(game.SAVE_KEY);
   };
 
-game.persistSettings = function persistSettings() {
+  game.persistSettings = function persistSettings() {
     game.applyCursor();
-    localStorage.setItem(game.SETTINGS_KEY, JSON.stringify(game.state.settings));
-    document.body.classList.toggle("reduced-motion", !game.state.settings.motion);
+    localStorage.setItem(
+      game.SETTINGS_KEY,
+      JSON.stringify(game.state.settings),
+    );
+    document.body.classList.toggle(
+      "reduced-motion",
+      !game.state.settings.motion,
+    );
     game.AudioManager.applyVolumes();
   };
 
-game.restoreSettings = function restoreSettings() {
+  game.restoreSettings = function restoreSettings() {
     try {
       game.state.settings = {
         ...game.defaults().settings,

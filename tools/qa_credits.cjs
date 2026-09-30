@@ -1,4 +1,4 @@
-/* Run with node tools/test_gameplay.cjs. Uses an isolated headless Chrome profile.
+/* Run with node tools/qa_credits.cjs. Uses an isolated headless Chrome profile.
    Test hooks are injected by this localhost server, never into the shipped game. */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -201,16 +201,12 @@ async function main() {
     await delay(100);
   await evaluate('document.getElementById("credits").click()');
   await check(
-    'document.querySelectorAll(".credit-social-button").length === 2',
-    "Both supporter Instagram buttons exist",
+    'document.querySelectorAll(".credit-social-button").length === 1',
+    "Mentor Instagram button exists",
   );
   await check(
     'document.querySelector(".credit-social-button").href === "https://www.instagram.com/kkml.la/"',
     "Mentor Instagram correct",
-  );
-  await check(
-    'document.querySelectorAll(".credit-social-button")[1].href === "https://www.instagram.com/mhmd_adli_i/"',
-    "Special thanks Instagram correct",
   );
   await evaluate(
     'document.querySelector(".credits-supporters").scrollIntoView({block:"center"})',

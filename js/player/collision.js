@@ -2,11 +2,11 @@
 ((game) => {
   "use strict";
 
-game.dist = function dist(a, b) {
+  game.dist = function dist(a, b) {
     return Math.hypot(a.x - b.x, a.y - b.y);
   };
 
-game.rectHit = function rectHit(x, y, w, h, r) {
+  game.rectHit = function rectHit(x, y, w, h, r) {
     return (
       x + w / 2 > r.x &&
       x - w / 2 < r.x + r.w &&
@@ -15,11 +15,16 @@ game.rectHit = function rectHit(x, y, w, h, r) {
     );
   };
 
-game.collisionBox = function collisionBox(who, x = who.x, y = who.y) {
+  game.collisionBox = function collisionBox(who, x = who.x, y = who.y) {
     // Invisible floor collision: independent of the illustrated sprite bounds.
     // A small directional offset follows the leading foot without catching decor.
     if (who === game.player) {
-      const offset = { up: [0, -3], down: [0, 3], left: [-3, 0], right: [3, 0] }[who.dir] || [0, 0];
+      const offset = {
+        up: [0, -3],
+        down: [0, 3],
+        left: [-3, 0],
+        right: [3, 0],
+      }[who.dir] || [0, 0];
       return { x: x + offset[0], y: y - 75 + offset[1], w: 22, h: 12 };
     }
     // NPCs use the same stable foot box, so their solid area matches what is visible.
@@ -27,7 +32,7 @@ game.collisionBox = function collisionBox(who, x = who.x, y = who.y) {
     return { x, y, w: who.w, h: who.h };
   };
 
-game.valid = function valid(x, y, who = game.player) {
+  game.valid = function valid(x, y, who = game.player) {
     const box = game.collisionBox(who, x, y);
     if (
       box.x - box.w / 2 < game.runtime.bounds?.l ||
@@ -36,7 +41,11 @@ game.valid = function valid(x, y, who = game.player) {
       box.y + box.h / 2 > game.runtime.bounds?.b
     )
       return false;
-    if (game.runtime.obstacles.some((r) => game.rectHit(box.x, box.y, box.w, box.h, r)))
+    if (
+      game.runtime.obstacles.some((r) =>
+        game.rectHit(box.x, box.y, box.w, box.h, r),
+      )
+    )
       return false;
     return !game.runtime.entities.some((e) => {
       if (e === who || e.solid === false) return false;
@@ -48,16 +57,16 @@ game.valid = function valid(x, y, who = game.player) {
     });
   };
 
-game.obstacle = function obstacle(x, y, w, h, id) {
+  game.obstacle = function obstacle(x, y, w, h, id) {
     game.runtime.obstacles.push({ x, y, w, h, id });
     game.drawDebug();
   };
 
-game.bounds = function bounds(l = 55, t = 120, r = 1617, b = 900) {
+  game.bounds = function bounds(l = 55, t = 120, r = 1617, b = 900) {
     game.runtime.bounds = { l, t, r, b };
   };
 
-game.findSafeSpawn = function findSafeSpawn(x, y, who) {
+  game.findSafeSpawn = function findSafeSpawn(x, y, who) {
     if (game.valid(x, y, who)) return { x, y };
     const offsets = [24, 48, 72, 108, 150, 210, 285, 360];
     for (const radius of offsets) {
@@ -87,10 +96,12 @@ game.findSafeSpawn = function findSafeSpawn(x, y, who) {
         };
   };
 
-game.resolveInteractionPoint = function resolveInteractionPoint(x, y) {
+  game.resolveInteractionPoint = function resolveInteractionPoint(x, y) {
     const isClear = (px, py) => {
       const box = game.collisionBox(game.player, px, py);
-      return !game.runtime.obstacles.some((area) => game.rectHit(box.x, box.y, box.w, box.h, area));
+      return !game.runtime.obstacles.some((area) =>
+        game.rectHit(box.x, box.y, box.w, box.h, area),
+      );
     };
     if (isClear(x, y)) return { x, y };
     // A target is never placed inside a solid object. Search the nearby floor
@@ -105,7 +116,7 @@ game.resolveInteractionPoint = function resolveInteractionPoint(x, y) {
     return { x, y };
   };
 
-game.drawDebug = function drawDebug() {
+  game.drawDebug = function drawDebug() {
     if (!game.els.debug || !game.runtime.obstacles) return;
     game.els.debug.innerHTML = "";
     game.els.debug.classList.toggle("active", game.debugCollisions);
@@ -165,7 +176,9 @@ game.drawDebug = function drawDebug() {
     );
   };
 
-game.addChapterFurnitureCollisions = function addChapterFurnitureCollisions(n) {
+  game.addChapterFurnitureCollisions = function addChapterFurnitureCollisions(
+    n,
+  ) {
     // These rectangles follow the baked-in furniture silhouettes. Large objects
     // cover their visible floor area so Andi cannot appear to walk on top of
     // them, while freestanding bins use only a short contact strip at the base.

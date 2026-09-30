@@ -2,23 +2,17 @@
 ((game) => {
   "use strict";
 
-game.sampleSpawnPoints = function sampleSpawnPoints(points, count) {
-    const pool = [...points];
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool.slice(0, Math.min(count, pool.length));
-  };
-
-game.startInvestigationSession = function startInvestigationSession(item, onComplete) {
+  game.startInvestigationSession = function startInvestigationSession(
+    item,
+    onComplete,
+  ) {
     if (game.runtime.investigating || item.marked) return;
     game.miniGameActive = true;
     game.lock();
     const overlay = document.createElement("div");
     overlay.className = "investigation-session";
     overlay.innerHTML =
-      '<div class="cleaning-help">Tahan dan gerakkan cahaya mengikuti seluruh noda</div><div class="investigation-zone"><i></i></div><div class="investigation-light"></div>';
+      '<div class="cleaning-help">Tahan cahaya Lumi tepat di noda selama 2 detik - ESC untuk batal</div><div class="investigation-zone"><i></i></div><div class="investigation-light"></div>';
     game.els.cleaning.replaceChildren(overlay);
     game.els.cleaning.className = "active investigation-active";
     const zone = overlay.querySelector(".investigation-zone");
@@ -33,8 +27,10 @@ game.startInvestigationSession = function startInvestigationSession(item, onComp
       height: `${((item.h * zoom) / game.H) * 100}%`,
     });
     let down = false,
-      last = null,
-      progress = 0;
+      point = null,
+      illuminatedSince = null,
+      frame = 0,
+      finished = false;
     const screenPoint = (event) => {
       const rect = game.els.view.getBoundingClientRect();
       return {
@@ -43,53 +39,73 @@ game.startInvestigationSession = function startInvestigationSession(item, onComp
       };
     };
     const finish = (success) => {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(frame);
       overlay.remove();
       game.els.cleaning.className = "";
       game.runtime.investigating = null;
       game.miniGameActive = false;
       if (success) onComplete();
     };
-    overlay.onpointerdown = (event) => {
-      down = true;
-      last = screenPoint(event);
-      overlay.setPointerCapture?.(event.pointerId);
+    const updateLight = (event) => {
+      point = screenPoint(event);
+      light.style.left = `${(point.x / game.W) * 100}%`;
+      light.style.top = `${(point.y / game.H) * 100}%`;
     };
-    overlay.onpointerup = () => {
-      down = false;
-      last = null;
-    };
-    overlay.onpointercancel = () => {
-      down = false;
-      last = null;
-    };
-    overlay.onpointermove = (event) => {
-      const p = screenPoint(event);
-      light.style.left = `${(p.x / game.W) * 100}%`;
-      light.style.top = `${(p.y / game.H) * 100}%`;
-      if (!down || !last) return;
-      const world = game.screenToWorld(p.x, p.y);
-      const area = {
+    const onDirt = () => {
+      if (!down || !point) return false;
+      const world = game.screenToWorld(point.x, point.y);
+      return game.rectHit(world.x, world.y, 2, 2, {
         x: item.x - item.w / 2,
         y: item.y - item.h / 2,
         w: item.w,
         h: item.h,
-      };
-      const travel = Math.hypot(p.x - last.x, p.y - last.y);
-      if (
-        game.rectHit(world.x, world.y, 2, 2, area) &&
-        travel >= 5 &&
-        travel <= 70
-      ) {
-        progress = Math.min(100, progress + travel * 0.16);
-        bar.style.width = `${progress}%`;
-      }
-      last = p;
-      if (progress >= 100) finish(true);
+      });
     };
+    const resetExposure = () => {
+      illuminatedSince = null;
+      bar.style.width = "0%";
+    };
+    overlay.onpointerdown = (event) => {
+      event.preventDefault();
+      down = true;
+      updateLight(event);
+      illuminatedSince = onDirt() ? performance.now() : null;
+      overlay.setPointerCapture?.(event.pointerId);
+    };
+    const release = () => {
+      down = false;
+      resetExposure();
+    };
+    overlay.onpointerup = release;
+    overlay.onpointercancel = release;
+    overlay.onlostpointercapture = release;
+    overlay.onpointermove = (event) => {
+      updateLight(event);
+      if (!onDirt()) resetExposure();
+      else if (illuminatedSince === null) illuminatedSince = performance.now();
+    };
+    const illuminate = (now) => {
+      if (finished) return;
+      if (document.hidden || !onDirt()) resetExposure();
+      else {
+        illuminatedSince ??= now;
+        const progress = Math.min(100, ((now - illuminatedSince) / 2000) * 100);
+        bar.style.width = `${progress}%`;
+        if (progress >= 100) return finish(true);
+      }
+      frame = requestAnimationFrame(illuminate);
+    };
+    frame = requestAnimationFrame(illuminate);
     game.runtime.investigating = { cancel: () => finish(false), item };
   };
 
-game.startCleaningSession = function startCleaningSession({ item, tool = "cloth", onComplete }) {
+  game.startCleaningSession = function startCleaningSession({
+    item,
+    tool = "cloth",
+    onComplete,
+  }) {
     if (game.runtime.cleaning || item.done) return;
     game.miniGameActive = true;
     game.lock();
@@ -145,7 +161,8 @@ game.startCleaningSession = function startCleaningSession({ item, tool = "cloth"
       }
       if (cancelled && !silent)
         game.toast(`Progress tersimpan: ${Math.round(item.progress)}%`);
-      if (cancelled && !silent && game.runtime.captureChapterProgress) game.save(game.state.scene);
+      if (cancelled && !silent && game.runtime.captureChapterProgress)
+        game.save(game.state.scene);
     };
     const finish = () => {
       item.progress = 100;
@@ -259,7 +276,7 @@ game.startCleaningSession = function startCleaningSession({ item, tool = "cloth"
     paint();
   };
 
-game.startTrashSorting = function startTrashSorting(onComplete, amount = 4) {
+  game.startTrashSorting = function startTrashSorting(onComplete, amount = 4) {
     if (game.runtime.trashSorting || game.runtime.chapterTimer?.expired) return;
     if (game.runtime.trashSorting) return;
     game.miniGameActive = true;
@@ -351,7 +368,7 @@ game.startTrashSorting = function startTrashSorting(onComplete, amount = 4) {
     game.runtime.trashSorting = { cancel: () => close(false) };
   };
 
-game.addCleanable = function addCleanable(config) {
+  game.addCleanable = function addCleanable(config) {
     game.runtime.cleanables ||= [];
     const item = { progress: 0, done: false, w: 160, h: 120, ...config };
     item.el =

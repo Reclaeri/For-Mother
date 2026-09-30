@@ -2,7 +2,10 @@
 ((game) => {
   "use strict";
 
-game.calculateChapterRating = function calculateChapterRating(n, strategyStars = 0) {
+  game.calculateChapterRating = function calculateChapterRating(
+    n,
+    strategyStars = 0,
+  ) {
     const limit = game.chapterTimeLimit(n);
     const timeLeft = Math.max(0, game.runtime.chapterTimer?.remaining ?? 0);
     const mistakes = Math.max(0, game.runtime.mistakes || 0);
@@ -22,10 +25,13 @@ game.calculateChapterRating = function calculateChapterRating(n, strategyStars =
     };
   };
 
-game.completeCard = function completeCard(n, result, next) {
+  game.completeCard = function completeCard(n, result, next) {
     game.runtime.completed = true;
     game.lock();
-    game.AudioManager.playSFX("chapter_complete", { level: 0.9, cooldown: 1000 });
+    game.AudioManager.playSFX("chapter_complete", {
+      level: 0.9,
+      cooldown: 1000,
+    });
     const names = [
       "Pilah Sampah",
       "Hentikan Sumbernya",
@@ -34,11 +40,11 @@ game.completeCard = function completeCard(n, result, next) {
       "Ujian Terakhir",
     ];
     const health = game.MOTHER_PROGRESS[n];
-    game.els.modal.innerHTML = `<div class="completion"><div class="card panel result-card"><small>CHAPTER SELESAI</small><h1>${names[n - 1]}</h1><div class="stars">${[1, 2, 3].map((star) => `<img style="--star-delay:${star * 0.16}s" src="${star <= result.stars ? game.ASSETS.ui.star1 : game.ASSETS.ui.star0}" alt="${star <= result.stars ? "Bintang" : "Kosong"}">`).join("")}</div><div class="result-grid"><span>Sisa waktu <b>${game.formatTime(result.timeLeft)}</b></span><span>Bonus waktu <b>+${game.runtime.chapterTimer?.bonus || 0} dtk</b></span><span>Kesalahan <b>${result.mistakes}</b></span><span>Kebersihan <b>${game.runtime.clean || 100}%</b></span><span>Kondisi Ibu <b>${health}%</b></span><span>Obat terkumpul <b>${Math.max(n, game.state.medicines.filter(Boolean).length)}/5</b></span></div><section class="chapter-lessons"><strong>YANG ANDI PELAJARI</strong><ul>${game.CHAPTER_LESSONS[n - 1].map((lesson) => `<li>${lesson}</li>`).join("")}</ul></section><button class="btn" id="continueResult">LANJUTKAN</button></div></div>`;
+    game.els.modal.innerHTML = `<div class="completion"><div class="card panel result-card"><small>CHAPTER SELESAI</small><h1>${names[n - 1]}</h1><div class="stars">${[1, 2, 3].map((star) => `<img style="--star-delay:${star * 0.16}s" src="${star <= result.stars ? game.ASSETS.ui.star1 : game.ASSETS.ui.star0}" alt="${star <= result.stars ? "Bintang" : "Kosong"}">`).join("")}</div><div class="result-grid"><span>Sisa waktu <b>${game.formatTime(result.timeLeft)}</b></span><span>Bonus waktu <b>+${game.runtime.chapterTimer?.bonus || 0} dtk</b></span><span>Kesalahan <b>${result.mistakes}</b></span><span>Kebersihan <b>${game.runtime.clean || 100}%</b></span></div><section class="result-mother-impact"><img src="${game.ASSETS.meds[n - 1]}" alt="Ramuan untuk Ibu"><div><small>DAMPAK PERJALANAN ANDI</small><strong>Satu ramuan untuk Ibu telah terbuka</strong><p>Ramuan ini akan membawa kondisi Ibu menuju <b>${health}%</b>.</p></div></section><section class="chapter-lessons"><strong>YANG ANDI PELAJARI</strong><ul>${game.CHAPTER_LESSONS[n - 1].map((lesson) => `<li>${lesson}</li>`).join("")}</ul></section><button class="btn" id="continueResult">TERIMA RAMUAN UNTUK IBU</button></div></div>`;
     game.$("#continueResult").onclick = next;
   };
 
-game.showEducationCard = function showEducationCard(n, next) {
+  game.showEducationCard = function showEducationCard(n, next) {
     const lessons = [
       [
         "Sampah dan Kesehatan",

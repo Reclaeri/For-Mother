@@ -2,14 +2,37 @@
 ((game) => {
   "use strict";
 
-game.interact = function interact(id, x, y, label, action, critical = false, el = null) {
+  game.interact = function interact(
+    id,
+    x,
+    y,
+    label,
+    action,
+    critical = false,
+    el = null,
+  ) {
     const point = game.resolveInteractionPoint(x, y);
-    const it = { id, x: point.x, y: point.y, label, action, critical, enabled: true, el };
+    const it = {
+      id,
+      x: point.x,
+      y: point.y,
+      label,
+      action,
+      critical,
+      enabled: true,
+      el,
+    };
     game.runtime.interactables.push(it);
     return it;
   };
 
-game.autoPortal = function autoPortal(x, y, action, el = null, enabled = () => true) {
+  game.autoPortal = function autoPortal(
+    x,
+    y,
+    action,
+    el = null,
+    enabled = () => true,
+  ) {
     const portal = {
       x,
       y,
@@ -68,17 +91,17 @@ game.autoPortal = function autoPortal(x, y, action, el = null, enabled = () => t
     return portal;
   };
 
-game.interactionPoint = function interactionPoint() {
+  game.interactionPoint = function interactionPoint() {
     const box = game.interactionBox();
     return { x: box.x, y: box.y };
   };
 
-game.interactionBox = function interactionBox() {
+  game.interactionBox = function interactionBox() {
     // Keep interaction anchored to the same foot area; object radii remain unchanged.
     return game.collisionBox(game.player);
   };
 
-game.followInteraction = function followInteraction(it, owner) {
+  game.followInteraction = function followInteraction(it, owner) {
     it.owner = owner;
     it.x = owner.x;
     it.y = owner.y;
@@ -87,9 +110,17 @@ game.followInteraction = function followInteraction(it, owner) {
     return it;
   };
 
-game.showPrompt = function showPrompt() {
+  game.showPrompt = function showPrompt() {
     let repairIcon = game.els.ui.querySelector(".repair-proximity-icon");
-    if (game.runtime.chapterIntroActive || game.miniGameActive || game.dialogActive || game.cutsceneActive || game.pauseActive || game.transitionActive || game.runtime.completed) {
+    if (
+      game.runtime.chapterIntroActive ||
+      game.miniGameActive ||
+      game.dialogActive ||
+      game.cutsceneActive ||
+      game.pauseActive ||
+      game.transitionActive ||
+      game.runtime.completed
+    ) {
       game.els.ui.querySelector(".prompt")?.remove();
       repairIcon?.remove();
       game.currentTarget = null;
@@ -104,11 +135,14 @@ game.showPrompt = function showPrompt() {
     });
     const detector = game.interactionPoint();
     const available = game.runtime.interactables.filter(
-      (i) => i.enabled && game.dist(detector, i) <= (i.radius || game.INTERACTION_RADIUS),
+      (i) =>
+        i.enabled &&
+        game.dist(detector, i) <= (i.radius || game.INTERACTION_RADIUS),
     );
     available.sort(
       (a, b) =>
-        b.critical - a.critical || game.dist(detector, a) - game.dist(detector, b),
+        b.critical - a.critical ||
+        game.dist(detector, a) - game.dist(detector, b),
     );
     game.currentTarget = available[0] || null;
     if (game.currentTarget) {
@@ -129,11 +163,18 @@ game.showPrompt = function showPrompt() {
         icon.style.top = `${Math.max(35, rect ? rect.top - view.top : view.height / 2)}px`;
         if (!repairIcon) game.els.ui.append(icon);
       } else repairIcon?.remove();
-    } else { p?.remove(); repairIcon?.remove(); }
+    } else {
+      p?.remove();
+      repairIcon?.remove();
+    }
   };
 
-game.interactionHint = function interactionHint(text) {
-    game.AudioManager.playSFX("error", { level: .22, rate: .68, cooldown: 400 });
+  game.interactionHint = function interactionHint(text) {
+    game.AudioManager.playSFX("error", {
+      level: 0.22,
+      rate: 0.68,
+      cooldown: 400,
+    });
     game.toast(text);
   };
 })(window.ForMotherRuntime);

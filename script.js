@@ -3,7 +3,7 @@
   "use strict";
   if (!game || game.booted) return;
   game.booted = true;
-addEventListener("keydown", (e) => {
+  addEventListener("keydown", (e) => {
     if (game.bootLoading || game.runtime.portalLock) return;
     const k = e.key.toLowerCase();
     if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k))
@@ -14,10 +14,17 @@ addEventListener("keydown", (e) => {
       e.preventDefault();
       game.debugCollisions = !game.debugCollisions;
       game.drawDebug();
-      game.toast(`Debug collision ${game.debugCollisions ? "aktif" : "nonaktif"}`);
+      game.toast(
+        `Debug collision ${game.debugCollisions ? "aktif" : "nonaktif"}`,
+      );
       return;
     }
-    if (k === "h" && !game.dialogActive && !game.pauseActive && !game.miniGameActive) {
+    if (
+      k === "h" &&
+      !game.dialogActive &&
+      !game.pauseActive &&
+      !game.miniGameActive
+    ) {
       game.toggleChapterHud();
       return;
     }
@@ -58,12 +65,21 @@ addEventListener("keydown", (e) => {
       game.advanceDialog();
       return;
     }
-    if ((k === "e" || k === "enter" || k === " ") && game.runtime.lumiEducation) {
+    if (
+      (k === "e" || k === "enter" || k === " ") &&
+      game.runtime.lumiEducation
+    ) {
       e.preventDefault();
       game.runtime.lumiEducation.advance();
       return;
     }
-    if (k === "e" && !game.dialogActive && !game.pauseActive && !game.miniGameActive && !game.runtime.chapterIntroActive) {
+    if (
+      k === "e" &&
+      !game.dialogActive &&
+      !game.pauseActive &&
+      !game.miniGameActive &&
+      !game.runtime.chapterIntroActive
+    ) {
       if (game.currentTarget) {
         game.player.interactTimer = 0.22;
         game.face(game.player, game.currentTarget);
@@ -74,25 +90,37 @@ addEventListener("keydown", (e) => {
       } else game.runtime.onEmptyInteract?.();
     }
     if (k === "r") game.releaseChapter1Trash?.();
-    if (k === "q" && !game.dialogActive && !game.pauseActive && !game.miniGameActive && !game.runtime.chapterIntroActive) game.runtime.onQ?.();
+    if (
+      k === "q" &&
+      !game.dialogActive &&
+      !game.pauseActive &&
+      !game.miniGameActive &&
+      !game.runtime.chapterIntroActive
+    )
+      game.runtime.onQ?.();
   });
 
-addEventListener("keyup", (e) => game.keys.delete(e.key.toLowerCase()));
+  addEventListener("keyup", (e) => game.keys.delete(e.key.toLowerCase()));
 
-addEventListener("blur", () => { game.keys.clear(); game.runtime.repair?.release?.(); });
+  addEventListener("blur", () => {
+    game.keys.clear();
+    game.runtime.repair?.release?.();
+  });
 
-game.els.dialog.addEventListener("click", (event) => {
+  game.els.dialog.addEventListener("click", (event) => {
     event.preventDefault();
     if (game.dialogActive) game.advanceDialog();
   });
 
-addEventListener("pointerdown", () => game.AudioManager.unlock(), {
+  addEventListener("pointerdown", () => game.AudioManager.unlock(), {
     capture: true,
   });
 
-addEventListener("keydown", () => game.AudioManager.unlock(), { capture: true });
+  addEventListener("keydown", () => game.AudioManager.unlock(), {
+    capture: true,
+  });
 
-document.addEventListener(
+  document.addEventListener(
     "click",
     (event) => {
       if (event.target.closest("button:not(:disabled)"))
@@ -101,7 +129,7 @@ document.addEventListener(
     true,
   );
 
-window.ForMotherQA = {
+  window.ForMotherQA = {
     W: game.W,
     H: game.H,
     INTERACTION_RADIUS: game.INTERACTION_RADIUS,
@@ -118,9 +146,9 @@ window.ForMotherQA = {
     }),
   };
 
-game.loadScene("MainMenu");
-game.showBoot();
+  game.loadScene("MainMenu");
+  game.showBoot();
 
-requestAnimationFrame(game.loop);
+  requestAnimationFrame(game.loop);
   delete window.ForMotherRuntime;
 })(window.ForMotherRuntime);

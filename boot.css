@@ -1,0 +1,153 @@
+/* Mobile game splash: isolated from the older cinematic boot styles. */
+.mobile-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  isolation: isolate;
+  overflow: hidden;
+  background: #10221b;
+  color: #fffbed;
+  font-family: system-ui, sans-serif;
+  transition: opacity 0.65s ease;
+}
+.mobile-boot-art, .mobile-boot-shade, .mobile-boot-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mobile-boot-art {
+  z-index: -3;
+  background: url("assets/cutscenes/penyihir/cutscene_andi_go_to_witch_house.png") center 56% / cover;
+  animation: mobile-boot-pan 16s ease-out both;
+}
+.mobile-boot-shade {
+  z-index: -2;
+  background: linear-gradient(180deg, #07150e35, #07150e08 40%, #07150e75 68%, #07150ef2), radial-gradient(ellipse at 50% 25%, #061b1220, #061b1240);
+}
+.mobile-boot-brand {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: min(660px, 74vw);
+  transform: translateX(-50%);
+  text-align: center;
+  transition: opacity 0.6s ease;
+}
+.mobile-boot-brand img {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 8px 16px #07150e80);
+}
+.mobile-boot-brand p {
+  margin: -7% 0 0;
+  font-size: clamp(12px, 1.3vw, 16px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 8px #000;
+}
+.mobile-boot-loading {
+  position: absolute;
+  left: 50%;
+  bottom: max(6%, env(safe-area-inset-bottom));
+  width: min(880px, 82%);
+  transform: translateX(-50%);
+  transition: opacity 0.5s ease;
+}
+.mobile-boot-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: 0 2px 6px #0008;
+}
+.mobile-boot #boot-percent { font: 700 14px/1.4 system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #fff1bb; }
+.mobile-boot-track {
+  height: 12px;
+  padding: 3px;
+  border: 1px solid #fff5ca55;
+  border-radius: 99px;
+  background: #091a16ba;
+  box-shadow: 0 3px 16px #0005;
+}
+.mobile-boot-track > i {
+  display: block;
+  position: relative;
+  width: var(--load, 0%);
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7ba76c, #c9dd8d 65%, #ffe9a1);
+  box-shadow: 0 0 14px #d9ed9e55;
+  transition: width 0.35s ease-out;
+}
+.mobile-boot-track > i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 25%, #fff8 50%, transparent 75%);
+  animation: mobile-boot-shine 2.4s linear infinite;
+}
+.mobile-boot-loading p { margin: 16px 0 0; min-height: 2.8em; text-align: center; color: #d8e2d5; font-size: 12px; line-height: 1.6; }
+.mobile-boot-team {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: #0b1713;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.mobile-boot-team img {
+  width: min(520px, 82vw);
+  max-height: 66vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 32px #e0efba35);
+}
+.mobile-boot-team p { font-size: 10px; letter-spacing: 0.18em; color: #c2cebc; }
+.mobile-boot[data-phase="team"] .mobile-boot-team { opacity: 1; }
+.mobile-boot[data-phase="team"] .mobile-boot-brand,
+.mobile-boot[data-phase="team"] .mobile-boot-loading { opacity: 0; }
+.mobile-boot #boot-skip {
+  top: max(22px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
+  bottom: auto;
+  padding: 10px 16px;
+  border: 1px solid #ffffff30;
+  border-radius: 99px;
+  background: #0b171360;
+  color: #e8edde;
+  font: 600 10px/1.5 system-ui, sans-serif;
+  letter-spacing: 0.08em;
+}
+.mobile-boot-sparks i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff2b8; box-shadow: 0 0 14px 3px #fff2b855; animation: mobile-boot-float 6s ease-in-out infinite; }
+.mobile-boot-sparks i:nth-child(1) { left: 16%; top: 58%; }
+.mobile-boot-sparks i:nth-child(2) { left: 32%; top: 38%; animation-delay: -2s; }
+.mobile-boot-sparks i:nth-child(3) { left: 68%; top: 62%; animation-delay: -4s; }
+.mobile-boot-sparks i:nth-child(4) { left: 83%; top: 32%; animation-delay: -1s; }
+.mobile-boot-sparks i:nth-child(5) { left: 55%; top: 72%; animation-delay: -3s; }
+@keyframes mobile-boot-pan { from { transform: scale(1.045); } to { transform: scale(1); } }
+@keyframes mobile-boot-shine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes mobile-boot-float { 0%, 100% { opacity: 0.15; transform: translateY(0); } 50% { opacity: 0.8; transform: translateY(-22px); } }
+@media (max-width: 600px) and (orientation: portrait) {
+  .mobile-boot-brand { top: 16%; width: 94%; }
+  .mobile-boot-art { background-position: 60% center; }
+  .mobile-boot-loading { width: 86%; bottom: max(7%, env(safe-area-inset-bottom)); }
+  .mobile-boot-label { font-size: 11px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-boot-brand { top: 0; width: min(390px, 47vw); }
+  .mobile-boot-loading { bottom: max(3%, env(safe-area-inset-bottom)); width: 76%; }
+  .mobile-boot-loading p { margin-top: 8px; min-height: 1.6em; font-size: 11px; }
+  .mobile-boot-label { margin-bottom: 7px; font-size: 11px; }
+}
+.mobile-boot[data-reduced="true"] *, .mobile-boot[data-reduced="true"] *::after { animation: none; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .mobile-boot, .mobile-boot *, .mobile-boot *::after { animation: none; transition: none; }
+}

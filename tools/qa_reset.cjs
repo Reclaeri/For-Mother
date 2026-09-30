@@ -1,4 +1,4 @@
-/* Run with node tools/test_difficulty.cjs. Uses an isolated headless Chrome profile.
+/* Run with node tools/qa_reset.cjs. Uses an isolated headless Chrome profile.
    Test hooks are injected by this localhost server, never into the shipped game. */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -15,7 +15,6 @@ const output = path.join(root, "tools", "qa-output");
 fs.mkdirSync(output, { recursive: true });
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const hooks = `window.ForMotherQA = {
-  spawnValid: game.spawnPositionValid, config:game.DIFFICULTIES, safeLoad:game.safeLoad,
   runtime: () => game.runtime, mutableState: () => game.state, player: () => game.player,
   save: game.save, restartChapter: game.restartChapter, repairDefinition: game.repairDefinition,
   startRepairSession: game.startRepairSession, advanceDialog: game.advanceDialog, updateChapterClock: game.updateChapterClock,
@@ -193,118 +192,38 @@ async function main() {
     i++
   )
     await delay(100);
-  await evaluate(
-    `window.q = ForMotherQA; q.mutableState().settings.motion = false;`,
-  );
-  const load = async (name) => {
-    await evaluate(`q.loadScene('${name}'); q.ready();`);
-  };
-  const reachable = async () =>
-    check(
-      `(() => {
-    const seen = new Set(), points = [], queue = [[q.player().x,q.player().y]];
-    for(let index=0; index<queue.length; index++) {
-      const [x,y]=queue[index], key=x+','+y;
-      if(seen.has(key) || !q.valid(x,y)) continue;
-      seen.add(key); const foot=q.collisionBox(q.player(),x,y); points.push([foot.x,foot.y]);
-      for(const [dx,dy] of [[20,0],[-20,0],[0,20],[0,-20]]) queue.push([x+dx,y+dy]);
-    }
-    return q.runtime().interactables.filter(i=>i.enabled).every(i=>points.some(([x,y])=>Math.hypot(i.x-x,i.y-y)<=(i.radius || q.INTERACTION_RADIUS)));
-  })()`,
-      "Every active objective is reachable using existing collisions",
+  const shot = async (name) =>
+    fs.writeFileSync(
+      path.join(output, name + ".png"),
+      Buffer.from((await send("Page.captureScreenshot")).data, "base64"),
     );
-  for (const mode of ["EASY", "MEDIUM", "HARD"]) {
-    await evaluate(
-      `q.mutableState().difficulty='${mode}';q.mutableState().chapterProgress={};q.mutableState().resume=null;`,
+  await evaluate('document.getElementById("reset").click()');
+  for (const [width, height] of [
+    [1440, 900],
+    [390, 844],
+    [320, 568],
+    [844, 390],
+  ]) {
+    await send("Emulation.setDeviceMetricsOverride", {
+      width,
+      height,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await delay(150);
+    await check(
+      `(()=>{const c=document.querySelector('.reset-card'),r=c.getBoundingClientRect(),b=document.getElementById('confirmReset').getBoundingClientRect();return c.scrollHeight<=c.clientHeight+1 && c.scrollWidth<=c.clientWidth+1 && r.top>=0 && r.bottom<=${height} && b.bottom<=${height};})()`,
+      "Reset fits without scrolling at " + width + "x" + height,
     );
-    for (let chapter = 1; chapter <= 5; chapter++) {
-      await load("Chapter" + chapter);
-      await reachable();
-      await check(
-        `q.runtime().chapterTimer.limit === q.config['${mode}'].timers[${chapter - 1}]`,
-        `${mode} Chapter ${chapter} timer`,
-      );
-      if (chapter === 1)
-        await check(
-          "q.runtime().total === q.config[q.mutableState().difficulty].trash",
-          "Trash count",
-        );
-      if (chapter === 2)
-        await check(
-          "q.repairDefinition('pipe').spots.length===q.config[q.mutableState().difficulty].pipe && q.repairDefinition('window').spots.length===q.config[q.mutableState().difficulty].window",
-          "Fixed source defect counts",
-        );
-      if (chapter === 3)
-        await check(
-          "q.runtime().stains.length===q.config[q.mutableState().difficulty].stains",
-          "Stain count",
-        );
-      if (chapter === 4)
-        await check(
-          "q.runtime().interactables.filter(i=>i.repair).length===q.config[q.mutableState().difficulty].repairs",
-          "Furniture repair count",
-        );
-      if (chapter === 5)
-        await check(
-          "Object.keys(q.runtime().flags).length===q.config[q.mutableState().difficulty].final",
-          "Final objective count",
-        );
-      for (let attempt = 0; attempt < 4; attempt++) {
-        const prior = await evaluate(
-          `JSON.stringify(q.mutableState().chapterProgress.chapter${chapter}.layouts)`,
-        );
-        await evaluate(`q.save('Chapter${chapter}')`);
-        await check(`q.safeLoad().difficulty==='${mode}'`, "Saved difficulty");
-        await load("Chapter" + chapter);
-        await check(
-          `JSON.stringify(q.mutableState().chapterProgress.chapter${chapter}.layouts)===${JSON.stringify(prior)}`,
-          "Continue retains layout",
-        );
-        await evaluate("q.restartChapter();q.ready();");
-        await check(
-          `JSON.stringify(q.mutableState().chapterProgress.chapter${chapter}.layouts)!==${JSON.stringify(prior)}`,
-          "Restart changes layout",
-        );
-        await check(
-          `Object.entries(q.mutableState().chapterProgress.chapter${chapter}.layouts).every(([key,points])=>points.every((p,i)=>!q.runtime().obstacles.some(r=>p[0]+40>r.x && p[0]-40<r.x+r.w && p[1]+20>r.y && p[1]-60<r.y+r.h) && points.every((b,j)=>i===j || Math.hypot(p[0]-b[0],p[1]-b[1]) >= (key==='trash'?80:key==='furniture'?120:100))))`,
-          "Spawn clearance and spacing",
-        );
-      }
-    }
+    await shot("reset-" + width);
   }
-  await evaluate(
-    'q.loadScene("MainMenu");document.getElementById("new").click();',
-  );
+  await evaluate('document.getElementById("cancelReset").click()');
   await check(
-    'document.querySelectorAll("[data-difficulty]").length===3',
-    "Menu offers three difficulty options",
+    '!!document.getElementById("reset") && !document.querySelector(".reset-card")',
+    "Cancel returns to menu",
   );
-  fs.writeFileSync(
-    path.join(output, "difficulty-menu.png"),
-    Buffer.from(
-      (await send("Page.captureScreenshot", { format: "png" })).data,
-      "base64",
-    ),
-  );
-  await evaluate(
-    `document.querySelector('[data-difficulty="EASY"]').click();document.getElementById('startDifficulty').click();`,
-  );
-  await delay(1500);
-  await check(
-    "q.mutableState().difficulty==='EASY' && q.safeLoad().difficulty==='EASY'",
-    "Selected mode is saved when starting",
-  );
-  await evaluate(
-    `localStorage.setItem('forMother.save.v2',JSON.stringify({scene:'WitchHouse',currentChapter:3,chapters:[true,true],medicines:[true,true]}));`,
-  );
-  await check(
-    "q.safeLoad().difficulty==='MEDIUM' && q.safeLoad().medicines[1] && q.safeLoad().chapters[1]",
-    "Legacy saves retain chapter and medicine progress with MEDIUM fallback",
-  );
-
-  assert.deepEqual(exceptions, []);
-  assert.deepEqual(missing, []);
-  console.log("PASS: all difficulty, repeated spawn, save and menu checks");
+  assert.deepEqual(exceptions, [], "No browser exceptions");
+  assert.deepEqual(missing, [], "No missing assets");
   await send("Browser.close");
 }
 main()

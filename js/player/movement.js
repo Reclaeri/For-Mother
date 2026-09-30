@@ -2,7 +2,7 @@
 ((game) => {
   "use strict";
 
-game.cameraTarget = function cameraTarget() {
+  game.cameraTarget = function cameraTarget() {
     const camera = game.runtime.camera;
     if (!camera) return { x: 0, y: 0 };
     const lookX = game.player.moving
@@ -31,18 +31,20 @@ game.cameraTarget = function cameraTarget() {
     };
   };
 
-game.applyCamera = function applyCamera() {
+  game.applyCamera = function applyCamera() {
     const camera = game.runtime.camera;
     if (!camera) return;
     const rect = game.els.view.getBoundingClientRect();
     const transform = `translate3d(${(camera.x * rect.width) / game.W}px,${(camera.y * rect.height) / game.H}px,0) scale(${camera.zoom})`;
-    [game.els.bg, game.els.world, game.els.fx, game.els.debug].forEach((layer) => {
-      layer.style.transformOrigin = "0 0";
-      layer.style.transform = transform;
-    });
+    [game.els.bg, game.els.world, game.els.fx, game.els.debug].forEach(
+      (layer) => {
+        layer.style.transformOrigin = "0 0";
+        layer.style.transform = transform;
+      },
+    );
   };
 
-game.initCamera = function initCamera() {
+  game.initCamera = function initCamera() {
     game.runtime.camera = { x: 0, y: 0, zoom: 1.28 };
     const target = game.cameraTarget();
     game.runtime.camera.x = target.x;
@@ -50,9 +52,14 @@ game.initCamera = function initCamera() {
     game.applyCamera();
   };
 
-game.updateCamera = function updateCamera(dt) {
+  game.updateCamera = function updateCamera(dt) {
     if (!game.runtime.camera || !game.player.el) return;
-    if (game.miniGameActive || game.dialogActive || game.cutsceneActive || game.pauseActive) {
+    if (
+      game.miniGameActive ||
+      game.dialogActive ||
+      game.cutsceneActive ||
+      game.pauseActive
+    ) {
       game.applyCamera();
       return;
     }
@@ -65,17 +72,17 @@ game.updateCamera = function updateCamera(dt) {
     game.applyCamera();
   };
 
-game.worldToScreen = function worldToScreen(x, y) {
+  game.worldToScreen = function worldToScreen(x, y) {
     const camera = game.runtime.camera || { x: 0, y: 0, zoom: 1 };
     return { x: x * camera.zoom + camera.x, y: y * camera.zoom + camera.y };
   };
 
-game.screenToWorld = function screenToWorld(x, y) {
+  game.screenToWorld = function screenToWorld(x, y) {
     const camera = game.runtime.camera || { x: 0, y: 0, zoom: 1 };
     return { x: (x - camera.x) / camera.zoom, y: (y - camera.y) / camera.zoom };
   };
 
-game.face = function face(a, b) {
+  game.face = function face(a, b) {
     const dx = b.x - a.x,
       dy = b.y - a.y;
     a.dir =
@@ -88,7 +95,7 @@ game.face = function face(a, b) {
           : "down";
   };
 
-game.addPlayer = function addPlayer(x, y, withLumi = false) {
+  game.addPlayer = function addPlayer(x, y, withLumi = false) {
     game.player.held = null;
     game.player.dir = "up";
     game.player.frame = 0;
@@ -97,9 +104,18 @@ game.addPlayer = function addPlayer(x, y, withLumi = false) {
     game.player.moving = false;
     // Forest and Witch House use their authored entrance positions so the
     // portal and story staging always begin from the intended spot.
-    const canRestorePosition = !["Forest", "WitchHouse"].includes(game.state.scene);
-    const savedPlayer = canRestorePosition && game.state.resume?.scene === game.state.scene && game.state.resume.player;
-    if (savedPlayer && Number.isFinite(savedPlayer.x) && Number.isFinite(savedPlayer.y)) {
+    const canRestorePosition = !["Forest", "WitchHouse"].includes(
+      game.state.scene,
+    );
+    const savedPlayer =
+      canRestorePosition &&
+      game.state.resume?.scene === game.state.scene &&
+      game.state.resume.player;
+    if (
+      savedPlayer &&
+      Number.isFinite(savedPlayer.x) &&
+      Number.isFinite(savedPlayer.y)
+    ) {
       x = savedPlayer.x;
       y = savedPlayer.y;
       game.player.dir = savedPlayer.dir || game.player.dir;
@@ -110,18 +126,40 @@ game.addPlayer = function addPlayer(x, y, withLumi = false) {
     game.player.x = x;
     game.player.y = y;
     game.runtime.entities.push(game.player);
-    game.player.el = game.img(game.ASSETS.andi.idle.up, "entity andi", x, y, 154, "andi");
+    game.player.el = game.img(
+      game.ASSETS.andi.idle.up,
+      "entity andi",
+      x,
+      y,
+      154,
+      "andi",
+    );
     game.initCamera();
     if (withLumi) game.addLumi();
   };
 
-game.addLumi = function addLumi() {
+  game.addLumi = function addLumi() {
     const l = { x: game.player.x + 55, y: game.player.y + 30, solid: false };
     game.runtime.lumi = l;
-    l.el = game.img(game.ASSETS.lumi.normal, "entity lumi", l.x, l.y, 52, "lumi");
+    l.el = game.img(
+      game.ASSETS.lumi.normal,
+      "entity lumi",
+      l.x,
+      l.y,
+      52,
+      "lumi",
+    );
   };
 
-game.npc = function npc(id, src, x, y, cls = "npc", patrol = null, folder = null) {
+  game.npc = function npc(
+    id,
+    src,
+    x,
+    y,
+    cls = "npc",
+    patrol = null,
+    folder = null,
+  ) {
     const n = {
       id,
       x,
@@ -141,7 +179,7 @@ game.npc = function npc(id, src, x, y, cls = "npc", patrol = null, folder = null
     return n;
   };
 
-game.setVillageNPCIdle = function setVillageNPCIdle(n, wait = 2.5) {
+  game.setVillageNPCIdle = function setVillageNPCIdle(n, wait = 2.5) {
     n.tx = null;
     n.ty = null;
     n.wait = wait;
@@ -158,7 +196,7 @@ game.setVillageNPCIdle = function setVillageNPCIdle(n, wait = 2.5) {
     game.renderEntity(n);
   };
 
-game.renderEntity = function renderEntity(e) {
+  game.renderEntity = function renderEntity(e) {
     if (!e.el) return;
     e.el.style.left = (e.x / game.W) * 100 + "%";
     e.el.style.top = (e.y / game.H) * 100 + "%";
@@ -172,12 +210,12 @@ game.renderEntity = function renderEntity(e) {
     }
   };
 
-game.lock = function lock() {
+  game.lock = function lock() {
     game.player.moving = false;
     game.AudioManager.stopSFX("footstep");
   };
 
-game.move = function move(dt) {
+  game.move = function move(dt) {
     if (
       !game.player.el ||
       game.dialogActive ||
@@ -203,7 +241,8 @@ game.move = function move(dt) {
     dy /= len;
     game.player.moving = !!(dx || dy);
     if (game.player.moving) {
-      const beforeX = game.player.x, beforeY = game.player.y;
+      const beforeX = game.player.x,
+        beforeY = game.player.y;
       game.player.dir =
         Math.abs(dx) > Math.abs(dy)
           ? dx < 0
@@ -212,7 +251,8 @@ game.move = function move(dt) {
           : dy < 0
             ? "up"
             : "down";
-      const distance = game.player.speed * (game.state.difficulty === "HARD" ? 1.3 : 1) * dt;
+      const distance =
+        game.player.speed * (game.state.difficulty === "HARD" ? 1.3 : 1) * dt;
       const steps = Math.max(1, Math.ceil(distance / 8));
       for (let step = 0; step < steps; step++) {
         const nx = game.player.x + (dx * distance) / steps,
@@ -220,14 +260,24 @@ game.move = function move(dt) {
         if (game.valid(nx, game.player.y)) game.player.x = nx;
         if (game.valid(game.player.x, ny)) game.player.y = ny;
       }
-      game.player.moving = Math.hypot(game.player.x - beforeX, game.player.y - beforeY) > .01;
+      game.player.moving =
+        Math.hypot(game.player.x - beforeX, game.player.y - beforeY) > 0.01;
       if (game.player.moving) game.player.frame += dt * 8;
-      game.player.footstepClock = game.player.moving ? (game.player.footstepClock || 0) + dt : 0;
+      game.player.footstepClock = game.player.moving
+        ? (game.player.footstepClock || 0) + dt
+        : 0;
       if (game.player.moving && game.player.footstepClock >= 0.36) {
         game.player.footstepClock = 0;
         // Soft, rate-varied indoor step; throttled to the walking cadence.
-        const outdoors = ["Village", "Forest", "WitchApproach"].includes(game.state.scene);
-        game.AudioManager.playSFX("footstep", { level: outdoors ? .1 : .075, rate: outdoors ? .8 : .65, vary: .05, cooldown: 260 });
+        const outdoors = ["Village", "Forest", "WitchApproach"].includes(
+          game.state.scene,
+        );
+        game.AudioManager.playSFX("footstep", {
+          level: outdoors ? 0.1 : 0.075,
+          rate: outdoors ? 0.8 : 0.65,
+          vary: 0.05,
+          cooldown: 260,
+        });
       }
       if (!game.player.moving) game.AudioManager.stopSFX("footstep");
     } else {
@@ -238,21 +288,26 @@ game.move = function move(dt) {
     game.renderEntity(game.player);
     game.updateHeldItemPosition();
     if (game.runtime.lumi) {
-      game.runtime.lumi.x += (game.player.x + 55 - game.runtime.lumi.x) * Math.min(1, dt * 5);
-      game.runtime.lumi.y += (game.player.y + 25 - game.runtime.lumi.y) * Math.min(1, dt * 5);
+      game.runtime.lumi.x +=
+        (game.player.x + 55 - game.runtime.lumi.x) * Math.min(1, dt * 5);
+      game.runtime.lumi.y +=
+        (game.player.y + 25 - game.runtime.lumi.y) * Math.min(1, dt * 5);
       game.renderEntity(game.runtime.lumi);
     }
   };
 
-game.updateHeldItemPosition = function updateHeldItemPosition() {
+  game.updateHeldItemPosition = function updateHeldItemPosition() {
     if (!game.runtime.held?.e) return;
-    const offset = game.HELD_ITEM_OFFSETS[game.player.dir] || game.HELD_ITEM_OFFSETS.down;
-    game.runtime.held.e.style.left = ((game.player.x + offset.x) / game.W) * 100 + "%";
-    game.runtime.held.e.style.top = ((game.player.y + offset.y) / game.H) * 100 + "%";
+    const offset =
+      game.HELD_ITEM_OFFSETS[game.player.dir] || game.HELD_ITEM_OFFSETS.down;
+    game.runtime.held.e.style.left =
+      ((game.player.x + offset.x) / game.W) * 100 + "%";
+    game.runtime.held.e.style.top =
+      ((game.player.y + offset.y) / game.H) * 100 + "%";
     game.runtime.held.e.style.zIndex = Math.floor(game.player.y) + offset.z;
   };
 
-game.chooseNPCPatrolTarget = function chooseNPCPatrolTarget(n) {
+  game.chooseNPCPatrolTarget = function chooseNPCPatrolTarget(n) {
     const [left, top, width, height] = n.patrol;
     // Only pick destinations whose foot collision box is clear. This keeps NPCs
     // from ever intentionally walking through the red collision areas.
@@ -264,11 +319,12 @@ game.chooseNPCPatrolTarget = function chooseNPCPatrolTarget(n) {
     return null;
   };
 
-game.updateNPC = function updateNPC(dt) {
+  game.updateNPC = function updateNPC(dt) {
     game.runtime.entities
       ?.filter((e) => e !== game.player && e.patrol)
       .forEach((n) => {
-        if (game.dialogActive || game.pauseActive || game.runtime.lumiEducation) return;
+        if (game.dialogActive || game.pauseActive || game.runtime.lumiEducation)
+          return;
         n.wait -= dt;
         if (n.wait <= 0) {
           const target = game.chooseNPCPatrolTarget(n);

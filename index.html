@@ -6,14 +6,27 @@
     <meta name="theme-color" content="#24180f" />
     <title>For Mother</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="boot.css" />
   </head>
   <body>
-    <section id="boot-screen" class="boot-screen" data-phase="team" aria-label="Memuat For Mother">
-      <div class="boot-landscape"></div><div class="boot-stars" aria-hidden="true"></div>
-      <div class="boot-brand boot-team"><span class="boot-eyebrow">SEBUAH PERSEMBAHAN DARI</span><img src="assets/Logo Tim.png" alt="Logo tim pengembang"><span class="boot-caption">Dibuat dengan hati.</span></div>
-      <div class="boot-brand boot-title"><span class="boot-eyebrow">SEBUAH PERJALANAN UNTUK PULANG</span><img src="assets/ui/logo_for_mother.png" alt="For Mother"><span class="boot-caption">Harapan tumbuh dari hal kecil.</span></div>
-      <div class="boot-bottom"><div class="boot-loading-label"><span id="boot-status" role="status">Menyiapkan perjalanan…</span><span id="boot-percent">0%</span></div><div class="boot-track" role="progressbar" aria-label="Memuat aset permainan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><p>Setiap langkah kecilmu berarti besar untuk Ibu.</p></div>
-      <button id="boot-skip" type="button">Lewati intro <span aria-hidden="true">→</span></button>
+    <section id="boot-screen" class="mobile-boot" data-phase="team" aria-label="Memuat For Mother">
+      <div class="mobile-boot-art" aria-hidden="true"></div>
+      <div class="mobile-boot-shade" aria-hidden="true"></div>
+      <div class="mobile-boot-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="mobile-boot-team">
+        <img src="assets/Logo Tim.png" alt="Logo tim pengembang" />
+        <p>SEBUAH PERSEMBAHAN DARI TIM KAMI</p>
+      </div>
+      <div class="mobile-boot-brand">
+        <img src="assets/ui/logo_for_mother.png" alt="For Mother" fetchpriority="high" />
+        <p>Untuk Ibu, selalu ada harapan.</p>
+      </div>
+      <div class="mobile-boot-loading">
+        <div class="mobile-boot-label"><span id="boot-status" role="status">Menyiapkan perjalanan</span><span id="boot-percent">0%</span></div>
+        <div class="mobile-boot-track" role="progressbar" aria-label="Memuat aset permainan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+        <p id="boot-message">Sebuah langkah kecil. Sebuah harapan besar.</p>
+      </div>
+      <button id="boot-skip" type="button">LEWATI INTRO <span aria-hidden="true">&#8594;</span></button>
     </section>
     <main id="game" aria-label="For Mother">
       <div id="viewport">

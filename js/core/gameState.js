@@ -3,48 +3,50 @@ window.ForMotherRuntime = { SCENES: {} };
 ((game) => {
   "use strict";
 
-game.W = 1672;
+  game.W = 1672;
 
-game.H = 941;
+  game.H = 941;
 
-game.INTERACTION_RADIUS = 100;
+  game.INTERACTION_RADIUS = 100;
 
-game.DEBUG_COLLISIONS = false;
+  game.DEBUG_COLLISIONS = false;
 
-game.SAVE_KEY = "forMother.save.v2";
+  game.SAVE_KEY = "forMother.save.v2";
 
-game.SETTINGS_KEY = "forMother.settings.v1";
+  game.SETTINGS_KEY = "forMother.settings.v1";
 
-game.AUDIO = "assets/audio/";
+  game.AUDIO = "assets/audio/";
 
-game.AUDIO_ASSETS = Object.freeze({
+  game.AUDIO_ASSETS = Object.freeze({
     music: {
       calm: game.AUDIO + "alex-morgan-calm-piano-541028.mp3.mpeg",
       emotional: game.AUDIO + "alex-morgan-emotional-545518.mp3.mpeg",
-      sad: game.AUDIO + "alex-morgan-sad-piano-emotional-rain-story-575883.mp3.mpeg",
+      sad:
+        game.AUDIO +
+        "alex-morgan-sad-piano-emotional-rain-story-575883.mp3.mpeg",
       exploration: game.AUDIO + "andriig-soft-soft-music-568206.mp3.mpeg",
       magical: game.AUDIO + "atlasaudio-emotional-piano-510218.mp3.mpeg",
       ending: game.AUDIO + "atlasaudio-sentimental-piano-512258.mp3.mpeg",
     },
     sfx: {
       ...Object.fromEntries(
-      [
-        "trash_pickup",
-        "trash_dispose",
-        "window_close",
-        "ui_click",
-        "mop_scrub",
-        "wipe_clean",
-        "dialog_type",
-        "dialog_next",
-        "objective_complete",
-        "chapter_complete",
-        "medicine_obtained",
-        "lumi_vision_activate",
-        "hidden_dirt_found",
-        "portal_activate",
-        "portal_enter",
-      ].map((name) => [name, `${game.AUDIO}sfx/${name}.wav`]),
+        [
+          "trash_pickup",
+          "trash_dispose",
+          "window_close",
+          "ui_click",
+          "mop_scrub",
+          "wipe_clean",
+          "dialog_type",
+          "dialog_next",
+          "objective_complete",
+          "chapter_complete",
+          "medicine_obtained",
+          "lumi_vision_activate",
+          "hidden_dirt_found",
+          "portal_activate",
+          "portal_enter",
+        ].map((name) => [name, `${game.AUDIO}sfx/${name}.wav`]),
       ),
       ui_click: game.AUDIO + "sfx/sfx-click.mp3",
       dialog_next: game.AUDIO + "sfx/sfx-click.mp3",
@@ -68,27 +70,60 @@ game.AUDIO_ASSETS = Object.freeze({
     },
   });
 
-
-
-game.CHAPTER_INTROS = Object.freeze({
+  game.CHAPTER_INTROS = Object.freeze({
     1: ["LANGKAH PERTAMA", "Pilah seluruh sampah di ruangan."],
     2: ["SUMBER MASALAH", "Hentikan sumber kotoran, lalu bersihkan akibatnya."],
-    3: ["NODA YANG TERSEMBUNYI", "Gunakan Lumi Vision untuk menemukan seluruh noda."],
-    4: ["RAPI DAN TERAWAT", "Tata barang, perbaiki perabot, lalu bersihkan dari atas ke bawah."],
+    3: [
+      "NODA YANG TERSEMBUNYI",
+      "Gunakan Lumi Vision untuk menemukan seluruh noda.",
+    ],
+    4: [
+      "RAPI DAN TERAWAT",
+      "Tata barang, perbaiki perabot, lalu bersihkan dari atas ke bawah.",
+    ],
     5: ["UNTUK IBU", "Satukan semua pelajaran dan bersihkan ruangan terakhir."],
   });
 
-game.CHAPTER_LESSONS = Object.freeze([
-    ["Sampah sebaiknya segera dibuang.", "Lingkungan bersih membuat rumah lebih nyaman.", "Pekerjaan kecil yang rutin mencegah kotoran menumpuk."],
-    ["Cari sumber masalah sebelum membersihkan akibatnya.", "Kebocoran harus diperbaiki terlebih dahulu.", "Debu dan genangan perlu ditangani dengan benar."],
-    ["Tidak semua kotoran mudah terlihat.", "Ketelitian membantu menemukan noda tersembunyi.", "Noda harus dibersihkan sampai benar-benar hilang."],
-    ["Barang rapi membuat rumah lebih aman.", "Urutan yang tepat membuat pekerjaan lebih efektif.", "Kebiasaan baik menjaga rumah tetap nyaman."],
-    ["Kebersihan melindungi orang yang kita sayangi.", "Setiap masalah perlu ditangani dari sumbernya.", "Ketelitian menyempurnakan hasil membersihkan."],
+  game.CHAPTER_LESSONS = Object.freeze([
+    [
+      "Sampah sebaiknya segera dibuang.",
+      "Lingkungan bersih membuat rumah lebih nyaman.",
+      "Pekerjaan kecil yang rutin mencegah kotoran menumpuk.",
+    ],
+    [
+      "Cari sumber masalah sebelum membersihkan akibatnya.",
+      "Kebocoran harus diperbaiki terlebih dahulu.",
+      "Debu dan genangan perlu ditangani dengan benar.",
+    ],
+    [
+      "Tidak semua kotoran mudah terlihat.",
+      "Ketelitian membantu menemukan noda tersembunyi.",
+      "Noda harus dibersihkan sampai benar-benar hilang.",
+    ],
+    [
+      "Barang rapi membuat rumah lebih aman.",
+      "Urutan yang tepat membuat pekerjaan lebih efektif.",
+      "Kebiasaan baik menjaga rumah tetap nyaman.",
+    ],
+    [
+      "Kebersihan melindungi orang yang kita sayangi.",
+      "Setiap masalah perlu ditangani dari sumbernya.",
+      "Ketelitian menyempurnakan hasil membersihkan.",
+    ],
   ]);
 
-game.MOTHER_PROGRESS = Object.freeze([10, 25, 45, 65, 85, 100]);
+  game.MOTHER_PROGRESS = Object.freeze([10, 25, 45, 65, 85, 100]);
 
-game.MEDICINE_NAMES = Object.freeze([
+  game.MOTHER_CONDITIONS = Object.freeze([
+    "Masih sangat lemah",
+    "Napas lebih tenang",
+    "Mulai membuka mata",
+    "Mulai merespons Andi",
+    "Sudah mampu duduk",
+    "Pulih sepenuhnya",
+  ]);
+
+  game.MEDICINE_NAMES = Object.freeze([
     "Eliksir Cahaya Harapan",
     "Serum Embun Kehidupan",
     "Kristal Penyembuh Lumi",
@@ -96,7 +131,7 @@ game.MEDICINE_NAMES = Object.freeze([
     "Eliksir Fajar Abadi",
   ]);
 
-game.MEDICINE_DESCRIPTIONS = Object.freeze([
+  game.MEDICINE_DESCRIPTIONS = Object.freeze([
     "Ramuan pertama yang memberi energi lembut untuk membantu memulihkan kondisi Ibu.",
     "Ramuan penyembuhan alami yang diracik dari embun dan kekuatan kehidupan.",
     "Kristal ajaib yang diperkuat oleh energi cahaya Lumi.",
@@ -104,32 +139,39 @@ game.MEDICINE_DESCRIPTIONS = Object.freeze([
     "Eliksir terakhir berenergi murni yang membawa harapan baru.",
   ]);
 
-game.CREDIT_INFO = Object.freeze({
+  game.CREDIT_INFO = Object.freeze({
     creator: "Kelompok 2 · Kelas XII RPL 1",
     members: [
       { name: "Revan Oknanda", instagram: "navervan", initials: "RO" },
-      { name: "Muhammad Carel Azzami", instagram: "mhmmdcrlazzam", initials: "MC" },
+      {
+        name: "Muhammad Carel Azzami",
+        instagram: "mhmmdcrlazzam",
+        initials: "MC",
+      },
       { name: "Alya Nur Azizah", instagram: "norshallayya", initials: "AN" },
-      { name: "Arzizah Dwiyanti Dasopang", instagram: "azizahhdwiyanti", initials: "AD" },
+      {
+        name: "Arzizah Dwiyanti Dasopang",
+        instagram: "azizahhdwiyanti",
+        initials: "AD",
+      },
     ],
     created: "Agustus 2026 – September 2026",
-    deployment:
-      "Game berbasis website · Di-deploy melalui Vercel · Publikasi 8 September 2026",
-    visualAssets: "Generated by ChatGPT",
+    deployment: "",
+    visualAssets: "Generated by ChatGPT dan Codex",
     audioAssets: "Suno AI, Codex dan Pixabay",
     technology: "HTML5, CSS3, dan JavaScript vanilla",
   });
 
-game.HELD_ITEM_OFFSETS = Object.freeze({
+  game.HELD_ITEM_OFFSETS = Object.freeze({
     up: { x: -2, y: -74, z: -1 },
     down: { x: 0, y: -43, z: 2 },
     left: { x: -34, y: -48, z: 2 },
     right: { x: 34, y: -48, z: 2 },
   });
 
-game.A = "assets/";
+  game.A = "assets/";
 
-game.ASSETS = {
+  game.ASSETS = {
     menu: {
       bg: game.A + "background/menu/menu awal.mp4",
       logo: game.A + "ui/logo_for_mother.png",
@@ -139,15 +181,20 @@ game.ASSETS = {
       forest: game.A + "background/hutan/background-hutan.png",
       witch: game.A + "background/rumah penyihir/bg_witch_house_topdown.png",
       c1:
-        game.A + "background/chapter background/bg_chapter_1_trash_room_topdown.png",
+        game.A +
+        "background/chapter background/bg_chapter_1_trash_room_topdown.png",
       c2:
-        game.A + "background/chapter background/bg_chapter_2_dust_room_topdown.png",
+        game.A +
+        "background/chapter background/bg_chapter_2_dust_room_topdown.png",
       c3:
-        game.A + "background/chapter background/bg_chapter_3_water_room_topdown.png",
+        game.A +
+        "background/chapter background/bg_chapter_3_water_room_topdown.png",
       c4:
-        game.A + "background/chapter background/bg_chapter_4_messy_room_topdown.png",
+        game.A +
+        "background/chapter background/bg_chapter_4_messy_room_topdown.png",
       c5:
-        game.A + "background/chapter background/bg_chapter_5_final_room_topdown.png",
+        game.A +
+        "background/chapter background/bg_chapter_5_final_room_topdown.png",
     },
     opening: [
       game.A + "cutscenes/opening/opening_1.png",
@@ -156,10 +203,12 @@ game.ASSETS = {
     ],
     prologue: {
       home: game.A + "cutscenes/opening/bg_rumah_andi_kotor_prolog.png",
-      motherCough: game.A + "cutscenes/opening/cutscene_ibu_batuk_lingkungan_kotor.png",
+      motherCough:
+        game.A + "cutscenes/opening/cutscene_ibu_batuk_lingkungan_kotor.png",
     },
     witchCuts: {
-      approach: game.A + "cutscenes/penyihir/cutscene_andi_go_to_witch_house.png",
+      approach:
+        game.A + "cutscenes/penyihir/cutscene_andi_go_to_witch_house.png",
       meet: game.A + "cutscenes/penyihir/cutscene_andi_meet_witch.png",
       mission: game.A + "cutscenes/penyihir/cutscene_witch_give_mission.png",
       open: game.A + "cutscenes/penyihir/cutscene_witch_open_portal.png",
@@ -174,13 +223,25 @@ game.ASSETS = {
       bg: game.A + "cutscenes/ending/cutscene_ending_mother_and_andi.mp4",
       panel: game.A + "cutscenes/ending/final_message_panel.png",
       montage: [
-        "C1 KOTOR.jpg", "C1 MULAI BERSIH.jpg", "C2 KOTOR.jpg", "C2 MULAI BERSIH.jpg",
-        "C3 KOTOR.jpg", "C3 HAMPIR BERSIH.jpg", "C4 KOTOR.jpg", "C4 HAMPIR BERSIH.jpg",
-        "C5 KOTOR.jpg", "C5 HAMPIR BERSIH.jpg",
+        "C1 KOTOR.jpg",
+        "C1 MULAI BERSIH.jpg",
+        "C2 KOTOR.jpg",
+        "C2 MULAI BERSIH.jpg",
+        "C3 KOTOR.jpg",
+        "C3 HAMPIR BERSIH.jpg",
+        "C4 KOTOR.jpg",
+        "C4 HAMPIR BERSIH.jpg",
+        "C5 KOTOR.jpg",
+        "C5 HAMPIR BERSIH.jpg",
       ].map((name) => game.A + `cutscenes/ending/New folder (4)/${name}`),
-      lumiFarewell: game.A + "cutscenes/ending/New folder (4)/cutscene_ending_andi_lumi_farewel.png",
-      lumiGoodbye: game.A + "cutscenes/ending/New folder (4)/ending_lumi_goodbye_pose.png",
-      lumiParticles: game.A + "cutscenes/ending/New folder (4)/ending_lumi_disappear_particles.png",
+      lumiFarewell:
+        game.A +
+        "cutscenes/ending/New folder (4)/cutscene_ending_andi_lumi_farewel.png",
+      lumiGoodbye:
+        game.A + "cutscenes/ending/New folder (4)/ending_lumi_goodbye_pose.png",
+      lumiParticles:
+        game.A +
+        "cutscenes/ending/New folder (4)/ending_lumi_disappear_particles.png",
     },
     andi: {
       idle: {
@@ -297,13 +358,13 @@ game.ASSETS = {
     ),
   };
 
-["down", "up", "left", "right"].forEach((d) => {
+  ["down", "up", "left", "right"].forEach((d) => {
     game.ASSETS.andi.walk[d] = [1, 2, 3, 4].map(
       (n) => game.A + `character/andi/walk_${d}_${n}.png`,
     );
   });
 
-["pak bima", "nina", "bu sari"].forEach((folder) => {
+  ["pak bima", "nina", "bu sari"].forEach((folder) => {
     game.ASSETS.npc.walk[folder] = {};
     ["down", "up", "left", "right"].forEach(
       (d) =>
@@ -313,7 +374,7 @@ game.ASSETS = {
     );
   });
 
-[
+  [
     "neutral",
     "worried",
     "sad",
@@ -324,26 +385,28 @@ game.ASSETS = {
     "emotional",
     "tired",
   ].forEach(
-    (x) => (game.ASSETS.andi.portrait[x] = game.A + `character/andi/andi_expr_${x}.png`),
+    (x) =>
+      (game.ASSETS.andi.portrait[x] =
+        game.A + `character/andi/andi_expr_${x}.png`),
   );
 
-game.$ = (s) => document.querySelector(s);
+  game.$ = (s) => document.querySelector(s);
 
-game.els = {
-      view: game.$("#viewport"),
-      scene: game.$("#scene"),
-      bg: game.$("#bg"),
-      world: game.$("#world"),
-      fx: game.$("#fx"),
-      debug: game.$("#debug"),
-      cleaning: game.$("#cleaning"),
-      ui: game.$("#ui"),
-      dialog: game.$("#dialog"),
-      modal: game.$("#modal"),
-      fade: game.$("#fade"),
-    };
+  game.els = {
+    view: game.$("#viewport"),
+    scene: game.$("#scene"),
+    bg: game.$("#bg"),
+    world: game.$("#world"),
+    fx: game.$("#fx"),
+    debug: game.$("#debug"),
+    cleaning: game.$("#cleaning"),
+    ui: game.$("#ui"),
+    dialog: game.$("#dialog"),
+    modal: game.$("#modal"),
+    fade: game.$("#fade"),
+  };
 
-game.defaults = () => ({
+  game.defaults = () => ({
     difficulty: "MEDIUM",
     scene: "MainMenu",
     storyStage: 0,
@@ -369,33 +432,33 @@ game.defaults = () => ({
     },
   });
 
-game.state = game.defaults();
+  game.state = game.defaults();
 
-game.runtime = {};
+  game.runtime = {};
 
-game.keys = new Set();
+  game.keys = new Set();
 
-game.pressed = new Set();
+  game.pressed = new Set();
 
-game.last = performance.now();
+  game.last = performance.now();
 
-game.transitionActive = false;
+  game.transitionActive = false;
 
-game.pauseActive = false;
+  game.pauseActive = false;
 
-game.dialogActive = false;
+  game.dialogActive = false;
 
-game.cutsceneActive = false;
+  game.cutsceneActive = false;
 
-game.miniGameActive = false;
+  game.miniGameActive = false;
 
-game.currentTarget = null;
+  game.currentTarget = null;
 
-game.debugCollisions = game.DEBUG_COLLISIONS;
+  game.debugCollisions = game.DEBUG_COLLISIONS;
 
-game.sceneToken = 0;
+  game.sceneToken = 0;
 
-game.player = {
+  game.player = {
     x: 820,
     y: 780,
     dir: "up",
@@ -409,7 +472,7 @@ game.player = {
     held: null,
   };
 
-game.LUMI_LESSONS = Object.freeze({
+  game.LUMI_LESSONS = Object.freeze({
     1: [
       "Sampah yang dibiarkan terlalu lama dapat membuat rumah menjadi kotor dan tidak nyaman.",
       "Membersihkan sedikit demi sedikit secara rutin membuat pekerjaan menjadi lebih ringan.",
@@ -435,7 +498,7 @@ game.LUMI_LESSONS = Object.freeze({
     ],
   });
 
-game.KNOWLEDGE_TITLES = Object.freeze([
+  game.KNOWLEDGE_TITLES = Object.freeze([
     "Lingkungan Bersih",
     "Udara dan Kebersihan Rumah",
     "Jejak Kotoran Tersembunyi",
@@ -443,108 +506,146 @@ game.KNOWLEDGE_TITLES = Object.freeze([
     "Kebiasaan Menjaga Rumah",
   ]);
 
-game.LUMI_BOOK_DETAILS = Object.freeze([
+  game.LUMI_BOOK_DETAILS = Object.freeze([
     {
-      intro: "Rumah yang bersih membuat kita lebih nyaman untuk beristirahat, belajar, dan berkumpul. Sampah yang tertinggal dapat menimbulkan bau, mengundang serangga, dan membuat ruangan tampak tidak terawat.",
-      detail: "Mulailah dari sampah yang paling mudah terlihat. Pisahkan sampah organik seperti sisa makanan dari sampah anorganik seperti plastik atau kaleng. Setelah itu, bersihkan bagian kecil secara rutin agar pekerjaan besar tidak menumpuk.",
-      points: ["Pisahkan sampah sesuai jenisnya.", "Gunakan tempat sampah yang tertutup.", "Bersihkan sedikit setiap hari."],
+      intro:
+        "Rumah yang bersih membuat kita lebih nyaman untuk beristirahat, belajar, dan berkumpul. Sampah yang tertinggal dapat menimbulkan bau, mengundang serangga, dan membuat ruangan tampak tidak terawat.",
+      detail:
+        "Mulailah dari sampah yang paling mudah terlihat. Pisahkan sampah organik seperti sisa makanan dari sampah anorganik seperti plastik atau kaleng. Setelah itu, bersihkan bagian kecil secara rutin agar pekerjaan besar tidak menumpuk.",
+      points: [
+        "Pisahkan sampah sesuai jenisnya.",
+        "Gunakan tempat sampah yang tertutup.",
+        "Bersihkan sedikit setiap hari.",
+      ],
     },
     {
-      intro: "Debu dari luar mudah masuk melalui jendela yang terbuka. Debu dapat menempel di lantai, meja, dan benda-benda di rumah, sehingga ruangan terasa kurang nyaman.",
-      detail: "Bila ada kebocoran, hentikan sumber airnya terlebih dahulu. Mengelap genangan tanpa memperbaiki pipa hanya membuat air kembali muncul. Setelah sumbernya aman, keringkan area tersebut agar lantai tidak licin.",
-      points: ["Tutup jendela saat udara berdebu.", "Perbaiki sumber kebocoran lebih dulu.", "Keringkan lantai yang basah."],
+      intro:
+        "Debu dari luar mudah masuk melalui jendela yang terbuka. Debu dapat menempel di lantai, meja, dan benda-benda di rumah, sehingga ruangan terasa kurang nyaman.",
+      detail:
+        "Bila ada kebocoran, hentikan sumber airnya terlebih dahulu. Mengelap genangan tanpa memperbaiki pipa hanya membuat air kembali muncul. Setelah sumbernya aman, keringkan area tersebut agar lantai tidak licin.",
+      points: [
+        "Tutup jendela saat udara berdebu.",
+        "Perbaiki sumber kebocoran lebih dulu.",
+        "Keringkan lantai yang basah.",
+      ],
     },
     {
-      intro: "Kotoran tidak selalu berada di tempat yang mudah dilihat. Debu dan noda dapat tertinggal di sudut ruangan, bawah furnitur, atau area yang jarang dilewati.",
-      detail: "Saat membersihkan, lakukan pemeriksaan dari satu sisi ruangan ke sisi lain agar tidak ada bagian yang terlewat. Perhatikan perubahan warna lantai, benda yang lembap, serta sudut yang tertutup. Ketelitian membuat hasil bersih lebih menyeluruh.",
-      points: ["Periksa sudut dan tepi ruangan.", "Bersihkan bawah benda yang aman dipindahkan.", "Gunakan cahaya untuk melihat noda samar."],
+      intro:
+        "Kotoran tidak selalu berada di tempat yang mudah dilihat. Debu dan noda dapat tertinggal di sudut ruangan, bawah furnitur, atau area yang jarang dilewati.",
+      detail:
+        "Saat membersihkan, lakukan pemeriksaan dari satu sisi ruangan ke sisi lain agar tidak ada bagian yang terlewat. Perhatikan perubahan warna lantai, benda yang lembap, serta sudut yang tertutup. Ketelitian membuat hasil bersih lebih menyeluruh.",
+      points: [
+        "Periksa sudut dan tepi ruangan.",
+        "Bersihkan bawah benda yang aman dipindahkan.",
+        "Gunakan cahaya untuk melihat noda samar.",
+      ],
     },
     {
-      intro: "Membersihkan akan lebih ringan bila dilakukan dengan urutan yang tepat. Ruangan yang rapi juga lebih aman karena jalan tidak tertutup barang atau sampah.",
-      detail: "Rapikan barang terlebih dahulu, buang sampah, lalu bersihkan debu pada permukaan. Terakhir, bersihkan lantai dari area paling jauh menuju pintu. Urutan ini mencegah area yang sudah bersih menjadi kotor kembali.",
-      points: ["Rapikan sebelum menyapu atau mengepel.", "Bersihkan dari atas ke bawah.", "Akhiri dari sudut terjauh menuju pintu."],
+      intro:
+        "Membersihkan akan lebih ringan bila dilakukan dengan urutan yang tepat. Ruangan yang rapi juga lebih aman karena jalan tidak tertutup barang atau sampah.",
+      detail:
+        "Rapikan barang terlebih dahulu, buang sampah, lalu bersihkan debu pada permukaan. Terakhir, bersihkan lantai dari area paling jauh menuju pintu. Urutan ini mencegah area yang sudah bersih menjadi kotor kembali.",
+      points: [
+        "Rapikan sebelum menyapu atau mengepel.",
+        "Bersihkan dari atas ke bawah.",
+        "Akhiri dari sudut terjauh menuju pintu.",
+      ],
     },
     {
-      intro: "Kebersihan yang bertahan lama berasal dari kebiasaan kecil yang dilakukan bersama. Setiap orang di rumah dapat membantu sesuai kemampuannya.",
-      detail: "Buat jadwal sederhana, misalnya membuang sampah setiap hari, memeriksa genangan air, dan merapikan barang setelah digunakan. Saat semua orang ikut menjaga, rumah menjadi lebih sehat, nyaman, dan menyenangkan untuk keluarga.",
-      points: ["Kembalikan barang ke tempatnya.", "Jangan menunda membuang sampah.", "Saling mengingatkan dengan baik."],
+      intro:
+        "Kebersihan yang bertahan lama berasal dari kebiasaan kecil yang dilakukan bersama. Setiap orang di rumah dapat membantu sesuai kemampuannya.",
+      detail:
+        "Buat jadwal sederhana, misalnya membuang sampah setiap hari, memeriksa genangan air, dan merapikan barang setelah digunakan. Saat semua orang ikut menjaga, rumah menjadi lebih sehat, nyaman, dan menyenangkan untuk keluarga.",
+      points: [
+        "Kembalikan barang ke tempatnya.",
+        "Jangan menunda membuang sampah.",
+        "Saling mengingatkan dengan baik.",
+      ],
     },
   ]);
 
-game.ANDI_THOUGHTS = Object.freeze({
+  game.ANDI_THOUGHTS = Object.freeze({
     1: "Aku harus membersihkan tempat ini... Ibu membutuhkan obat itu.",
     2: "Rumah yang kotor seperti ini pasti membuat Ibu semakin tidak nyaman.",
-    3: "Aku harus lebih teliti. Tidak semua kotoran mudah terlihat.",
+    3: "Aku harus lebih teliti. Setiap noda yang kutemukan membawaku lebih dekat kepada obat Ibu.",
     4: "Aku sudah sejauh ini. Aku harus terus maju demi Ibu.",
     5: "Obat terakhir... setelah ini aku bisa kembali kepada Ibu.",
   });
 
-game.ENDING_MONTAGE_CAPTIONS = [
+  game.ENDING_MONTAGE_CAPTIONS = [
     "Perjalanan Andi dimulai hanya dengan satu keinginan: melihat Ibunya kembali sehat.",
     "Namun setiap ujian mengajarkannya bahwa pekerjaan kecil membutuhkan perhatian, kesabaran, dan ketekunan.",
     "Setiap langkah membawanya semakin dekat kepada orang yang paling ia sayangi.",
   ];
 
-game.ENDING_WITCH_LINES = [
-    { name: "Penyihir", who: "witch", text: "Kau akhirnya menyelesaikan kelima ujian." },
-    { name: "Andi", who: "andi", p: "relieved", text: "Aku hanya ingin membawa obat untuk Ibu." },
-    { name: "Penyihir", who: "witch", text: "Dan karena itulah kau berhasil." },
-    { name: "Penyihir", who: "witch", text: "Kau tidak menyerah saat pekerjaan terasa sulit. Kau belajar memperhatikan hal-hal kecil yang sering diabaikan." },
-    { name: "Penyihir", who: "witch", text: "Kebersihan bukan sekadar membuat sesuatu terlihat rapi. Ia membutuhkan kepedulian, tanggung jawab, dan ketekunan." },
-    { name: "Andi", who: "andi", p: "determined", text: "Jadi... itu tujuan sebenarnya dari lima ujian?" },
-    { name: "Penyihir", who: "witch", text: "Obat itu penting. Tetapi apa yang kau pelajari akan tetap bersamamu jauh lebih lama." },
-    { name: "Penyihir", who: "witch", text: "Pulanglah, Andi. Ada seseorang yang menunggumu." },
+  game.ENDING_WITCH_LINES = [
+    {
+      name: "Penyihir",
+      who: "witch",
+      text: "Kau akhirnya menyelesaikan kelima ujian.",
+    },
+    {
+      name: "Andi",
+      who: "andi",
+      p: "relieved",
+      text: "Semua ini kulakukan agar Ibu bisa sehat lagi.",
+    },
+    {
+      name: "Penyihir",
+      who: "witch",
+      text: "Kasih sayangmu membuatmu bertahan. Lima ramuan itu kini membawa harapanmu pulang.",
+    },
+    {
+      name: "Penyihir",
+      who: "witch",
+      text: "Pulanglah, Andi. Ada seseorang yang menunggumu.",
+    },
     { name: "Andi", who: "andi", p: "happy", text: "Terima kasih." },
   ];
 
-game.ENDING_LUMI_LINES = [
+  game.ENDING_LUMI_LINES = [
     { name: "Andi", who: "andi", p: "happy", text: "Ayo, Lumi. Kita pulang." },
     { name: "Lumi", text: "Andi... sepertinya aku tidak ikut." },
     { name: "Andi", who: "andi", p: "surprised", text: "Kenapa?" },
-    { name: "Lumi", text: "Karena tugasku sudah selesai." },
-    { name: "Andi", who: "andi", p: "sad", text: "Tapi aku masih membutuhkanmu." },
-    { name: "Lumi", text: "Dulu mungkin iya. Tapi sekarang kau sudah bisa melihat apa yang harus dilakukan tanpa bantuanku." },
-    { name: "Lumi", text: "Aku hanya membantumu melihat sesuatu yang sebenarnya sudah ada di dalam dirimu: kepedulian dan ketekunan." },
+    { name: "Lumi", text: "Tugasku sudah selesai. Ibumu menunggumu pulang." },
+    {
+      name: "Andi",
+      who: "andi",
+      p: "sad",
+      text: "Tapi aku masih membutuhkanmu.",
+    },
+    { name: "Lumi", text: "Kepedulian dan ketekunan itu sudah ada di dalam dirimu." },
     { name: "Andi", who: "andi", p: "emotional", text: "Lumi!" },
-    { name: "Lumi", text: "Tenang. Aku tidak benar-benar pergi. Saat kau memilih untuk tidak pura-pura tidak melihat sesuatu yang berantakan, anggap saja aku ada di sana." },
-    { name: "Lumi", text: "Oh, dan Andi? Kamarmu masih berantakan." },
-    { name: "Andi", who: "andi", p: "surprised", text: "LUMI!" },
-    { name: "Narator", who: "narrator", text: "Andi pulang membawa lebih dari sekadar obat: kepedulian, tanggung jawab, dan ketekunan yang akan terus ia jaga." },
+    {
+      name: "Narator",
+      who: "narrator",
+      text: "Andi pulang membawa lima ramuan dan satu harapan: memeluk Ibu dalam keadaan sehat.",
+    },
   ];
 
-game.openingLines = [
+  game.openingLines = [
     [
       {
         name: "Narator",
         who: "narrator",
-        text: "Rumah Andi dulu selalu terasa hangat dan nyaman.",
+        text: "Rumah Andi dulu selalu hangat oleh senyum Ibu.",
       },
       {
         name: "Narator",
         who: "narrator",
-        text: "Namun belakangan, banyak bagian rumah mulai tidak terawat.",
+        text: "Saat Ibu jatuh sakit, rumah pun perlahan tidak terawat.",
       },
       {
         name: "Narator",
         who: "narrator",
-        text: "Debu mulai menumpuk, udara terasa lembap, dan genangan air dibiarkan terlalu lama.",
-      },
-      {
-        name: "Narator",
-        who: "narrator",
-        text: "Lingkungan seperti ini bukan hanya membuat rumah tidak nyaman, tetapi juga kurang baik bagi seseorang yang sedang sakit.",
+        text: "Andi sadar: rumah yang bersih akan membantu Ibu beristirahat dan pulih.",
       },
     ],
     [
       {
         name: "Narator",
         who: "narrator",
-        text: "Di tengah kondisi rumah yang semakin tidak terawat, kesehatan Ibu perlahan semakin melemah.",
-      },
-      {
-        name: "Narator",
-        who: "narrator",
-        text: "Tubuhnya membutuhkan istirahat dan lingkungan yang lebih bersih agar ia dapat merasa lebih nyaman.",
+        text: "Hari demi hari, tubuh Ibu semakin lemah. Andi takut kehilangan senyumnya.",
       },
     ],
     [
@@ -573,7 +674,7 @@ game.openingLines = [
       {
         name: "Tabib",
         who: "tabib",
-        text: "Aku tidak mengetahui jalan pastinya. Tetapi warga desa mungkin mengetahui sesuatu.",
+        text: "Tanyakan jalannya kepada warga desa.",
       },
       {
         name: "Andi",
@@ -584,43 +685,33 @@ game.openingLines = [
     ],
   ];
 
-game.motherBedLines = [
+  game.motherBedLines = [
     {
       name: "Narator",
       who: "narrator",
-      text: "Beberapa hari terakhir, kesehatan Ibu Sari semakin memburuk.",
+      text: "Ibu semakin lemah, tetapi tetap berusaha tersenyum untuk Andi.",
     },
-    {
-      name: "Narator",
-      who: "narrator",
-      text: "Hari demi hari, tubuhnya semakin lemah.",
-    },
-    { name: "Ibu", who: "mother", text: "Andi... Ibu hanya sedikit lelah." },
+    { name: "Ibu", who: "mother", text: "Andi... jangan takut. Ibu percaya kepadamu." },
   ];
 
-game.andiMotherLines = [
+  game.andiMotherLines = [
     {
       name: "Andi",
       who: "andi",
       p: "worried",
       text: "Bu... bagaimana perasaan Ibu?",
     },
-    { name: "Andi", who: "andi", p: "sad", text: "Ibu?" },
+    { name: "Ibu", who: "mother", text: "Pergilah jika itu memberi kita harapan. Jaga dirimu, Nak." },
     {
       name: "Andi",
       who: "andi",
       p: "determined",
-      text: "Aku akan mencari cara supaya Ibu sembuh.",
+      text: "Aku akan pulang membawa obat untuk Ibu. Aku janji.",
     },
     {
       name: "Narator",
       who: "narrator",
-      text: "Andi belum tahu bahwa perjalanan yang akan ia jalani bukan hanya tentang mencari obat.",
-    },
-    {
-      name: "Narator",
-      who: "narrator",
-      text: "Ia juga akan belajar bahwa menjaga kebersihan berarti menjaga orang yang kita sayangi.",
+      text: "Dengan janji itu, Andi memulai perjalanan demi orang yang paling ia sayangi.",
     },
   ];
 })(window.ForMotherRuntime);
